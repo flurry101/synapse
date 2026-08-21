@@ -10,7 +10,7 @@ import { User } from '../models/user'
 import authService from '../services/auth.service'
 import { GoogleIcon } from './LoginForm'
 
-const SHOW_EMAIL_REGISTER_FORM: string = import.meta.env.VITE_PWD_SIGNUP_ENABLED
+const SHOW_EMAIL_REGISTER_FORM: string = import.meta.env.VITE_PWD_SIGNUP_ENABLED ?? 'true'
 
 export default function RegisterForm() {
   const {
