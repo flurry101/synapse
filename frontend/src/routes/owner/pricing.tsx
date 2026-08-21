@@ -50,9 +50,9 @@ export default function OwnerPricing() {
 
   if (loading) {
     return (
-      <SectionCard title='Pricing' subtitle='Loading pricing details...'>
+      <SectionCard title='Pricing & Monetization' subtitle='Loading pricing details...'>
         <Stack alignItems='center' sx={{ py: 4 }}>
-          <CircularProgress size={32} />
+          <CircularProgress size={32} sx={{ color: '#fb7185' }} />
         </Stack>
       </SectionCard>
     )
@@ -60,35 +60,57 @@ export default function OwnerPricing() {
 
   if (!selectedModel) {
     return (
-      <SectionCard title='Pricing' subtitle='Manage pricing'>
-        <Alert severity='info'>No models found to configure pricing.</Alert>
+      <SectionCard title='Pricing & Monetization' subtitle='Manage pricing'>
+        <Alert
+          severity='info'
+          sx={{
+            bgcolor: 'rgba(56, 189, 248, 0.1)',
+            color: '#bae6fd',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+          }}
+        >
+          No models found to configure pricing.
+        </Alert>
       </SectionCard>
     )
   }
 
   return (
     <SectionCard
-      title='Pricing'
-      subtitle='Manage pricing for requests, tokens, and optional monthly plans'
+      title='Pricing & Monetization'
+      subtitle='Manage per-request, token-based, and monthly retainer pricing tiers'
     >
-      <TextField
-        select
-        label='Select Model'
-        value={selectedModel.id}
-        onChange={(event) => {
-          setSaved(null)
-          setSelectedModelId(event.target.value)
-        }}
-      >
-        {models.map((model) => (
-          <MenuItem key={model.id} value={model.id}>
-            {model.name}
-          </MenuItem>
-        ))}
-      </TextField>
+      <Stack spacing={2.5}>
+        <TextField
+          select
+          label='Select Model'
+          value={selectedModel.id}
+          onChange={(event) => {
+            setSaved(null)
+            setSelectedModelId(event.target.value)
+          }}
+        >
+          {models.map((model) => (
+            <MenuItem key={model.id} value={model.id}>
+              {model.name}
+            </MenuItem>
+          ))}
+        </TextField>
 
-      <PricingForm model={selectedModel} onSave={savePricing} />
-      {saved && <Alert severity='success'>{saved}</Alert>}
+        <PricingForm model={selectedModel} onSave={savePricing} />
+        {saved && (
+          <Alert
+            severity='success'
+            sx={{
+              bgcolor: 'rgba(74, 222, 128, 0.15)',
+              color: '#86efac',
+              border: '1px solid rgba(74, 222, 128, 0.3)',
+            }}
+          >
+            {saved}
+          </Alert>
+        )}
+      </Stack>
     </SectionCard>
   )
 }

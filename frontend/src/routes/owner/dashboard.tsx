@@ -1,5 +1,5 @@
 import { Add } from '@mui/icons-material'
-import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Paper, Stack, Typography } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import OwnerModelCard from '../../components/owner/OwnerModelCard'
@@ -45,22 +45,24 @@ export default function OwnerDashboard() {
   }, [models])
 
   return (
-    <Stack spacing={2.25}>
-      <Box
+    <Stack spacing={3}>
+      <Paper
+        elevation={0}
         sx={{
-          borderRadius: 3,
-          p: { xs: 2.25, sm: 3 },
-          border: '1px solid #f0d8bf',
-          background: 'linear-gradient(135deg, #693100 0%, #b35f18 52%, #f7cc88 100%)',
-          color: 'white',
+          borderRadius: 4,
+          p: { xs: 2.5, sm: 3.5 },
+          border: '1px solid #1e293b',
+          background: 'linear-gradient(135deg, #111622 0%, #1f1422 100%)',
+          color: '#f8fafc',
+          boxShadow: '0 8px 30px rgba(0, 0, 0, 0.4)',
         }}
       >
-        <Typography variant='h4' sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
-          Model Owner Dashboard
+        <Typography variant='h4' sx={{ fontWeight: 900, letterSpacing: '-0.02em' }}>
+          Model Owner Studio
         </Typography>
-        <Typography sx={{ mt: 1, maxWidth: 830, color: '#fff6ea' }}>
-          Manage your model portfolio, benchmarks, pricing, and live analytics directly linked to
-          your Synapse AI Hub backend.
+        <Typography sx={{ mt: 1, maxWidth: 830, color: '#94a3b8', lineHeight: 1.6 }}>
+          Manage your model portfolio, published benchmarks, custom pricing tiers, and live
+          monetization analytics on Synapse.
         </Typography>
         <Button
           component={NavLink}
@@ -68,48 +70,74 @@ export default function OwnerDashboard() {
           variant='contained'
           startIcon={<Add />}
           sx={{
-            mt: 2,
-            alignSelf: 'flex-start',
-            bgcolor: '#fff4e5',
-            color: '#6b3900',
+            mt: 2.5,
+            bgcolor: '#fb7185',
+            color: '#0f172a',
             fontWeight: 800,
+            px: 3,
+            py: 1,
+            borderRadius: 2.5,
+            '&:hover': { bgcolor: '#f43f5e' },
           }}
         >
-          Add Model
+          Add New Model
         </Button>
-      </Box>
+      </Paper>
 
       <Box
         sx={{
           display: 'grid',
-          gap: 2,
-          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+          gap: 2.5,
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
         }}
       >
-        <MetricCard label='Total Models' value={String(summary.totalModels)} />
-        <MetricCard label='Total Requests' value={summary.totalRequests.toLocaleString()} />
-        <MetricCard label='Revenue' value={`$${summary.revenue.toLocaleString()}`} />
+        <MetricCard
+          label='Total Models'
+          value={String(summary.totalModels)}
+          delta='Active portfolio'
+        />
+        <MetricCard
+          label='Total Requests'
+          value={summary.totalRequests.toLocaleString()}
+          delta='+12.4% MoM'
+        />
+        <MetricCard
+          label='Gross Revenue'
+          value={`$${summary.revenue.toLocaleString()}`}
+          delta='Payout ready'
+        />
         <MetricCard
           label='Average Trust Score'
           value={`${summary.averageTrustScore.toFixed(1)}%`}
+          delta='Verified'
         />
       </Box>
 
       <SectionCard
         title='My Models'
-        subtitle='Portfolio snapshot'
+        subtitle='Portfolio snapshot and live status'
         action={
-          <Button variant='outlined' onClick={() => navigate('/owner/model-profile')}>
+          <Button
+            variant='outlined'
+            onClick={() => navigate('/owner/model-profile')}
+            sx={{
+              color: '#fb7185',
+              borderColor: '#fb7185',
+              fontWeight: 700,
+              borderRadius: 2,
+              '&:hover': { bgcolor: 'rgba(251, 113, 133, 0.1)', borderColor: '#fda4af' },
+            }}
+          >
             Open Profile Editor
           </Button>
         }
       >
         {loading ? (
           <Stack alignItems='center' sx={{ py: 4 }}>
-            <CircularProgress size={32} />
+            <CircularProgress size={32} sx={{ color: '#fb7185' }} />
           </Stack>
         ) : (
-          <Stack spacing={1.5}>
+          <Stack spacing={2}>
             {models.map((model) => (
               <OwnerModelCard
                 key={model.id}

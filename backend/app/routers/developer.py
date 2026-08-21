@@ -1,5 +1,4 @@
 import secrets
-from datetime import datetime, timezone
 from uuid import UUID
 
 from beanie.operators import In
@@ -150,9 +149,7 @@ async def compare_developer_models(
     current_user: User = Depends(require_developer),
 ) -> CompareResponse:
     models = await Model.find(In(Model.slug, payload.model_ids)).to_list()
-    benchmarks = await Benchmark.find(
-        In(Benchmark.model_id, payload.model_ids)
-    ).to_list()
+    benchmarks = await Benchmark.find(In(Benchmark.model_id, payload.model_ids)).to_list()
 
     bench_outs = [
         BenchmarkOut(
@@ -357,4 +354,3 @@ async def search_hf_for_developers(
         sort=query.sort or "downloads",
         token=current_user.hf_token,
     )
-

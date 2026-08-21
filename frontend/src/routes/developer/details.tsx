@@ -1,4 +1,4 @@
-import { OpenInNew } from '@mui/icons-material'
+import { OpenInNew, RocketLaunch } from '@mui/icons-material'
 import { Box, Button, Chip, CircularProgress, Stack, Typography } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { NavLink, useParams } from 'react-router'
@@ -33,33 +33,52 @@ export default function DeveloperModelDetails() {
     return (
       <SectionCard title='Model Specifications' subtitle='Loading model...'>
         <Stack alignItems='center' sx={{ py: 4 }}>
-          <CircularProgress size={32} />
+          <CircularProgress size={32} sx={{ color: '#38bdf8' }} />
         </Stack>
       </SectionCard>
     )
   }
 
   return (
-    <Stack spacing={2.25}>
+    <Stack spacing={3}>
       <SectionCard
         title={model.name}
         subtitle={model.description}
-        action={<Chip label={`Trust score ${model.trustScore}%`} color='primary' />}
+        action={
+          <Chip
+            label={`Trust Score: ${model.trustScore}%`}
+            sx={{
+              bgcolor: 'rgba(74, 222, 128, 0.15)',
+              color: '#4ade80',
+              border: '1px solid rgba(74, 222, 128, 0.3)',
+              fontWeight: 800,
+            }}
+          />
+        }
       >
-        <Stack spacing={0.5}>
-          <Typography sx={{ color: '#4f6683' }}>Creator / Model Owner: {model.creator}</Typography>
+        <Stack spacing={0.75}>
+          <Typography sx={{ color: '#94a3b8' }}>
+            Creator / Model Owner: <strong style={{ color: '#f8fafc' }}>{model.creator}</strong>
+          </Typography>
           {model.huggingFaceId && (
-            <Typography sx={{ color: '#4f6683' }}>
-              Hugging Face ID: <strong>{model.huggingFaceId}</strong>
+            <Typography sx={{ color: '#94a3b8' }}>
+              Hugging Face ID: <strong style={{ color: '#38bdf8' }}>{model.huggingFaceId}</strong>
             </Typography>
           )}
         </Stack>
-        <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
+        <Stack direction='row' spacing={2} useFlexGap flexWrap='wrap' sx={{ mt: 1 }}>
           <Button
             component={NavLink}
             to={`/developer/playground?model=${encodeURIComponent(model.id)}`}
             variant='contained'
             endIcon={<OpenInNew />}
+            sx={{
+              bgcolor: '#38bdf8',
+              color: '#090d16',
+              fontWeight: 800,
+              borderRadius: 2.5,
+              '&:hover': { bgcolor: '#7dd3fc' },
+            }}
           >
             Open Playground
           </Button>
@@ -67,6 +86,14 @@ export default function DeveloperModelDetails() {
             component={NavLink}
             to={`/developer/deploy?model=${encodeURIComponent(model.id)}`}
             variant='outlined'
+            startIcon={<RocketLaunch />}
+            sx={{
+              color: '#4ade80',
+              borderColor: '#4ade80',
+              fontWeight: 800,
+              borderRadius: 2.5,
+              '&:hover': { bgcolor: 'rgba(74, 222, 128, 0.1)', borderColor: '#86efac' },
+            }}
           >
             Deploy Model
           </Button>
@@ -76,35 +103,88 @@ export default function DeveloperModelDetails() {
       <Box
         sx={{
           display: 'grid',
-          gap: 2,
-          gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+          gap: 2.5,
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
         }}
       >
-        <MetricCard label='Accuracy' value={`${model.accuracy}%`} />
-        <MetricCard label='Latency' value={`${model.latencyMs}ms`} />
-        <MetricCard label='Price Input / 1M' value={`$${model.pricePerMInput.toFixed(2)}`} />
-        <MetricCard label='Price Output / 1M' value={`$${model.pricePerMOutput.toFixed(2)}`} />
+        <MetricCard label='Accuracy' value={`${model.accuracy}%`} delta='Benchmark P90' />
+        <MetricCard label='P95 Latency' value={`${model.latencyMs}ms`} delta='Live TTFT' />
+        <MetricCard
+          label='Price Input / 1M'
+          value={`$${model.pricePerMInput.toFixed(2)}`}
+          delta='Prompt tokens'
+        />
+        <MetricCard
+          label='Price Output / 1M'
+          value={`$${model.pricePerMOutput.toFixed(2)}`}
+          delta='Completion tokens'
+        />
       </Box>
 
-      <SectionCard title='Benchmark metrics'>
-        <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
-          <Chip label={`MMLU: ${model.benchmarkResults.mmlu ?? 84}`} />
-          <Chip label={`HumanEval: ${model.benchmarkResults.humaneval ?? 71}`} />
-          <Chip label={`Long Context: ${model.benchmarkResults.longContext ?? 82}`} />
+      <SectionCard
+        title='Benchmark Metrics & Evaluations'
+        subtitle='Standardized multi-dataset test results'
+      >
+        <Stack direction='row' spacing={1.5} useFlexGap flexWrap='wrap'>
+          <Chip
+            label={`MMLU Reasoning: ${model.benchmarkResults.mmlu ?? 84}`}
+            sx={{
+              bgcolor: 'rgba(56, 189, 248, 0.12)',
+              color: '#38bdf8',
+              border: '1px solid rgba(56, 189, 248, 0.3)',
+              fontWeight: 700,
+            }}
+          />
+          <Chip
+            label={`HumanEval Coding: ${model.benchmarkResults.humaneval ?? 71}`}
+            sx={{
+              bgcolor: 'rgba(192, 132, 252, 0.12)',
+              color: '#c084fc',
+              border: '1px solid rgba(192, 132, 252, 0.3)',
+              fontWeight: 700,
+            }}
+          />
+          <Chip
+            label={`Long Context Needle: ${model.benchmarkResults.longContext ?? 82}`}
+            sx={{
+              bgcolor: 'rgba(253, 224, 71, 0.12)',
+              color: '#fde047',
+              border: '1px solid rgba(253, 224, 71, 0.3)',
+              fontWeight: 700,
+            }}
+          />
         </Stack>
-        <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
+        <Stack direction='row' spacing={1.25} useFlexGap flexWrap='wrap' sx={{ mt: 1 }}>
           {modelDetailsMetrics.map((metric) => (
-            <Chip key={metric.key} label={`${metric.label}: ${metric.value}`} variant='outlined' />
+            <Chip
+              key={metric.key}
+              label={`${metric.label}: ${metric.value}`}
+              sx={{
+                bgcolor: '#0a0e17',
+                border: '1px solid #1e293b',
+                color: '#cbd5e1',
+                fontWeight: 600,
+              }}
+            />
           ))}
         </Stack>
       </SectionCard>
 
-      <SectionCard title='Usage information'>
-        <Typography sx={{ color: '#4f6683' }}>Active apps: {model.usage.activeApps}</Typography>
-        <Typography sx={{ color: '#4f6683' }}>
-          Monthly requests: {model.usage.monthlyRequests}
-        </Typography>
-        <Typography sx={{ color: '#4f6683' }}>Observed uptime: {model.usage.uptime}</Typography>
+      <SectionCard title='Usage & Reliability Information' subtitle='Marketplace observation logs'>
+        <Stack spacing={1}>
+          <Typography sx={{ color: '#94a3b8' }}>
+            Active applications connected:{' '}
+            <strong style={{ color: '#f8fafc' }}>{model.usage.activeApps}</strong>
+          </Typography>
+          <Typography sx={{ color: '#94a3b8' }}>
+            Monthly request volume:{' '}
+            <strong style={{ color: '#f8fafc' }}>{model.usage.monthlyRequests}</strong>
+          </Typography>
+          <Typography sx={{ color: '#94a3b8' }}>
+            Observed 30-day uptime:{' '}
+            <strong style={{ color: '#4ade80' }}>{model.usage.uptime}</strong>
+          </Typography>
+        </Stack>
       </SectionCard>
     </Stack>
   )

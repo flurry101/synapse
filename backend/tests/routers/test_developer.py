@@ -16,9 +16,7 @@ async def test_developer_endpoints_and_deployments(client: AsyncClient) -> None:
     headers = await generate_user_auth_headers(client, dev)
 
     # 1. List developer models (seeded on startup)
-    r = await client.get(
-        f"{settings.API_V1_STR}/developer/models", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/developer/models", headers=headers)
     assert r.status_code == 200
     models = r.json()
     assert isinstance(models, list)
@@ -86,9 +84,7 @@ async def test_developer_endpoints_and_deployments(client: AsyncClient) -> None:
     deployment_id = deployment["id"]
 
     # 6. List deployments
-    r = await client.get(
-        f"{settings.API_V1_STR}/developer/deployments", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/developer/deployments", headers=headers)
     assert r.status_code == 200
     deploy_list = r.json()
     assert any(d["id"] == deployment_id for d in deploy_list)
@@ -127,9 +123,6 @@ async def test_developer_role_guard(client: AsyncClient) -> None:
     owner_user = await create_test_owner()
     headers = await generate_user_auth_headers(client, owner_user)
 
-    r = await client.get(
-        f"{settings.API_V1_STR}/developer/models", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/developer/models", headers=headers)
     assert r.status_code == 403
     assert "Developer workspace access required" in r.json()["detail"]
-

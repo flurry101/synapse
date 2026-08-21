@@ -38,24 +38,43 @@ export default function DeveloperCompare() {
   }, [])
 
   return (
-    <Stack spacing={2.25}>
+    <Stack spacing={3}>
       <SectionCard
-        title='Model comparison'
-        subtitle='Compare shortlisted models side-by-side across quality, trust, speed, price, and benchmarks'
+        title='Side-by-Side Model Battle & Comparison'
+        subtitle='Compare shortlisted models across quality, trust, speed, price, and evaluations'
         action={
-          <Button component={NavLink} to='/developer/search' variant='outlined'>
-            Update selection
+          <Button
+            component={NavLink}
+            to='/developer/search'
+            variant='outlined'
+            sx={{
+              color: '#38bdf8',
+              borderColor: '#38bdf8',
+              fontWeight: 700,
+              borderRadius: 2.5,
+              '&:hover': { bgcolor: 'rgba(56, 189, 248, 0.1)', borderColor: '#7dd3fc' },
+            }}
+          >
+            Update Selection
           </Button>
         }
       >
         {loading ? (
           <Stack alignItems='center' sx={{ py: 4 }}>
-            <CircularProgress size={32} />
+            <CircularProgress size={32} sx={{ color: '#38bdf8' }} />
           </Stack>
         ) : (
           <>
             {models.length < 2 && (
-              <Alert severity='info' sx={{ mb: 2 }}>
+              <Alert
+                severity='info'
+                sx={{
+                  mb: 2.5,
+                  bgcolor: 'rgba(56, 189, 248, 0.1)',
+                  color: '#bae6fd',
+                  border: '1px solid rgba(56, 189, 248, 0.3)',
+                }}
+              >
                 Select at least two models from the Search Catalog to compare. Showing default
                 models for now.
               </Alert>
@@ -64,8 +83,9 @@ export default function DeveloperCompare() {
           </>
         )}
       </SectionCard>
-      <Typography variant='body2' sx={{ color: '#5f6f88' }}>
-        Strongest values are highlighted. For latency and price, lower values are considered better.
+      <Typography variant='body2' sx={{ color: '#94a3b8' }}>
+        🏆 Strongest metrics are highlighted with green badges. For latency and pricing, lower
+        values indicate better performance.
       </Typography>
     </Stack>
   )

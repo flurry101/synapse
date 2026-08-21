@@ -95,7 +95,7 @@ export default function DeveloperSearch() {
   }, [models, sortBy])
 
   return (
-    <Stack spacing={2.25}>
+    <Stack spacing={3}>
       <SectionCard
         title='Model Search & Discovery'
         subtitle='Browse the verified Synapse Catalog or query millions of open-weight models on Hugging Face'
@@ -103,7 +103,17 @@ export default function DeveloperSearch() {
         <Tabs
           value={searchSource}
           onChange={(_, val) => setSearchSource(val)}
-          sx={{ mb: 1, borderBottom: 1, borderColor: 'divider' }}
+          sx={{
+            mb: 1.5,
+            borderBottom: '1px solid #1e293b',
+            '& .MuiTab-root': {
+              color: '#94a3b8',
+              fontWeight: 700,
+              textTransform: 'none',
+              '&.Mui-selected': { color: '#38bdf8' },
+            },
+            '& .MuiTabs-indicator': { bgcolor: '#38bdf8' },
+          }}
         >
           <Tab
             value='catalog'
@@ -119,16 +129,16 @@ export default function DeveloperSearch() {
           onChange={setQuery}
           placeholder={
             searchSource === 'catalog'
-              ? 'Search models by use case, task, or capability'
-              : 'Search Hugging Face models by name or repo ID (e.g. llama-3, mistral, qwen)'
+              ? 'Search models by use case, task, or capability...'
+              : 'Search Hugging Face models by repo name or author (e.g. meta-llama, mistralai, deepseek)...'
           }
         />
 
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mt: 1 }}>
           <TextField
             select
             fullWidth
-            label='Task/category filter'
+            label='Task Filter'
             value={taskFilter}
             onChange={(event) => setTaskFilter(event.target.value)}
           >
@@ -142,7 +152,7 @@ export default function DeveloperSearch() {
             <TextField
               select
               fullWidth
-              label='Sort options'
+              label='Sort Options'
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value)}
             >
@@ -155,21 +165,38 @@ export default function DeveloperSearch() {
           )}
         </Stack>
 
-        <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
-          {taskFilters.slice(1).map((task) => (
-            <Chip
-              key={task}
-              label={task}
-              clickable
-              color={task === taskFilter ? 'primary' : 'default'}
-              onClick={() => setTaskFilter(task)}
-            />
-          ))}
+        <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap' sx={{ mt: 0.5 }}>
+          {taskFilters.slice(1).map((task) => {
+            const isSelected = task === taskFilter
+            return (
+              <Chip
+                key={task}
+                label={task}
+                clickable
+                onClick={() => setTaskFilter(task)}
+                sx={{
+                  bgcolor: isSelected ? 'rgba(56, 189, 248, 0.15)' : '#0a0e17',
+                  color: isSelected ? '#38bdf8' : '#cbd5e1',
+                  border: `1px solid ${isSelected ? '#38bdf8' : '#1e293b'}`,
+                  fontWeight: 700,
+                  '&:hover': {
+                    borderColor: '#38bdf8',
+                    bgcolor: 'rgba(56, 189, 248, 0.1)',
+                  },
+                }}
+              />
+            )
+          })}
           <Chip
-            label='Clear filters'
-            variant='outlined'
+            label='Clear Filters'
             onClick={() => setTaskFilter('All')}
             clickable
+            sx={{
+              bgcolor: '#0a0e17',
+              border: '1px solid #1e293b',
+              color: '#94a3b8',
+              '&:hover': { color: '#f8fafc', borderColor: '#64748b' },
+            }}
           />
         </Stack>
       </SectionCard>
@@ -190,6 +217,14 @@ export default function DeveloperSearch() {
               to='/developer/compare'
               variant='contained'
               disabled={compareIds.length < 2}
+              sx={{
+                bgcolor: '#38bdf8',
+                color: '#090d16',
+                fontWeight: 800,
+                borderRadius: 2.5,
+                '&:hover': { bgcolor: '#7dd3fc' },
+                '&:disabled': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: '#64748b' },
+              }}
             >
               Compare Selected ({compareIds.length})
             </Button>
@@ -198,16 +233,16 @@ export default function DeveloperSearch() {
       >
         {loading ? (
           <Stack alignItems='center' sx={{ py: 4 }}>
-            <CircularProgress size={32} />
+            <CircularProgress size={32} sx={{ color: '#38bdf8' }} />
           </Stack>
         ) : searchSource === 'catalog' ? (
           sortedCatalogModels.length === 0 ? (
-            <Typography sx={{ color: '#5f6f88' }}>
+            <Typography sx={{ color: '#94a3b8' }}>
               No models found matching your filters. Try switching to the Hugging Face tab or
               clearing filters.
             </Typography>
           ) : (
-            <Stack spacing={1.5}>
+            <Stack spacing={2}>
               {sortedCatalogModels.map((model) => (
                 <ModelCard
                   key={model.id}
@@ -219,47 +254,63 @@ export default function DeveloperSearch() {
             </Stack>
           )
         ) : hfModels.length === 0 ? (
-          <Typography sx={{ color: '#5f6f88' }}>
+          <Typography sx={{ color: '#94a3b8' }}>
             No Hugging Face models found for &quot;{query}&quot;.
           </Typography>
         ) : (
-          <Stack spacing={1.5}>
+          <Stack spacing={2}>
             {hfModels.map((hf) => (
               <Box
                 key={hf.id}
                 sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  border: '1px solid #dce5f2',
-                  bgcolor: '#ffffff',
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid #1e293b',
+                  bgcolor: '#0a0e17',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: { xs: 'flex-start', sm: 'center' },
                   flexDirection: { xs: 'column', sm: 'row' },
-                  gap: 1.5,
+                  gap: 2,
+                  transition: 'border-color 0.2s ease',
+                  '&:hover': { borderColor: '#38bdf8' },
                 }}
               >
                 <Box>
-                  <Stack direction='row' spacing={1} alignItems='center'>
-                    <Typography variant='subtitle1' sx={{ fontWeight: 700, color: '#0f3a5e' }}>
+                  <Stack direction='row' spacing={1} alignItems='center' useFlexGap flexWrap='wrap'>
+                    <Typography variant='subtitle1' sx={{ fontWeight: 800, color: '#f8fafc' }}>
                       {hf.name}
                     </Typography>
                     <Chip
                       label={hf.task || 'text-generation'}
                       size='small'
-                      color='primary'
-                      variant='outlined'
+                      sx={{
+                        bgcolor: 'rgba(56, 189, 248, 0.12)',
+                        color: '#38bdf8',
+                        border: '1px solid rgba(56, 189, 248, 0.3)',
+                        fontWeight: 700,
+                      }}
                     />
-                    {hf.parameters !== 'Unknown' && <Chip label={hf.parameters} size='small' />}
+                    {hf.parameters !== 'Unknown' && (
+                      <Chip
+                        label={hf.parameters}
+                        size='small'
+                        sx={{ bgcolor: '#111622', color: '#cbd5e1' }}
+                      />
+                    )}
                   </Stack>
                   <Typography
                     variant='caption'
-                    sx={{ color: '#5f6f88', display: 'block', mt: 0.5 }}
+                    sx={{ color: '#94a3b8', display: 'block', mt: 0.75 }}
                   >
-                    Repo: <strong>{hf.id}</strong> • Author: {hf.author} • Downloads:{' '}
-                    {hf.downloads.toLocaleString()} • Likes: {hf.likes.toLocaleString()}
+                    Repo: <strong style={{ color: '#f8fafc' }}>{hf.id}</strong> • Author:{' '}
+                    {hf.author} • Downloads: {hf.downloads.toLocaleString()} • Likes:{' '}
+                    {hf.likes.toLocaleString()}
                   </Typography>
-                  <Typography variant='body2' sx={{ color: '#334e68', mt: 0.75 }}>
+                  <Typography
+                    variant='body2'
+                    sx={{ color: '#cbd5e1', mt: 1, fontSize: 13.5, lineHeight: 1.5 }}
+                  >
                     {hf.description}
                   </Typography>
                 </Box>
@@ -268,7 +319,14 @@ export default function DeveloperSearch() {
                   to={`/developer/playground?model=${encodeURIComponent(hf.id)}`}
                   variant='outlined'
                   size='small'
-                  sx={{ whiteSpace: 'nowrap' }}
+                  sx={{
+                    color: '#38bdf8',
+                    borderColor: '#38bdf8',
+                    fontWeight: 700,
+                    whiteSpace: 'nowrap',
+                    borderRadius: 2,
+                    '&:hover': { bgcolor: 'rgba(56, 189, 248, 0.1)', borderColor: '#7dd3fc' },
+                  }}
                 >
                   Test in Playground
                 </Button>

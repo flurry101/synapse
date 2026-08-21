@@ -7,6 +7,7 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material'
+import { useNavigate } from 'react-router'
 import type { DeveloperModel } from '../../mocks/developerData'
 
 type ModelComparisonTableProps = {
@@ -20,6 +21,7 @@ const higherIsBetterKeys: Array<keyof DeveloperModel['benchmarkResults']> = [
 ]
 
 export default function ModelComparisonTable({ models }: ModelComparisonTableProps) {
+  const navigate = useNavigate()
   if (models.length === 0) {
     return null
   }
@@ -36,52 +38,57 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
 
   return (
     <TableContainer
-      sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, backgroundColor: 'white' }}
+      sx={{
+        border: '1px solid #1e293b',
+        borderRadius: 3.5,
+        backgroundColor: '#111622',
+        overflowX: 'auto',
+      }}
     >
       <Table>
         <TableHead>
-          <TableRow sx={{ backgroundColor: '#f5f8fc' }}>
-            <TableCell sx={{ fontWeight: 800 }}>Metric</TableCell>
+          <TableRow sx={{ backgroundColor: '#0e1422' }}>
+            <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Metric</TableCell>
             {models.map((model) => (
-              <TableCell key={model.id} sx={{ fontWeight: 800 }}>
+              <TableCell key={model.id} sx={{ fontWeight: 800, color: '#f8fafc' }}>
                 {model.name}
               </TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow>
-            <TableCell>Accuracy</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>Accuracy</TableCell>
             {models.map((model) => (
               <TableCell
                 key={`${model.id}-accuracy`}
                 sx={cellStyle(model.accuracy === bestAccuracy)}
               >
-                {model.accuracy}%
+                {model.accuracy}% {model.accuracy === bestAccuracy && '🏆'}
               </TableCell>
             ))}
           </TableRow>
-          <TableRow>
-            <TableCell>Trust score</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>Trust Score</TableCell>
             {models.map((model) => (
               <TableCell key={`${model.id}-trust`} sx={cellStyle(model.trustScore === bestTrust)}>
-                {model.trustScore}%
+                {model.trustScore}% {model.trustScore === bestTrust && '🏆'}
               </TableCell>
             ))}
           </TableRow>
-          <TableRow>
-            <TableCell>Latency</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>P95 Latency</TableCell>
             {models.map((model) => (
               <TableCell
                 key={`${model.id}-latency`}
                 sx={cellStyle(model.latencyMs === bestLatency)}
               >
-                {model.latencyMs}ms
+                {model.latencyMs}ms {model.latencyMs === bestLatency && '⚡'}
               </TableCell>
             ))}
           </TableRow>
-          <TableRow>
-            <TableCell>Price (input+output / 1M)</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>Price (1M tokens in+out)</TableCell>
             {models.map((model) => (
               <TableCell
                 key={`${model.id}-price`}
@@ -91,8 +98,8 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
               </TableCell>
             ))}
           </TableRow>
-          <TableRow>
-            <TableCell>Benchmark: MMLU</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>MMLU Benchmark</TableCell>
             {models.map((model) => (
               <TableCell
                 key={`${model.id}-mmlu`}
@@ -102,8 +109,8 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
               </TableCell>
             ))}
           </TableRow>
-          <TableRow>
-            <TableCell>Benchmark: HumanEval</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>HumanEval Coding</TableCell>
             {models.map((model) => (
               <TableCell
                 key={`${model.id}-humaneval`}
@@ -113,8 +120,8 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
               </TableCell>
             ))}
           </TableRow>
-          <TableRow>
-            <TableCell>Benchmark: Long Context</TableCell>
+          <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+            <TableCell sx={{ color: '#94a3b8' }}>Long Context Retain</TableCell>
             {models.map((model) => (
               <TableCell
                 key={`${model.id}-long-context`}
@@ -125,11 +132,22 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
             ))}
           </TableRow>
           <TableRow>
-            <TableCell>Action</TableCell>
+            <TableCell sx={{ color: '#94a3b8' }}>Action</TableCell>
             {models.map((model) => (
               <TableCell key={`${model.id}-action`}>
-                <Button variant='contained' size='small'>
-                  Use this model
+                <Button
+                  onClick={() => navigate(`/developer/playground?model=${model.id}`)}
+                  variant='contained'
+                  size='small'
+                  sx={{
+                    bgcolor: '#38bdf8',
+                    color: '#090d16',
+                    fontWeight: 800,
+                    borderRadius: 2,
+                    '&:hover': { bgcolor: '#7dd3fc' },
+                  }}
+                >
+                  Use Model
                 </Button>
               </TableCell>
             ))}
@@ -142,11 +160,11 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
 
 function cellStyle(highlight: boolean) {
   if (!highlight) {
-    return undefined
+    return { color: '#cbd5e1' }
   }
   return {
-    backgroundColor: '#edf7ed',
-    color: '#1f5422',
+    backgroundColor: 'rgba(74, 222, 128, 0.15)',
+    color: '#4ade80',
     fontWeight: 800,
   }
 }

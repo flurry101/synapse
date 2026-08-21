@@ -19,10 +19,7 @@ class Deployment(Document):
     rate_limit_rpm: int = 180
     endpoint_url: str = ""
     status: str = "active"
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Settings:
         name = "deployments"
-

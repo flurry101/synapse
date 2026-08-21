@@ -17,7 +17,7 @@ export default function SearchBar({
   onSubmit,
 }: SearchBarProps) {
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
       <TextField
         fullWidth
         value={value}
@@ -26,13 +26,30 @@ export default function SearchBar({
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
-              <SearchIcon />
+              <SearchIcon sx={{ color: '#38bdf8' }} />
             </InputAdornment>
           ),
         }}
+        sx={{
+          '& .MuiOutlinedInput-root': {
+            bgcolor: '#0a0e17',
+            borderRadius: 2.5,
+          },
+        }}
       />
       {buttonLabel && (
-        <Button variant='contained' onClick={onSubmit} sx={{ minWidth: 160 }}>
+        <Button
+          variant='contained'
+          onClick={onSubmit}
+          sx={{
+            minWidth: 160,
+            bgcolor: '#38bdf8',
+            color: '#090d16',
+            fontWeight: 800,
+            borderRadius: 2.5,
+            '&:hover': { bgcolor: '#7dd3fc' },
+          }}
+        >
           {buttonLabel}
         </Button>
       )}

@@ -26,22 +26,22 @@ export default function PricingForm({ model, onSave }: PricingFormProps) {
   }, [currency, monthlyPrice, pricePer1kTokens, pricePerRequest])
 
   return (
-    <Stack spacing={1.25}>
+    <Stack spacing={2}>
       <TextField
         type='number'
-        label='Price per request'
+        label='Price Per Request'
         value={pricePerRequest}
         onChange={(event) => setPricePerRequest(Number(event.target.value))}
       />
       <TextField
         type='number'
-        label='Price per 1K tokens'
+        label='Price Per 1K Tokens'
         value={pricePer1kTokens}
         onChange={(event) => setPricePer1kTokens(Number(event.target.value))}
       />
       <TextField
         type='number'
-        label='Optional monthly pricing'
+        label='Optional Monthly Retainer'
         value={monthlyPrice}
         onChange={(event) => {
           const nextValue = event.target.value
@@ -54,30 +54,47 @@ export default function PricingForm({ model, onSave }: PricingFormProps) {
         value={currency}
         onChange={(event) => setCurrency(event.target.value as OwnerModel['pricing']['currency'])}
       >
-        <MenuItem value='USD'>USD</MenuItem>
-        <MenuItem value='EUR'>EUR</MenuItem>
-        <MenuItem value='INR'>INR</MenuItem>
+        <MenuItem value='USD'>USD ($)</MenuItem>
+        <MenuItem value='EUR'>EUR (€)</MenuItem>
+        <MenuItem value='INR'>INR (₹)</MenuItem>
       </TextField>
 
-      <Stack spacing={0.5} sx={{ p: 1.25, borderRadius: 2, bgcolor: '#f4f8fd' }}>
-        <Typography variant='subtitle2' sx={{ color: '#1d3a58', fontWeight: 800 }}>
-          Pricing preview
+      <Stack
+        spacing={0.75}
+        sx={{
+          p: 2,
+          borderRadius: 2.5,
+          bgcolor: '#0a0e17',
+          border: '1px solid #1e293b',
+        }}
+      >
+        <Typography variant='caption' sx={{ color: '#fb7185', fontWeight: 800, letterSpacing: 1 }}>
+          LIVE PRICING PREVIEW
         </Typography>
-        <Typography variant='body2' sx={{ color: '#577191' }}>
+        <Typography variant='body2' sx={{ color: '#f8fafc', fontWeight: 600 }}>
           {preview.request}
         </Typography>
-        <Typography variant='body2' sx={{ color: '#577191' }}>
+        <Typography variant='body2' sx={{ color: '#f8fafc', fontWeight: 600 }}>
           {preview.token}
         </Typography>
-        <Typography variant='body2' sx={{ color: '#577191' }}>
-          Monthly: {preview.monthly}
+        <Typography variant='body2' sx={{ color: '#94a3b8' }}>
+          Monthly Subscription: {preview.monthly}
         </Typography>
       </Stack>
 
       <Button
         variant='contained'
         startIcon={<SaveIcon />}
-        sx={{ alignSelf: 'flex-start' }}
+        sx={{
+          alignSelf: 'flex-start',
+          bgcolor: '#fb7185',
+          color: '#0f172a',
+          fontWeight: 800,
+          px: 3,
+          py: 1,
+          borderRadius: 2.5,
+          '&:hover': { bgcolor: '#f43f5e' },
+        }}
         onClick={() =>
           onSave(model.id, {
             pricePerRequest,
@@ -87,7 +104,7 @@ export default function PricingForm({ model, onSave }: PricingFormProps) {
           })
         }
       >
-        Save pricing
+        Save Pricing Tiers
       </Button>
     </Stack>
   )

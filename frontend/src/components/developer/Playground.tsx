@@ -4,8 +4,10 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   MenuItem,
+  Paper,
   Stack,
   TextField,
   Typography,
@@ -59,8 +61,8 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
   }
 
   return (
-    <Stack spacing={2}>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+    <Stack spacing={2.5}>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <TextField
           fullWidth
           select
@@ -80,44 +82,79 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
           value={temperature}
           inputProps={{ step: 0.1, min: 0.0, max: 1.0 }}
           onChange={(e) => setTemperature(Number(e.target.value))}
-          sx={{ width: { xs: '100%', sm: 140 } }}
+          sx={{ width: { xs: '100%', sm: 150 } }}
         />
         <TextField
           type='number'
           label='Max Tokens'
           value={maxTokens}
           onChange={(e) => setMaxTokens(Number(e.target.value))}
-          sx={{ width: { xs: '100%', sm: 140 } }}
+          sx={{ width: { xs: '100%', sm: 150 } }}
         />
       </Stack>
 
       <TextField
         multiline
         minRows={5}
-        label='Prompt input'
+        label='Prompt Input'
         placeholder='Type a prompt or instructions to test model behavior...'
         value={input}
         onChange={(event) => setInput(event.target.value)}
       />
 
-      <Stack direction='row' spacing={1}>
+      <Stack direction='row' spacing={1.5}>
         <Button
           onClick={onRun}
           variant='contained'
           disabled={running || !input.trim()}
           startIcon={running ? <CircularProgress size={16} color='inherit' /> : <PlayArrowIcon />}
+          sx={{
+            bgcolor: '#4ade80',
+            color: '#052e16',
+            fontWeight: 800,
+            px: 3,
+            '&:hover': { bgcolor: '#22c55e' },
+          }}
         >
-          {running ? 'Executing...' : 'Run Inference'}
+          {running ? 'Running Model...' : 'Run Inference'}
         </Button>
-        <Button onClick={onClear} variant='outlined' startIcon={<RestartAltIcon />}>
+        <Button
+          onClick={onClear}
+          variant='outlined'
+          startIcon={<RestartAltIcon />}
+          sx={{
+            color: '#94a3b8',
+            borderColor: '#1e293b',
+            '&:hover': { borderColor: '#64748b', bgcolor: 'rgba(255, 255, 255, 0.05)' },
+          }}
+        >
           Clear
         </Button>
       </Stack>
 
-      {error && <Alert severity='error'>{error}</Alert>}
+      {error && (
+        <Alert
+          severity='error'
+          sx={{
+            bgcolor: 'rgba(248, 113, 113, 0.15)',
+            border: '1px solid rgba(248, 113, 113, 0.3)',
+            color: '#fca5a5',
+          }}
+        >
+          {error}
+        </Alert>
+      )}
 
       {!running && !result && (
-        <Alert severity='info'>
+        <Alert
+          severity='info'
+          sx={{
+            bgcolor: 'rgba(56, 189, 248, 0.1)',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+            color: '#bae6fd',
+            '& .MuiAlert-icon': { color: '#38bdf8' },
+          }}
+        >
           Run inference to view generated output, latency, token metrics, and cost calculation.
         </Alert>
       )}
@@ -125,45 +162,75 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
       {result && (
         <Box
           sx={{
-            p: 2,
-            border: '1px solid #c8d6ea',
-            borderRadius: 2,
-            bgcolor: '#fafcff',
+            p: 2.5,
+            border: '1px solid #1e293b',
+            borderRadius: 3,
+            bgcolor: '#0a0e17',
           }}
         >
-          <Typography variant='subtitle2' sx={{ color: '#0f3a5e', fontWeight: 700, mb: 1 }}>
-            Execution Output
-          </Typography>
           <Typography
+            variant='caption'
             sx={{
-              color: '#213a58',
+              color: '#38bdf8',
+              fontWeight: 800,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              mb: 1.5,
+              display: 'block',
+            }}
+          >
+            Live Execution Output
+          </Typography>
+          <Paper
+            elevation={0}
+            sx={{
+              color: '#f8fafc',
               whiteSpace: 'pre-wrap',
-              bgcolor: '#ffffff',
-              p: 1.5,
-              borderRadius: 1.5,
-              border: '1px solid #e1eaf5',
-              fontFamily: 'inherit',
+              bgcolor: '#111622',
+              p: 2,
+              borderRadius: 2,
+              border: '1px solid #1e293b',
+              fontFamily: 'monospace',
+              fontSize: '0.9rem',
+              lineHeight: 1.6,
             }}
           >
             {result.output_text}
-          </Typography>
+          </Paper>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            sx={{ mt: 1.5, color: '#577191' }}
+            spacing={1.5}
+            sx={{ mt: 2 }}
             useFlexGap
             flexWrap='wrap'
           >
-            <Typography variant='body2'>
-              ⏱️ <strong>Latency:</strong> {result.latency_ms}ms
-            </Typography>
-            <Typography variant='body2'>
-              📊 <strong>Tokens:</strong> {result.prompt_tokens} prompt + {result.completion_tokens}{' '}
-              completion = {result.total_tokens} total
-            </Typography>
-            <Typography variant='body2'>
-              💰 <strong>Estimated Cost:</strong> {result.cost_formatted}
-            </Typography>
+            <Chip
+              label={`⏱️ Latency: ${result.latency_ms}ms`}
+              sx={{
+                bgcolor: 'rgba(56, 189, 248, 0.12)',
+                color: '#38bdf8',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                fontWeight: 700,
+              }}
+            />
+            <Chip
+              label={`📊 Tokens: ${result.prompt_tokens} prompt + ${result.completion_tokens} completion (${result.total_tokens} total)`}
+              sx={{
+                bgcolor: 'rgba(74, 222, 128, 0.12)',
+                color: '#4ade80',
+                border: '1px solid rgba(74, 222, 128, 0.3)',
+                fontWeight: 700,
+              }}
+            />
+            <Chip
+              label={`💰 Cost: ${result.cost_formatted}`}
+              sx={{
+                bgcolor: 'rgba(192, 132, 252, 0.12)',
+                color: '#c084fc',
+                border: '1px solid rgba(192, 132, 252, 0.3)',
+                fontWeight: 700,
+              }}
+            />
           </Stack>
         </Box>
       )}

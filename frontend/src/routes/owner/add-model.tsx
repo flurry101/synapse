@@ -125,12 +125,29 @@ export default function OwnerAddModel() {
   return (
     <SectionCard
       title='Add Model'
-      subtitle='Register a new model manually or import directly from the Hugging Face Hub'
+      subtitle='Register a new model manually or auto-import metadata from the Hugging Face Hub'
     >
-      <Stack spacing={2}>
-        <Box sx={{ p: 2, bgcolor: '#f0f7ff', borderRadius: 2, border: '1px solid #cce3ff' }}>
-          <Typography variant='subtitle2' sx={{ color: '#0052cc', fontWeight: 600, mb: 1 }}>
-            Import from Hugging Face Hub
+      <Stack spacing={2.5}>
+        <Box
+          sx={{
+            p: 2.5,
+            bgcolor: '#0a0e17',
+            borderRadius: 3,
+            border: '1px solid #1e293b',
+          }}
+        >
+          <Typography
+            variant='caption'
+            sx={{
+              color: '#38bdf8',
+              fontWeight: 800,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              mb: 1,
+              display: 'block',
+            }}
+          >
+            Hugging Face Auto-Import
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems='center'>
             <TextField
@@ -142,29 +159,43 @@ export default function OwnerAddModel() {
             />
             <Button
               variant='contained'
-              color='primary'
-              size='medium'
               disabled={isImporting}
               startIcon={
                 isImporting ? <CircularProgress size={16} color='inherit' /> : <CloudDownloadIcon />
               }
               onClick={handleImportHf}
-              sx={{ whiteSpace: 'nowrap' }}
+              sx={{
+                bgcolor: '#38bdf8',
+                color: '#090d16',
+                fontWeight: 800,
+                whiteSpace: 'nowrap',
+                px: 2.5,
+                borderRadius: 2,
+                '&:hover': { bgcolor: '#7dd3fc' },
+              }}
             >
-              {isImporting ? 'Importing...' : 'Fetch HF Metadata'}
+              {isImporting ? 'Importing...' : 'Fetch Metadata'}
             </Button>
           </Stack>
           {importStatus && (
-            <Alert severity='info' sx={{ mt: 1.5 }}>
+            <Alert
+              severity='info'
+              sx={{
+                mt: 2,
+                bgcolor: 'rgba(56, 189, 248, 0.1)',
+                color: '#bae6fd',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+              }}
+            >
               {importStatus}
             </Alert>
           )}
         </Box>
 
-        <Divider />
+        <Divider sx={{ borderColor: '#1e293b' }} />
 
         <TextField
-          label='Model name'
+          label='Model Name'
           placeholder='e.g. Neuron Dialogue 3'
           value={form.modelName}
           onChange={(event) => setForm({ ...form, modelName: event.target.value })}
@@ -184,7 +215,7 @@ export default function OwnerAddModel() {
         />
         <TextField
           select
-          label='Task/category'
+          label='Task Category'
           value={form.task}
           onChange={(event) => setForm({ ...form, task: event.target.value })}
         >
@@ -194,7 +225,7 @@ export default function OwnerAddModel() {
             </MenuItem>
           ))}
         </TextField>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
           <TextField
             fullWidth
             label='Version'
@@ -204,7 +235,7 @@ export default function OwnerAddModel() {
           <TextField
             fullWidth
             select
-            label='Model type'
+            label='Model Type'
             value={form.modelType}
             onChange={(event) => setForm({ ...form, modelType: event.target.value })}
           >
@@ -221,15 +252,26 @@ export default function OwnerAddModel() {
           value={form.tags}
           onChange={(event) => setForm({ ...form, tags: event.target.value })}
         />
-        <Box>
-          <Typography variant='subtitle2' sx={{ color: '#1d3a58', mb: 1 }}>
-            Pricing & Monetization
+
+        <Box sx={{ p: 2.5, bgcolor: '#0a0e17', borderRadius: 3, border: '1px solid #1e293b' }}>
+          <Typography
+            variant='caption'
+            sx={{
+              color: '#fb7185',
+              fontWeight: 800,
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              mb: 1.5,
+              display: 'block',
+            }}
+          >
+            Pricing & Monetization Settings
           </Typography>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               fullWidth
               type='number'
-              label='Price per request ($)'
+              label='Price Per Request ($)'
               value={form.pricePerRequest}
               onChange={(event) =>
                 setForm({ ...form, pricePerRequest: Number(event.target.value) })
@@ -238,18 +280,18 @@ export default function OwnerAddModel() {
             <TextField
               fullWidth
               type='number'
-              label='Price per 1K tokens ($)'
+              label='Price Per 1K Tokens ($)'
               value={form.pricePer1kTokens}
               onChange={(event) =>
                 setForm({ ...form, pricePer1kTokens: Number(event.target.value) })
               }
             />
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 1.25 }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mt: 2 }}>
             <TextField
               fullWidth
               type='number'
-              label='Optional monthly pricing ($)'
+              label='Optional Monthly Retainer ($)'
               value={form.monthlyPrice}
               onChange={(event) => setForm({ ...form, monthlyPrice: event.target.value })}
             />
@@ -262,19 +304,26 @@ export default function OwnerAddModel() {
                 setForm({ ...form, currency: event.target.value as 'USD' | 'EUR' | 'INR' })
               }
             >
-              <MenuItem value='USD'>USD</MenuItem>
-              <MenuItem value='EUR'>EUR</MenuItem>
-              <MenuItem value='INR'>INR</MenuItem>
+              <MenuItem value='USD'>USD ($)</MenuItem>
+              <MenuItem value='EUR'>EUR (€)</MenuItem>
+              <MenuItem value='INR'>INR (₹)</MenuItem>
             </TextField>
           </Stack>
         </Box>
 
-        <Stack direction='row' spacing={1.5}>
+        <Stack direction='row' spacing={1.5} sx={{ mt: 1 }}>
           <Button
             variant='outlined'
             disabled={isSubmitting}
             startIcon={<AddCircleOutlineIcon />}
             onClick={() => saveModel('Draft')}
+            sx={{
+              color: '#cbd5e1',
+              borderColor: '#1e293b',
+              fontWeight: 700,
+              borderRadius: 2,
+              '&:hover': { borderColor: '#64748b', bgcolor: 'rgba(255, 255, 255, 0.05)' },
+            }}
           >
             Save Draft
           </Button>
@@ -283,10 +332,21 @@ export default function OwnerAddModel() {
             disabled={isSubmitting}
             startIcon={<PublishIcon />}
             onClick={() => saveModel('Published')}
+            sx={{
+              bgcolor: '#fb7185',
+              color: '#0f172a',
+              fontWeight: 800,
+              borderRadius: 2,
+              '&:hover': { bgcolor: '#f43f5e' },
+            }}
           >
             Publish to Hub
           </Button>
-          <Button variant='text' onClick={() => navigate('/owner/models')}>
+          <Button
+            variant='text'
+            onClick={() => navigate('/owner/models')}
+            sx={{ color: '#94a3b8', fontWeight: 700 }}
+          >
             View My Models
           </Button>
         </Stack>
@@ -297,11 +357,27 @@ export default function OwnerAddModel() {
             .map((tag) => tag.trim())
             .filter((tag) => tag.length > 0)
             .map((tag) => (
-              <Chip key={tag} label={tag} size='small' />
+              <Chip
+                key={tag}
+                label={tag}
+                size='small'
+                sx={{ bgcolor: '#0a0e17', border: '1px solid #1e293b', color: '#cbd5e1' }}
+              />
             ))}
         </Stack>
 
-        {submitted && <Alert severity='success'>{submitted}</Alert>}
+        {submitted && (
+          <Alert
+            severity='success'
+            sx={{
+              bgcolor: 'rgba(74, 222, 128, 0.15)',
+              color: '#86efac',
+              border: '1px solid rgba(74, 222, 128, 0.3)',
+            }}
+          >
+            {submitted}
+          </Alert>
+        )}
       </Stack>
     </SectionCard>
   )

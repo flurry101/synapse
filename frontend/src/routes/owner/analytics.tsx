@@ -38,9 +38,9 @@ export default function OwnerAnalytics() {
 
   if (loading || !analytics) {
     return (
-      <SectionCard title='Usage / Analytics' subtitle='Loading analytics...'>
+      <SectionCard title='Usage & Analytics' subtitle='Loading telemetry...'>
         <Stack alignItems='center' sx={{ py: 4 }}>
-          <CircularProgress size={32} />
+          <CircularProgress size={32} sx={{ color: '#fb7185' }} />
         </Stack>
       </SectionCard>
     )
@@ -57,10 +57,10 @@ export default function OwnerAnalytics() {
       : 240
 
   return (
-    <Stack spacing={2.25}>
+    <Stack spacing={3}>
       <SectionCard
-        title='Usage / Analytics'
-        subtitle='Request and revenue monitoring from deployed model endpoints'
+        title='Usage & Revenue Telemetry'
+        subtitle='Real-time request metrics and monetization monitoring'
       >
         <UsageStats
           totalRequests={totalRequests}
@@ -71,10 +71,13 @@ export default function OwnerAnalytics() {
         />
       </SectionCard>
 
-      <SectionCard title='Requests over time chart'>
+      <SectionCard
+        title='Requests Over Time'
+        subtitle='Aggregated hourly query throughput across all endpoints'
+      >
         <UsageChart
-          title='Requests over time'
-          color='#2368a2'
+          title='Requests Volume'
+          color='#38bdf8'
           points={analytics.time_series.map((point) => ({
             label: point.label,
             value: point.requests,
@@ -83,10 +86,13 @@ export default function OwnerAnalytics() {
         />
       </SectionCard>
 
-      <SectionCard title='Revenue over time chart'>
+      <SectionCard
+        title='Gross Revenue Over Time'
+        subtitle='Monetized token billing and monthly subscriptions'
+      >
         <UsageChart
-          title='Revenue over time'
-          color='#2e7d32'
+          title='Revenue ($)'
+          color='#4ade80'
           points={analytics.time_series.map((point) => ({
             label: point.label,
             value: point.revenue,
@@ -95,30 +101,37 @@ export default function OwnerAnalytics() {
         />
       </SectionCard>
 
-      <SectionCard title='Recent usage table' subtitle='Latest consumer traffic samples'>
-        <TableContainer sx={{ border: '1px solid #dce5f2', borderRadius: 2.5 }}>
+      <SectionCard
+        title='Recent Traffic Log'
+        subtitle='Live incoming requests from developer API keys'
+      >
+        <TableContainer sx={{ border: '1px solid #1e293b', borderRadius: 3, bgcolor: '#0a0e17' }}>
           <Table size='small'>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f6f9fe' }}>
-                <TableCell sx={{ fontWeight: 800 }}>App</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Model</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Requests</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Success rate</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Revenue</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Avg latency</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Timestamp</TableCell>
+              <TableRow sx={{ backgroundColor: '#0e1422' }}>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Consumer App</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Target Model</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Requests</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Success Rate</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Revenue</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Avg Latency</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Timestamp</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {analytics.recent_usage.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.app}</TableCell>
-                  <TableCell>{row.model}</TableCell>
-                  <TableCell>{row.requests.toLocaleString()}</TableCell>
-                  <TableCell>{row.success_rate.toFixed(1)}%</TableCell>
-                  <TableCell>${row.revenue.toLocaleString()}</TableCell>
-                  <TableCell>{row.avg_latency_ms}ms</TableCell>
-                  <TableCell>{row.timestamp}</TableCell>
+                <TableRow key={row.id} sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ color: '#f8fafc', fontWeight: 700 }}>{row.app}</TableCell>
+                  <TableCell sx={{ color: '#38bdf8' }}>{row.model}</TableCell>
+                  <TableCell sx={{ color: '#cbd5e1' }}>{row.requests.toLocaleString()}</TableCell>
+                  <TableCell sx={{ color: '#4ade80', fontWeight: 700 }}>
+                    {row.success_rate.toFixed(1)}%
+                  </TableCell>
+                  <TableCell sx={{ color: '#fde047', fontWeight: 700 }}>
+                    ${row.revenue.toLocaleString()}
+                  </TableCell>
+                  <TableCell sx={{ color: '#cbd5e1' }}>{row.avg_latency_ms}ms</TableCell>
+                  <TableCell sx={{ color: '#94a3b8' }}>{row.timestamp}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

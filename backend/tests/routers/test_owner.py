@@ -38,9 +38,7 @@ async def test_owner_crud_and_benchmarks(client: AsyncClient) -> None:
     model_slug = created["slug"]
 
     # 2. List owner models
-    r = await client.get(
-        f"{settings.API_V1_STR}/owner/models", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/owner/models", headers=headers)
     assert r.status_code == 200
     models_list = r.json()
     assert any(m["slug"] == model_slug for m in models_list)
@@ -79,17 +77,13 @@ async def test_owner_crud_and_benchmarks(client: AsyncClient) -> None:
     assert bm_res["accuracy"] == 92.5
 
     # 5. List benchmarks
-    r = await client.get(
-        f"{settings.API_V1_STR}/owner/benchmarks", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/owner/benchmarks", headers=headers)
     assert r.status_code == 200
     benchmarks = r.json()
     assert any(b["dataset"] == "FalconEval v1" for b in benchmarks)
 
     # 6. Analytics
-    r = await client.get(
-        f"{settings.API_V1_STR}/owner/analytics", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/owner/analytics", headers=headers)
     assert r.status_code == 200
     analytics = r.json()
     assert "total_revenue" in analytics
@@ -116,9 +110,7 @@ async def test_owner_crud_and_benchmarks(client: AsyncClient) -> None:
     assert r.status_code == 200
     import_details = r.json()
     assert "name" in import_details
-    assert (
-        import_details["hugging_face_id"] == "meta-llama/Llama-3.1-8B-Instruct"
-    )
+    assert import_details["hugging_face_id"] == "meta-llama/Llama-3.1-8B-Instruct"
 
     # 9. Delete model
     r = await client.delete(
@@ -133,9 +125,6 @@ async def test_owner_role_guard(client: AsyncClient) -> None:
     dev_user = await create_test_developer()
     headers = await generate_user_auth_headers(client, dev_user)
 
-    r = await client.get(
-        f"{settings.API_V1_STR}/owner/models", headers=headers
-    )
+    r = await client.get(f"{settings.API_V1_STR}/owner/models", headers=headers)
     assert r.status_code == 403
     assert "Model Owner workspace access required" in r.json()["detail"]
-

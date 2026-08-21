@@ -94,14 +94,14 @@ export default function OwnerBenchmarks() {
     return (
       <SectionCard title='Benchmark Results' subtitle='Loading benchmarks...'>
         <Stack alignItems='center' sx={{ py: 4 }}>
-          <CircularProgress size={32} />
+          <CircularProgress size={32} sx={{ color: '#fb7185' }} />
         </Stack>
       </SectionCard>
     )
   }
 
   return (
-    <Stack spacing={2.25}>
+    <Stack spacing={3}>
       <SectionCard title='Benchmark Results' subtitle='Quality, latency, and throughput tracking'>
         {latest && (
           <BenchmarkMetrics
@@ -116,38 +116,42 @@ export default function OwnerBenchmarks() {
       </SectionCard>
 
       <SectionCard
-        title='Benchmark results table'
-        subtitle='Dataset-level test history for owner-managed models'
+        title='Benchmark Results Table'
+        subtitle='Dataset-level evaluation history for owner-managed models'
       >
-        <TableContainer sx={{ border: '1px solid #dce5f2', borderRadius: 2.5 }}>
+        <TableContainer sx={{ border: '1px solid #1e293b', borderRadius: 3, bgcolor: '#0a0e17' }}>
           <Table size='small'>
             <TableHead>
-              <TableRow sx={{ backgroundColor: '#f6f9fe' }}>
-                <TableCell sx={{ fontWeight: 800 }}>Model</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Benchmark dataset</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Test date</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Accuracy</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Precision</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Recall</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>F1 score</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Latency</TableCell>
-                <TableCell sx={{ fontWeight: 800 }}>Throughput</TableCell>
+              <TableRow sx={{ backgroundColor: '#0e1422' }}>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Model</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Benchmark Dataset</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Test Date</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Accuracy</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Precision</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Recall</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>F1 Score</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Latency</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Throughput</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>
+                <TableRow key={row.id} sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ color: '#f8fafc', fontWeight: 700 }}>
                     {models.find((model) => model.id === row.modelId)?.name ?? row.modelId}
                   </TableCell>
-                  <TableCell>{row.dataset}</TableCell>
-                  <TableCell>{row.testDate}</TableCell>
-                  <TableCell>{row.accuracy.toFixed(1)}%</TableCell>
-                  <TableCell>{row.precision.toFixed(1)}%</TableCell>
-                  <TableCell>{row.recall.toFixed(1)}%</TableCell>
-                  <TableCell>{row.f1Score.toFixed(1)}%</TableCell>
-                  <TableCell>{row.latencyMs}ms</TableCell>
-                  <TableCell>{row.throughputRps} rps</TableCell>
+                  <TableCell sx={{ color: '#38bdf8' }}>{row.dataset}</TableCell>
+                  <TableCell sx={{ color: '#94a3b8' }}>{row.testDate}</TableCell>
+                  <TableCell sx={{ color: '#4ade80', fontWeight: 700 }}>
+                    {row.accuracy.toFixed(1)}%
+                  </TableCell>
+                  <TableCell sx={{ color: '#cbd5e1' }}>{row.precision.toFixed(1)}%</TableCell>
+                  <TableCell sx={{ color: '#cbd5e1' }}>{row.recall.toFixed(1)}%</TableCell>
+                  <TableCell sx={{ color: '#c084fc', fontWeight: 700 }}>
+                    {row.f1Score.toFixed(1)}%
+                  </TableCell>
+                  <TableCell sx={{ color: '#fde047' }}>{row.latencyMs}ms</TableCell>
+                  <TableCell sx={{ color: '#cbd5e1' }}>{row.throughputRps} rps</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -159,8 +163,8 @@ export default function OwnerBenchmarks() {
         title='Add Benchmark Result'
         subtitle='Submit a new benchmark dataset evaluation'
       >
-        <Stack spacing={1.5}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+        <Stack spacing={2}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               fullWidth
               select
@@ -179,7 +183,7 @@ export default function OwnerBenchmarks() {
             </TextField>
             <TextField
               fullWidth
-              label='Benchmark dataset'
+              label='Benchmark Dataset'
               value={newResult.dataset}
               onChange={(event) => {
                 setSaved(null)
@@ -187,11 +191,11 @@ export default function OwnerBenchmarks() {
               }}
             />
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               fullWidth
               type='date'
-              label='Test date'
+              label='Test Date'
               value={newResult.testDate}
               InputLabelProps={{ shrink: true }}
               onChange={(event) => {
@@ -220,7 +224,7 @@ export default function OwnerBenchmarks() {
               }}
             />
           </Stack>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               fullWidth
               type='number'
@@ -234,7 +238,7 @@ export default function OwnerBenchmarks() {
             <TextField
               fullWidth
               type='number'
-              label='F1 score (%)'
+              label='F1 Score (%)'
               value={newResult.f1Score}
               onChange={(event) => {
                 setSaved(null)
@@ -266,12 +270,32 @@ export default function OwnerBenchmarks() {
             variant='contained'
             disabled={isSubmitting}
             startIcon={isSubmitting ? <CircularProgress size={16} color='inherit' /> : <AddIcon />}
-            sx={{ alignSelf: 'flex-start' }}
+            sx={{
+              alignSelf: 'flex-start',
+              bgcolor: '#fb7185',
+              color: '#0f172a',
+              fontWeight: 800,
+              px: 3,
+              py: 1,
+              borderRadius: 2.5,
+              '&:hover': { bgcolor: '#f43f5e' },
+            }}
             onClick={addBenchmarkResult}
           >
             Add Benchmark Result
           </Button>
-          {saved && <Alert severity='success'>{saved}</Alert>}
+          {saved && (
+            <Alert
+              severity='success'
+              sx={{
+                bgcolor: 'rgba(74, 222, 128, 0.15)',
+                color: '#86efac',
+                border: '1px solid rgba(74, 222, 128, 0.3)',
+              }}
+            >
+              {saved}
+            </Alert>
+          )}
         </Stack>
       </SectionCard>
     </Stack>

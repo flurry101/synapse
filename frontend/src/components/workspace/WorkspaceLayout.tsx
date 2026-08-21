@@ -26,7 +26,7 @@ type WorkspaceLayoutProps = {
   children: React.ReactNode
 }
 
-const drawerWidth = 272
+const drawerWidth = 280
 
 export default function WorkspaceLayout({
   role,
@@ -37,15 +37,19 @@ export default function WorkspaceLayout({
 }: WorkspaceLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname } = useLocation()
-  const roleColor = role === 'developer' ? '#154c79' : '#7a3e00'
-  const roleLabel = role === 'developer' ? 'Developer Workspace' : 'Model Owner Workspace'
+  const isDev = role === 'developer'
+  const roleBg = isDev ? 'rgba(56, 189, 248, 0.15)' : 'rgba(251, 113, 133, 0.15)'
+  const roleBorder = isDev ? 'rgba(56, 189, 248, 0.4)' : 'rgba(251, 113, 133, 0.4)'
+  const roleColor = isDev ? '#38bdf8' : '#fb7185'
+  const roleLabel = isDev ? 'Developer Workspace' : 'Model Owner Workspace'
 
   return (
     <Box
       sx={{
         display: 'flex',
         minHeight: 'calc(100vh - 64px)',
-        background: 'linear-gradient(180deg, #f7f8fb 0%, #eef2f7 100%)',
+        bgcolor: '#090d16',
+        color: '#f8fafc',
       }}
     >
       <AppBar
@@ -56,14 +60,17 @@ export default function WorkspaceLayout({
           top: 64,
           width: { md: `calc(100% - ${drawerWidth}px)` },
           ml: { md: `${drawerWidth}px` },
-          borderBottom: '1px solid #d7dee9',
-          backdropFilter: 'blur(8px)',
+          borderBottom: '1px solid #1e293b',
+          bgcolor: 'rgba(9, 13, 22, 0.85)',
+          backdropFilter: 'blur(12px)',
+          zIndex: 1100,
         }}
       >
         <Toolbar sx={{ minHeight: '76px !important', px: { xs: 2, sm: 3 } }}>
           <IconButton
             color='inherit'
             edge='start'
+            aria-label='Open workspace menu'
             onClick={() => setMobileOpen(true)}
             sx={{ mr: 2, display: { md: 'none' } }}
           >
@@ -72,21 +79,23 @@ export default function WorkspaceLayout({
           <Stack spacing={0.25} sx={{ flexGrow: 1 }}>
             <Typography
               variant='h5'
-              sx={{ fontWeight: 800, letterSpacing: '-0.02em', color: '#10243e' }}
+              sx={{ fontWeight: 800, letterSpacing: '-0.02em', color: '#f8fafc' }}
             >
               {title}
             </Typography>
-            <Typography variant='body2' sx={{ color: '#4f637e', maxWidth: 860 }}>
+            <Typography variant='body2' sx={{ color: '#94a3b8', maxWidth: 860 }}>
               {subtitle}
             </Typography>
           </Stack>
           <Chip
             label={roleLabel}
             sx={{
-              fontWeight: 700,
-              color: 'white',
-              backgroundColor: roleColor,
-              borderRadius: 1.5,
+              fontWeight: 800,
+              color: roleColor,
+              backgroundColor: roleBg,
+              border: `1px solid ${roleBorder}`,
+              borderRadius: 2,
+              px: 0.5,
             }}
           />
         </Toolbar>
@@ -104,12 +113,19 @@ export default function WorkspaceLayout({
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              bgcolor: '#0e1422',
+              borderRight: '1px solid #1e293b',
+              color: '#f8fafc',
+            },
           }}
         >
           <SidebarContent
             items={items}
             pathname={pathname}
+            isDev={isDev}
             onClickItem={() => setMobileOpen(false)}
           />
         </Drawer>
@@ -121,16 +137,27 @@ export default function WorkspaceLayout({
             '& .MuiDrawer-paper': {
               boxSizing: 'border-box',
               width: drawerWidth,
-              borderRight: '1px solid #d7dee9',
-              backgroundColor: '#f4f7fc',
+              borderRight: '1px solid #1e293b',
+              bgcolor: '#0e1422',
+              color: '#f8fafc',
             },
           }}
         >
-          <SidebarContent items={items} pathname={pathname} />
+          <SidebarContent items={items} pathname={pathname} isDev={isDev} />
         </Drawer>
       </Box>
 
-      <Box component='main' sx={{ flexGrow: 1, p: { xs: 2, sm: 3 }, mt: '76px' }}>
+      <Box
+        component='main'
+        sx={{
+          flexGrow: 1,
+          p: { xs: 2, sm: 3.5 },
+          mt: '76px',
+          bgcolor: '#090d16',
+          maxWidth: '100%',
+          overflowX: 'hidden',
+        }}
+      >
         {children}
       </Box>
     </Box>
@@ -140,30 +167,44 @@ export default function WorkspaceLayout({
 function SidebarContent({
   items,
   pathname,
+  isDev,
   onClickItem,
 }: {
   items: NavItem[]
   pathname: string
+  isDev: boolean
   onClickItem?: () => void
 }) {
+  const activeAccent = isDev ? '#38bdf8' : '#fb7185'
+  const activeBg = isDev ? 'rgba(56, 189, 248, 0.12)' : 'rgba(251, 113, 133, 0.12)'
+  const activeBorder = isDev ? 'rgba(56, 189, 248, 0.4)' : 'rgba(251, 113, 133, 0.4)'
+
   return (
-    <Box sx={{ mt: 0.5 }}>
+    <Box sx={{ mt: 0.5, height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Toolbar />
-      <Box sx={{ px: 2.25, pb: 1.5 }}>
+      <Box sx={{ px: 2.25, pb: 2 }}>
         <Paper
           elevation={0}
-          sx={{ p: 2, borderRadius: 3, border: '1px solid #d7dee9', bgcolor: '#ffffff' }}
+          sx={{
+            p: 2,
+            borderRadius: 3,
+            border: '1px solid #1e293b',
+            bgcolor: '#121826',
+          }}
         >
-          <Typography variant='overline' sx={{ color: '#5d6e85', fontWeight: 700 }}>
-            Synapse Navigation
+          <Typography
+            variant='overline'
+            sx={{ color: activeAccent, fontWeight: 800, letterSpacing: 1.2 }}
+          >
+            {isDev ? 'DEVELOPER HUB' : 'OWNER STUDIO'}
           </Typography>
-          <Typography variant='body2' sx={{ color: '#3c4f6d' }}>
-            Move through each step of your role-specific workflow.
+          <Typography variant='body2' sx={{ color: '#94a3b8', mt: 0.25, fontSize: 13 }}>
+            Navigate through your workspace features and live tools.
           </Typography>
         </Paper>
       </Box>
-      <Divider />
-      <List sx={{ px: 1.25, py: 1.5 }}>
+      <Divider sx={{ borderColor: '#1e293b' }} />
+      <List sx={{ px: 1.5, py: 1.5, flexGrow: 1 }} component='nav'>
         {items.map((item) => {
           const active = pathname === item.path
           return (
@@ -173,19 +214,34 @@ function SidebarContent({
               to={item.path}
               onClick={onClickItem}
               sx={{
-                mb: 0.75,
-                borderRadius: 2,
+                mb: 1,
+                borderRadius: 2.5,
                 border: '1px solid',
-                borderColor: active ? '#8fa7c7' : 'transparent',
-                backgroundColor: active ? '#eaf1fb' : 'transparent',
-                '&:hover': { backgroundColor: '#edf2f9' },
+                borderColor: active ? activeBorder : 'transparent',
+                backgroundColor: active ? activeBg : 'transparent',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: active ? activeBg : 'rgba(255, 255, 255, 0.05)',
+                  borderColor: active ? activeBorder : '#2a3b54',
+                },
+                '&:focus-visible': {
+                  outline: `2px solid ${activeAccent}`,
+                  outlineOffset: 2,
+                },
               }}
             >
               <ListItemText
                 primary={item.label}
                 secondary={item.hint}
-                primaryTypographyProps={{ fontWeight: active ? 700 : 600 }}
-                secondaryTypographyProps={{ fontSize: 12, sx: { color: '#61758f' } }}
+                primaryTypographyProps={{
+                  fontWeight: active ? 800 : 600,
+                  color: active ? activeAccent : '#f1f5f9',
+                  fontSize: 14,
+                }}
+                secondaryTypographyProps={{
+                  fontSize: 12,
+                  sx: { color: active ? '#cbd5e1' : '#64748b' },
+                }}
               />
             </ListItemButton>
           )

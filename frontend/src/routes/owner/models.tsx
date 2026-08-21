@@ -28,17 +28,24 @@ export default function OwnerModels() {
   }, [])
 
   return (
-    <SectionCard title='My models' subtitle='Published and in-progress model catalog'>
+    <SectionCard title='My Models' subtitle='Published and in-progress model catalog'>
       {loading ? (
         <Stack alignItems='center' sx={{ py: 4 }}>
-          <CircularProgress size={32} />
+          <CircularProgress size={32} sx={{ color: '#fb7185' }} />
         </Stack>
       ) : models.length === 0 ? (
-        <Alert severity='info'>
-          No models listed yet. Click &quot;Add Model&quot; to create one.
+        <Alert
+          severity='info'
+          sx={{
+            bgcolor: 'rgba(56, 189, 248, 0.1)',
+            color: '#bae6fd',
+            border: '1px solid rgba(56, 189, 248, 0.3)',
+          }}
+        >
+          No models listed yet. Click &quot;Add Model&quot; to create or import one.
         </Alert>
       ) : (
-        <Stack spacing={1.5}>
+        <Stack spacing={2}>
           {models.map((model) => (
             <OwnerModelCard
               key={model.id}

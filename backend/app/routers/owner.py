@@ -67,9 +67,7 @@ def _model_to_out(model: Model) -> ModelOut:
         owner_id=model.owner_id,
         owner=OwnerInfo(
             name=model.owner_name
-            or (
-                f"{model.owner_name}" if model.owner_name else "Model Provider"
-            ),
+            or (f"{model.owner_name}" if model.owner_name else "Model Provider"),
             email=model.owner_email or "owner@synapse.ai",
             organization=model.owner_org or "Independent",
         ),
@@ -260,9 +258,7 @@ async def list_owner_benchmarks(
     if current_user.is_superuser:
         benchmarks = await Benchmark.find_all().to_list()
     else:
-        benchmarks = await Benchmark.find(
-            In(Benchmark.model_id, model_ids)
-        ).to_list()
+        benchmarks = await Benchmark.find(In(Benchmark.model_id, model_ids)).to_list()
     return [
         BenchmarkOut(
             id=str(b.uuid),
@@ -345,9 +341,7 @@ async def get_owner_analytics(
 
     total_revenue = sum(m.revenue for m in models) or 1820.0
     total_requests = sum(m.requests for m in models) or 287000
-    avg_trust = (
-        sum(m.trust_score for m in models) / len(models) if models else 91.2
-    )
+    avg_trust = sum(m.trust_score for m in models) / len(models) if models else 91.2
 
     time_series = [
         {
@@ -401,9 +395,11 @@ async def get_owner_analytics(
         UsageRow(
             id="u-2",
             app="CodeFlow Reviewer",
-            model=models[1].name
-            if len(models) > 1
-            else (models[0].name if models else "Neuron Code 2"),
+            model=(
+                models[1].name
+                if len(models) > 1
+                else (models[0].name if models else "Neuron Code 2")
+            ),
             requests=19140,
             success_rate=98.4,
             revenue=164.0,
@@ -444,4 +440,3 @@ async def import_hf_model(
     token = payload.hf_token or current_user.hf_token
     details = await hf_service.get_hf_model_details(payload.repo_id, token=token)
     return details
-

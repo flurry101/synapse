@@ -5,6 +5,7 @@ import {
   Alert,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Divider,
   MenuItem,
@@ -89,13 +90,24 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
   }
 
   return (
-    <Stack spacing={2.5}>
-      <Paper elevation={0} sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, p: 2.5 }}>
-        <Typography variant='h6' sx={{ fontWeight: 800, color: '#12304f', mb: 2 }}>
-          Deploy Model & Issue API Key
+    <Stack spacing={3}>
+      <Paper
+        elevation={0}
+        sx={{
+          border: '1px solid #1e293b',
+          borderRadius: 3.5,
+          p: { xs: 2.5, sm: 3.5 },
+          bgcolor: '#111622',
+        }}
+      >
+        <Typography variant='h6' sx={{ fontWeight: 800, color: '#f8fafc', mb: 0.5 }}>
+          Provision Production Endpoint & API Key
+        </Typography>
+        <Typography variant='body2' sx={{ color: '#94a3b8', mb: 3 }}>
+          Configure inference parameters and instantly generate dedicated API keys.
         </Typography>
 
-        <Stack spacing={2}>
+        <Stack spacing={2.5}>
           <TextField
             select
             fullWidth
@@ -110,7 +122,7 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
             ))}
           </TextField>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               select
               fullWidth
@@ -118,9 +130,9 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
               value={environment}
               onChange={(e) => setEnvironment(e.target.value)}
             >
-              <MenuItem value='production'>Production</MenuItem>
-              <MenuItem value='staging'>Staging</MenuItem>
-              <MenuItem value='development'>Development</MenuItem>
+              <MenuItem value='production'>Production (P99 Isolated)</MenuItem>
+              <MenuItem value='staging'>Staging (Pre-release)</MenuItem>
+              <MenuItem value='development'>Development (Sandbox)</MenuItem>
             </TextField>
             <TextField
               select
@@ -136,7 +148,7 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
             </TextField>
           </Stack>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
             <TextField
               type='number'
               fullWidth
@@ -160,18 +172,46 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
               isDeploying ? <CircularProgress size={16} color='inherit' /> : <RocketLaunchIcon />
             }
             onClick={handleDeploy}
-            sx={{ alignSelf: 'flex-start', px: 3, py: 1 }}
+            sx={{
+              alignSelf: 'flex-start',
+              bgcolor: '#4ade80',
+              color: '#052e16',
+              fontWeight: 800,
+              px: 3.5,
+              py: 1.25,
+              borderRadius: 2.5,
+              '&:hover': { bgcolor: '#22c55e' },
+            }}
           >
             {isDeploying ? 'Deploying...' : 'Provision Endpoint'}
           </Button>
 
-          {successMessage && <Alert severity='success'>{successMessage}</Alert>}
+          {successMessage && (
+            <Alert
+              severity='success'
+              sx={{
+                bgcolor: 'rgba(74, 222, 128, 0.15)',
+                color: '#86efac',
+                border: '1px solid rgba(74, 222, 128, 0.3)',
+              }}
+            >
+              {successMessage}
+            </Alert>
+          )}
         </Stack>
       </Paper>
 
       {deployments.length > 0 && (
-        <Paper elevation={0} sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, p: 2.5 }}>
-          <Typography variant='h6' sx={{ fontWeight: 800, color: '#12304f', mb: 2 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            border: '1px solid #1e293b',
+            borderRadius: 3.5,
+            p: { xs: 2.5, sm: 3.5 },
+            bgcolor: '#111622',
+          }}
+        >
+          <Typography variant='h6' sx={{ fontWeight: 800, color: '#f8fafc', mb: 2 }}>
             Active Deployments & Endpoints ({deployments.length})
           </Typography>
 
@@ -180,53 +220,102 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
               <Box
                 key={d.id}
                 sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  border: '1px solid #e1eaf5',
-                  bgcolor: '#fafcff',
+                  p: 2.5,
+                  borderRadius: 3,
+                  border: '1px solid #1e293b',
+                  bgcolor: '#0a0e17',
                 }}
               >
                 <Stack
                   direction={{ xs: 'column', sm: 'row' }}
                   justifyContent='space-between'
                   alignItems={{ xs: 'flex-start', sm: 'center' }}
-                  spacing={1}
+                  spacing={1.5}
                 >
                   <Box>
-                    <Typography variant='subtitle1' sx={{ fontWeight: 700, color: '#0f3a5e' }}>
+                    <Typography variant='subtitle1' sx={{ fontWeight: 800, color: '#f8fafc' }}>
                       {d.model_name}
                     </Typography>
-                    <Typography variant='caption' sx={{ color: '#577191' }}>
-                      Env: <strong>{d.environment}</strong> • Region: <strong>{d.region}</strong> •
-                      RPM: {d.rate_limit_rpm}
-                    </Typography>
+                    <Stack direction='row' spacing={1} sx={{ mt: 0.5 }}>
+                      <Chip
+                        label={d.environment}
+                        size='small'
+                        sx={{
+                          height: 22,
+                          fontSize: 11,
+                          bgcolor: 'rgba(56, 189, 248, 0.15)',
+                          color: '#38bdf8',
+                        }}
+                      />
+                      <Chip
+                        label={d.region}
+                        size='small'
+                        sx={{
+                          height: 22,
+                          fontSize: 11,
+                          bgcolor: 'rgba(192, 132, 252, 0.15)',
+                          color: '#c084fc',
+                        }}
+                      />
+                      <Chip
+                        label={`${d.rate_limit_rpm} RPM`}
+                        size='small'
+                        sx={{
+                          height: 22,
+                          fontSize: 11,
+                          bgcolor: 'rgba(74, 222, 128, 0.15)',
+                          color: '#4ade80',
+                        }}
+                      />
+                    </Stack>
                   </Box>
                   <Button
                     color='error'
                     size='small'
                     startIcon={<DeleteOutlineIcon />}
                     onClick={() => handleDelete(d.id)}
+                    sx={{
+                      color: '#f87171',
+                      borderColor: 'rgba(248, 113, 113, 0.3)',
+                      '&:hover': { bgcolor: 'rgba(248, 113, 113, 0.1)' },
+                    }}
                   >
-                    Revoke
+                    Revoke Key
                   </Button>
                 </Stack>
 
-                <Divider sx={{ my: 1.5 }} />
+                <Divider sx={{ my: 2, borderColor: '#1e293b' }} />
 
-                <Stack spacing={1}>
+                <Stack spacing={1.5}>
                   <Box>
-                    <Typography variant='caption' sx={{ fontWeight: 600, color: '#486581' }}>
-                      API Key:
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        fontWeight: 700,
+                        color: '#94a3b8',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Provisioned API Key:
                     </Typography>
-                    <Stack direction='row' spacing={1} alignItems='center'>
+                    <Stack
+                      direction='row'
+                      spacing={1.5}
+                      alignItems='center'
+                      sx={{ mt: 0.5 }}
+                      useFlexGap
+                      flexWrap='wrap'
+                    >
                       <Typography
                         sx={{
                           fontFamily: 'monospace',
-                          bgcolor: '#ffffff',
-                          px: 1,
-                          py: 0.5,
-                          borderRadius: 1,
-                          border: '1px solid #dce5f2',
+                          bgcolor: '#111622',
+                          color: '#fde047',
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 1.5,
+                          border: '1px solid #1e293b',
                           fontSize: 13,
                         }}
                       >
@@ -234,8 +323,14 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
                       </Typography>
                       <Button
                         size='small'
+                        variant='outlined'
                         onClick={() => onCopy(d.api_key)}
                         startIcon={<ContentCopyIcon />}
+                        sx={{
+                          color: '#38bdf8',
+                          borderColor: 'rgba(56, 189, 248, 0.3)',
+                          '&:hover': { bgcolor: 'rgba(56, 189, 248, 0.1)' },
+                        }}
                       >
                         Copy Key
                       </Button>
@@ -243,24 +338,35 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
                   </Box>
 
                   <Box>
-                    <Typography variant='caption' sx={{ fontWeight: 600, color: '#486581' }}>
-                      Usage Example:
+                    <Typography
+                      variant='caption'
+                      sx={{
+                        fontWeight: 700,
+                        color: '#94a3b8',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Production Integration Snippet:
                     </Typography>
                     <Typography
                       component='pre'
                       sx={{
-                        mt: 0.5,
+                        mt: 0.75,
                         mb: 0,
                         overflowX: 'auto',
-                        p: 1.25,
-                        borderRadius: 1.5,
-                        bgcolor: '#0f1f33',
-                        color: '#dbe9f8',
+                        p: 2,
+                        borderRadius: 2,
+                        bgcolor: '#111622',
+                        border: '1px solid #1e293b',
+                        color: '#38bdf8',
+                        fontFamily: 'monospace',
                         fontSize: 12.5,
+                        lineHeight: 1.6,
                       }}
                     >
                       {d.curl_example ||
-                        `curl -X POST ${d.endpoint_url} \\\n  -H "Authorization: Bearer ${d.api_key}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"input": "Hello world"}'`}
+                        `curl -X POST ${d.endpoint_url} \\\n  -H "Authorization: Bearer ${d.api_key}" \\\n  -H "Content-Type: application/json" \\\n  -d '{"prompt": "Hello world", "max_tokens": ${d.max_tokens}}'`}
                     </Typography>
                   </Box>
                 </Stack>
@@ -275,8 +381,12 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
         autoHideDuration={1800}
         onClose={() => setCopiedText(null)}
       >
-        <Alert severity='success' onClose={() => setCopiedText(null)}>
-          Copied to clipboard!
+        <Alert
+          severity='success'
+          onClose={() => setCopiedText(null)}
+          sx={{ bgcolor: '#111622', color: '#4ade80', border: '1px solid #4ade80' }}
+        >
+          Copied API key to clipboard!
         </Alert>
       </Snackbar>
     </Stack>

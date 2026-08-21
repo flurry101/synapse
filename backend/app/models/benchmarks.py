@@ -18,10 +18,7 @@ class Benchmark(Document):
     f1_score: float = 0.0
     latency_ms: int = 0
     throughput_rps: float = 0.0
-    created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     class Settings:
         name = "benchmarks"
-
