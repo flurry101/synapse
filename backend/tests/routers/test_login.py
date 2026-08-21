@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 from httpx import AsyncClient
 
@@ -42,6 +44,28 @@ async def test_not_authorized(client: AsyncClient) -> None:
 
 @pytest.mark.anyio
 async def test_google_callback_missing_code(client: AsyncClient) -> None:
-    r = await client.get(f"{settings.API_V1_STR}/login/google/callback")
-    assert r.status_code == 400
-    assert "Missing 'code' parameter" in r.json()["detail"]
+    with (
+        patch("app.config.config.settings.GOOGLE_CLIENT_ID", "mock-client-id"),
+        patch("app.config.config.settings.GOOGLE_CLIENT_SECRET", "mock-client-secret"),
+        patch(
+            "app.config.config.settings.SSO_CALLBACK_HOSTNAME", "http://localhost:8000"
+        ),
+        patch(
+            "app.config.config.settings.SSO_LOGIN_CALLBACK_URL",
+            "http://localhost:5173/api/v1/login/google/callback",
+        ),
+    ):
+        r = await client.get(f"{settings.API_V1_STR}/login/google/callback")
+        assert r.status_code == 400
+        assert "Missing 'code' parameter" in r.json()["detail"]
+
+
+@pytest.mark.anyio
+async def test_google_sso_disabled(client: AsyncClient) -> None:
+    with (
+        patch("app.config.config.settings.GOOGLE_CLIENT_ID", None),
+        patch("app.config.config.settings.GOOGLE_CLIENT_SECRET", None),
+    ):
+        r = await client.get(f"{settings.API_V1_STR}/login/google/callback")
+        assert r.status_code == 400
+        assert "Google SSO not enabled." in r.json()["detail"]

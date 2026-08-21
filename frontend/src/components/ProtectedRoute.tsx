@@ -124,4 +124,3 @@ export default function ProtectedRoute({ requiredRole, children }: ProtectedRout
 
   return children ? <>{children}</> : <Outlet />
 }
-

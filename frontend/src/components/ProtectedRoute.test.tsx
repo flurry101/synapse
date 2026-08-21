@@ -123,4 +123,3 @@ describe('ProtectedRoute Role Separation', () => {
     expect(await screen.findByText('Model Owner Workspace Content')).toBeInTheDocument()
   })
 })
-
