@@ -37,10 +37,26 @@ export default function TopMenuBar() {
   }
 
   return (
-    <AppBar position='absolute' elevation={0} sx={{ bgcolor: '#0a0b0d', borderBottom: '1px solid #30343b' }}>
+    <AppBar
+      position='absolute'
+      elevation={0}
+      sx={{ bgcolor: '#0a0b0d', borderBottom: '1px solid #30343b' }}
+    >
       <Toolbar sx={{ maxWidth: 1180, width: '100%', mx: 'auto', px: { xs: 2, sm: 4 } }}>
-        <Typography component='h1' variant='h6' color='inherit' noWrap sx={{ flexGrow: 1, fontWeight: 800, letterSpacing: '-.04em' }}>
-          <Link component={NavLink} to='/' color='inherit' underline='none' sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
+        <Typography
+          component='h1'
+          variant='h6'
+          color='inherit'
+          noWrap
+          sx={{ flexGrow: 1, fontWeight: 800, letterSpacing: '-.04em' }}
+        >
+          <Link
+            component={NavLink}
+            to='/'
+            color='inherit'
+            underline='none'
+            sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}
+          >
             <Bolt sx={{ color: '#d8b4fe' }} /> Synapse
           </Link>
         </Typography>

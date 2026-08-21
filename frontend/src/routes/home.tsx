@@ -1,37 +1,639 @@
-import { Add, Api, Bolt, CheckCircle, ContentCopy, DeleteOutline, Image, Key, PlayArrow, Publish, Search, Shield, Speed, Terminal, TipsAndUpdates } from '@mui/icons-material'
-import { Alert, Box, Button, Card, CardContent, Chip, Divider, IconButton, InputAdornment, LinearProgress, Paper, Stack, Tab, Tabs, TextField, Typography } from '@mui/material'
+import {
+  Add,
+  Api,
+  Bolt,
+  CheckCircle,
+  ContentCopy,
+  DeleteOutline,
+  Image,
+  Key,
+  PlayArrow,
+  Publish,
+  Search,
+  Shield,
+  Speed,
+  Terminal,
+  TipsAndUpdates,
+} from '@mui/icons-material'
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { useMemo, useState } from 'react'
 
-type Model = { name: string; maker: string; category: string; description: string; price: string; speed: string; score: number; color: string }
+type Model = {
+  name: string
+  maker: string
+  category: string
+  description: string
+  price: string
+  speed: string
+  score: number
+  color: string
+}
 const models: Model[] = [
-  { name: 'Llama 3 8B', maker: 'Meta', category: 'Text & Chat', description: 'Fast, capable instruction-following for everyday AI products.', price: '$0.20 / 1M', speed: '120 ms', score: 82, color: '#86efac' },
-  { name: 'Mistral 7B', maker: 'Mistral AI', category: 'Text & Chat', description: 'A lightweight model for high-volume, low-latency tasks.', price: '$0.15 / 1M', speed: '110 ms', score: 79, color: '#93c5fd' },
-  { name: 'FLUX.1 Schnell', maker: 'Black Forest Labs', category: 'Images', description: 'Detailed image generation with remarkably quick turnaround.', price: '$0.015 / image', speed: '0.8 s', score: 92, color: '#f9a8d4' },
-  { name: 'CodeLlama 13B', maker: 'Meta', category: 'Coding', description: 'A focused coding companion for generation, review, and debugging.', price: '$0.30 / 1M', speed: '180 ms', score: 87, color: '#d8b4fe' },
+  {
+    name: 'Llama 3 8B',
+    maker: 'Meta',
+    category: 'Text & Chat',
+    description: 'Fast, capable instruction-following for everyday AI products.',
+    price: '$0.20 / 1M',
+    speed: '120 ms',
+    score: 82,
+    color: '#86efac',
+  },
+  {
+    name: 'Mistral 7B',
+    maker: 'Mistral AI',
+    category: 'Text & Chat',
+    description: 'A lightweight model for high-volume, low-latency tasks.',
+    price: '$0.15 / 1M',
+    speed: '110 ms',
+    score: 79,
+    color: '#93c5fd',
+  },
+  {
+    name: 'FLUX.1 Schnell',
+    maker: 'Black Forest Labs',
+    category: 'Images',
+    description: 'Detailed image generation with remarkably quick turnaround.',
+    price: '$0.015 / image',
+    speed: '0.8 s',
+    score: 92,
+    color: '#f9a8d4',
+  },
+  {
+    name: 'CodeLlama 13B',
+    maker: 'Meta',
+    category: 'Coding',
+    description: 'A focused coding companion for generation, review, and debugging.',
+    price: '$0.30 / 1M',
+    speed: '180 ms',
+    score: 87,
+    color: '#d8b4fe',
+  },
 ]
-const tabStyles = { minHeight: 42, minWidth: 0, px: { xs: 1.25, sm: 2 }, mr: .75, border: '1px solid transparent', borderRadius: 2, color: 'text.secondary', fontWeight: 700, textTransform: 'none', '&.Mui-selected': { color: '#fff', backgroundColor: '#191c22', borderColor: '#4b5563' } }
-const fieldStyles = { '& .MuiOutlinedInput-root': { color: '#f3f4f6', bgcolor: '#0d0f12', '& fieldset': { borderColor: '#3c414a' }, '&:hover fieldset': { borderColor: '#93c5fd' }, '&.Mui-focused fieldset': { borderColor: '#93c5fd' } }, '& .MuiInputLabel-root': { color: '#9ca3af' } }
-const primaryButton = { bgcolor: '#d8b4fe', color: '#261530', fontWeight: 800, '&:hover': { bgcolor: '#e9d5ff' } }
-
-export default function Home() {
-  const [tab, setTab] = useState(0); const [prompt, setPrompt] = useState('Explain how a vector database helps an AI assistant remember context.'); const [selected, setSelected] = useState(models[0]); const [ran, setRan] = useState(false); const [query, setQuery] = useState(''); const [keys, setKeys] = useState([{ name: 'Production key', value: 'syn_live_••••••••K9m2', created: 'Today' }])
-  const filtered = useMemo(() => models.filter((model) => `${model.name} ${model.category}`.toLowerCase().includes(query.toLowerCase())), [query])
-  return <Box sx={{ bgcolor: '#0a0b0d', color: '#f3f4f6', minHeight: 'calc(100vh - 64px)', pb: 8 }}><Box sx={{ maxWidth: 1180, mx: 'auto', px: { xs: 2, sm: 4 }, pt: { xs: 4, md: 6 } }}>
-    <Stack direction={{ xs: 'column', md: 'row' }} justifyContent='space-between' alignItems={{ md: 'end' }} spacing={2} sx={{ mb: 4 }}><Box><Typography variant='overline' sx={{ color: '#d8b4fe', fontWeight: 800, letterSpacing: 1.5 }}>THE AI MODEL MARKETPLACE</Typography><Typography component='h2' variant='h3' sx={{ fontWeight: 800, letterSpacing: '-.05em', mt: .25 }}>Build with the best model for the job.</Typography><Typography color='text.secondary' sx={{ mt: 1, maxWidth: 620 }}>Compare models side by side, test them on your prompt, and take the winner straight to production.</Typography></Box><Button startIcon={<Api />} variant='outlined' sx={{ color: '#fde047', borderColor: '#fde047', fontWeight: 800 }}>View API docs</Button></Stack>
-    <Paper elevation={0} sx={{ mb: 4, overflow: 'auto', bgcolor: '#111318', border: '1px solid #30343b', borderRadius: 3 }}><Tabs value={tab} onChange={(_, value) => setTab(value)} variant='scrollable' scrollButtons={false} sx={{ p: 1, minHeight: 58, '& .MuiTabs-indicator': { display: 'none' } }}><Tab icon={<Bolt fontSize='small' />} iconPosition='start' label='Test arena' sx={tabStyles} /><Tab icon={<Search fontSize='small' />} iconPosition='start' label='Catalog' sx={tabStyles} /><Tab icon={<Key fontSize='small' />} iconPosition='start' label='API keys' sx={tabStyles} /><Tab icon={<Publish fontSize='small' />} iconPosition='start' label='Publish' sx={tabStyles} /></Tabs></Paper>
-    {tab === 0 && <Arena prompt={prompt} setPrompt={setPrompt} selected={selected} setSelected={setSelected} ran={ran} onRun={() => setRan(true)} />}
-    {tab === 1 && <Catalog query={query} setQuery={setQuery} items={filtered} onTry={(model) => { setSelected(model); setTab(0) }} />}
-    {tab === 2 && <Keys keys={keys} onCreate={() => setKeys((current) => [{ name: `Development key ${current.length + 1}`, value: 'syn_live_••••••••R7x4', created: 'Just now' }, ...current])} onDelete={(index) => setKeys((current) => current.filter((_, i) => i !== index))} />}
-    {tab === 3 && <PublishModel />}
-  </Box></Box>
+const tabStyles = {
+  minHeight: 42,
+  minWidth: 0,
+  px: { xs: 1.25, sm: 2 },
+  mr: 0.75,
+  border: '1px solid transparent',
+  borderRadius: 2,
+  color: 'text.secondary',
+  fontWeight: 700,
+  textTransform: 'none',
+  '&.Mui-selected': { color: '#fff', backgroundColor: '#191c22', borderColor: '#4b5563' },
+}
+const fieldStyles = {
+  '& .MuiOutlinedInput-root': {
+    color: '#f3f4f6',
+    bgcolor: '#0d0f12',
+    '& fieldset': { borderColor: '#3c414a' },
+    '&:hover fieldset': { borderColor: '#93c5fd' },
+    '&.Mui-focused fieldset': { borderColor: '#93c5fd' },
+  },
+  '& .MuiInputLabel-root': { color: '#9ca3af' },
+}
+const primaryButton = {
+  bgcolor: '#d8b4fe',
+  color: '#261530',
+  fontWeight: 800,
+  '&:hover': { bgcolor: '#e9d5ff' },
 }
 
-function Arena({ prompt, setPrompt, selected, setSelected, ran, onRun }: { prompt: string; setPrompt: (value: string) => void; selected: Model; setSelected: (model: Model) => void; ran: boolean; onRun: () => void }) { return <Stack spacing={3}><Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}><Panel title='Your prompt' eyebrow='01 · WRITE THE TASK' sx={{ flex: 1.1 }}><TextField multiline minRows={7} fullWidth value={prompt} onChange={(e) => setPrompt(e.target.value)} sx={fieldStyles} /><Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mt: 2 }}><Typography variant='caption' color='text.secondary'>{prompt.length} characters</Typography><Button onClick={onRun} variant='contained' startIcon={<PlayArrow />} sx={primaryButton}>Run comparison</Button></Stack></Panel><Panel title='Pick a contender' eyebrow='02 · SELECT A MODEL' sx={{ flex: .9 }}><Stack spacing={1.25}>{models.slice(0, 3).map((model) => <Button key={model.name} onClick={() => setSelected(model)} fullWidth sx={{ justifyContent: 'flex-start', textAlign: 'left', p: 1.5, textTransform: 'none', color: '#f3f4f6', border: '1px solid', borderColor: selected.name === model.name ? model.color : '#343840', bgcolor: selected.name === model.name ? `${model.color}14` : 'transparent' }}><Box sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: model.color, mr: 1.5 }} /><Box><Typography fontWeight={800}>{model.name}</Typography><Typography variant='caption' color='text.secondary'>{model.maker} · {model.speed}</Typography></Box></Button>)}</Stack></Panel></Stack><Panel title='Result' eyebrow='03 · COMPARE OUTPUTS'>{!ran ? <Box sx={{ py: 5, textAlign: 'center', color: 'text.secondary' }}><Terminal sx={{ fontSize: 38, mb: 1 }} /><Typography>Run your prompt to see a live comparison.</Typography></Box> : <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}><Box sx={{ flex: 1 }}><Stack direction='row' spacing={1} alignItems='center'><CheckCircle sx={{ color: '#86efac' }} /><Typography fontWeight={800}>{selected.name}</Typography><Chip label='Winner' size='small' sx={{ bgcolor: '#86efac', color: '#102114', fontWeight: 800 }} /></Stack><Typography sx={{ mt: 2, lineHeight: 1.75, color: '#d1d5db' }}>A vector database gives an AI assistant a searchable long-term memory. It turns relevant documents and conversations into numerical representations, then retrieves the closest matches when a new question arrives.</Typography><Stack direction='row' spacing={1} sx={{ mt: 3 }}><Chip icon={<Speed />} label={selected.speed} size='small' /><Chip icon={<Shield />} label='Safety checked' size='small' /></Stack></Box><Divider flexItem orientation='vertical' sx={{ borderColor: '#30343b' }} /><Box sx={{ minWidth: 220 }}><Typography variant='caption' color='text.secondary' fontWeight={800}>QUALITY SCORE</Typography><Typography variant='h2' fontWeight={800} sx={{ color: selected.color }}>{selected.score}<Typography component='span' color='text.secondary' variant='h6'>/100</Typography></Typography><LinearProgress variant='determinate' value={selected.score} sx={{ height: 8, borderRadius: 5, bgcolor: '#282c33', '& .MuiLinearProgress-bar': { bgcolor: selected.color } }} /></Box></Stack>}</Panel></Stack> }
+export default function Home() {
+  const [tab, setTab] = useState(0)
+  const [prompt, setPrompt] = useState(
+    'Explain how a vector database helps an AI assistant remember context.',
+  )
+  const [selected, setSelected] = useState(models[0])
+  const [ran, setRan] = useState(false)
+  const [query, setQuery] = useState('')
+  const [keys, setKeys] = useState([
+    { name: 'Production key', value: 'syn_live_••••••••K9m2', created: 'Today' },
+  ])
+  const filtered = useMemo(
+    () =>
+      models.filter((model) =>
+        `${model.name} ${model.category}`.toLowerCase().includes(query.toLowerCase()),
+      ),
+    [query],
+  )
+  return (
+    <Box sx={{ bgcolor: '#0a0b0d', color: '#f3f4f6', minHeight: 'calc(100vh - 64px)', pb: 8 }}>
+      <Box sx={{ maxWidth: 1180, mx: 'auto', px: { xs: 2, sm: 4 }, pt: { xs: 4, md: 6 } }}>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          justifyContent='space-between'
+          alignItems={{ md: 'end' }}
+          spacing={2}
+          sx={{ mb: 4 }}
+        >
+          <Box>
+            <Typography
+              variant='overline'
+              sx={{ color: '#d8b4fe', fontWeight: 800, letterSpacing: 1.5 }}
+            >
+              THE AI MODEL MARKETPLACE
+            </Typography>
+            <Typography
+              component='h2'
+              variant='h3'
+              sx={{ fontWeight: 800, letterSpacing: '-.05em', mt: 0.25 }}
+            >
+              Build with the best model for the job.
+            </Typography>
+            <Typography color='text.secondary' sx={{ mt: 1, maxWidth: 620 }}>
+              Compare models side by side, test them on your prompt, and take the winner straight to
+              production.
+            </Typography>
+          </Box>
+          <Button
+            startIcon={<Api />}
+            variant='outlined'
+            sx={{ color: '#fde047', borderColor: '#fde047', fontWeight: 800 }}
+          >
+            View API docs
+          </Button>
+        </Stack>
+        <Paper
+          elevation={0}
+          sx={{
+            mb: 4,
+            overflow: 'auto',
+            bgcolor: '#111318',
+            border: '1px solid #30343b',
+            borderRadius: 3,
+          }}
+        >
+          <Tabs
+            value={tab}
+            onChange={(_, value) => setTab(value)}
+            variant='scrollable'
+            scrollButtons={false}
+            sx={{ p: 1, minHeight: 58, '& .MuiTabs-indicator': { display: 'none' } }}
+          >
+            <Tab
+              icon={<Bolt fontSize='small' />}
+              iconPosition='start'
+              label='Test arena'
+              sx={tabStyles}
+            />
+            <Tab
+              icon={<Search fontSize='small' />}
+              iconPosition='start'
+              label='Catalog'
+              sx={tabStyles}
+            />
+            <Tab
+              icon={<Key fontSize='small' />}
+              iconPosition='start'
+              label='API keys'
+              sx={tabStyles}
+            />
+            <Tab
+              icon={<Publish fontSize='small' />}
+              iconPosition='start'
+              label='Publish'
+              sx={tabStyles}
+            />
+          </Tabs>
+        </Paper>
+        {tab === 0 && (
+          <Arena
+            prompt={prompt}
+            setPrompt={setPrompt}
+            selected={selected}
+            setSelected={setSelected}
+            ran={ran}
+            onRun={() => setRan(true)}
+          />
+        )}
+        {tab === 1 && (
+          <Catalog
+            query={query}
+            setQuery={setQuery}
+            items={filtered}
+            onTry={(model) => {
+              setSelected(model)
+              setTab(0)
+            }}
+          />
+        )}
+        {tab === 2 && (
+          <Keys
+            keys={keys}
+            onCreate={() =>
+              setKeys((current) => [
+                {
+                  name: `Development key ${current.length + 1}`,
+                  value: 'syn_live_••••••••R7x4',
+                  created: 'Just now',
+                },
+                ...current,
+              ])
+            }
+            onDelete={(index) => setKeys((current) => current.filter((_, i) => i !== index))}
+          />
+        )}
+        {tab === 3 && <PublishModel />}
+      </Box>
+    </Box>
+  )
+}
 
-function Catalog({ query, setQuery, items, onTry }: { query: string; setQuery: (value: string) => void; items: Model[]; onTry: (model: Model) => void }) { return <><TextField fullWidth value={query} onChange={(e) => setQuery(e.target.value)} placeholder='Search models, categories, or capabilities' InputProps={{ startAdornment: <InputAdornment position='start'><Search /></InputAdornment> }} sx={{ ...fieldStyles, mb: 3 }} /><Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(245px, 1fr))', gap: 2 }}>{items.map((model) => <Card key={model.name} sx={{ bgcolor: '#14161a', color: '#f3f4f6', border: '1px solid #30343b', borderTop: `3px solid ${model.color}`, boxShadow: 'none' }}><CardContent><Typography variant='overline' sx={{ color: model.color, fontWeight: 800 }}>{model.category}</Typography><Typography variant='h6' fontWeight={800}>{model.name}</Typography><Typography variant='body2' color='text.secondary'>{model.maker}</Typography><Typography variant='body2' sx={{ mt: 2, minHeight: 62, color: '#d1d5db' }}>{model.description}</Typography><Divider sx={{ my: 2, borderColor: '#30343b' }} /><Stack direction='row' justifyContent='space-between'><Typography variant='caption' color='text.secondary'>{model.price}</Typography><Typography variant='caption' color='text.secondary'>{model.speed}</Typography></Stack><Button onClick={() => onTry(model)} endIcon={<PlayArrow />} fullWidth sx={{ mt: 2, color: model.color, borderColor: model.color, fontWeight: 800 }} variant='outlined'>Test in arena</Button></CardContent></Card>)}</Box></> }
+function Arena({
+  prompt,
+  setPrompt,
+  selected,
+  setSelected,
+  ran,
+  onRun,
+}: {
+  prompt: string
+  setPrompt: (value: string) => void
+  selected: Model
+  setSelected: (model: Model) => void
+  ran: boolean
+  onRun: () => void
+}) {
+  return (
+    <Stack spacing={3}>
+      <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
+        <Panel title='Your prompt' eyebrow='01 · WRITE THE TASK' sx={{ flex: 1.1 }}>
+          <TextField
+            multiline
+            minRows={7}
+            fullWidth
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            sx={fieldStyles}
+          />
+          <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mt: 2 }}>
+            <Typography variant='caption' color='text.secondary'>
+              {prompt.length} characters
+            </Typography>
+            <Button
+              onClick={onRun}
+              variant='contained'
+              startIcon={<PlayArrow />}
+              sx={primaryButton}
+            >
+              Run comparison
+            </Button>
+          </Stack>
+        </Panel>
+        <Panel title='Pick a contender' eyebrow='02 · SELECT A MODEL' sx={{ flex: 0.9 }}>
+          <Stack spacing={1.25}>
+            {models.slice(0, 3).map((model) => (
+              <Button
+                key={model.name}
+                onClick={() => setSelected(model)}
+                fullWidth
+                sx={{
+                  justifyContent: 'flex-start',
+                  textAlign: 'left',
+                  p: 1.5,
+                  textTransform: 'none',
+                  color: '#f3f4f6',
+                  border: '1px solid',
+                  borderColor: selected.name === model.name ? model.color : '#343840',
+                  bgcolor: selected.name === model.name ? `${model.color}14` : 'transparent',
+                }}
+              >
+                <Box
+                  sx={{ width: 9, height: 9, borderRadius: '50%', bgcolor: model.color, mr: 1.5 }}
+                />
+                <Box>
+                  <Typography fontWeight={800}>{model.name}</Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    {model.maker} · {model.speed}
+                  </Typography>
+                </Box>
+              </Button>
+            ))}
+          </Stack>
+        </Panel>
+      </Stack>
+      <Panel title='Result' eyebrow='03 · COMPARE OUTPUTS'>
+        {!ran ? (
+          <Box sx={{ py: 5, textAlign: 'center', color: 'text.secondary' }}>
+            <Terminal sx={{ fontSize: 38, mb: 1 }} />
+            <Typography>Run your prompt to see a live comparison.</Typography>
+          </Box>
+        ) : (
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+            <Box sx={{ flex: 1 }}>
+              <Stack direction='row' spacing={1} alignItems='center'>
+                <CheckCircle sx={{ color: '#86efac' }} />
+                <Typography fontWeight={800}>{selected.name}</Typography>
+                <Chip
+                  label='Winner'
+                  size='small'
+                  sx={{ bgcolor: '#86efac', color: '#102114', fontWeight: 800 }}
+                />
+              </Stack>
+              <Typography sx={{ mt: 2, lineHeight: 1.75, color: '#d1d5db' }}>
+                A vector database gives an AI assistant a searchable long-term memory. It turns
+                relevant documents and conversations into numerical representations, then retrieves
+                the closest matches when a new question arrives.
+              </Typography>
+              <Stack direction='row' spacing={1} sx={{ mt: 3 }}>
+                <Chip icon={<Speed />} label={selected.speed} size='small' />
+                <Chip icon={<Shield />} label='Safety checked' size='small' />
+              </Stack>
+            </Box>
+            <Divider flexItem orientation='vertical' sx={{ borderColor: '#30343b' }} />
+            <Box sx={{ minWidth: 220 }}>
+              <Typography variant='caption' color='text.secondary' fontWeight={800}>
+                QUALITY SCORE
+              </Typography>
+              <Typography variant='h2' fontWeight={800} sx={{ color: selected.color }}>
+                {selected.score}
+                <Typography component='span' color='text.secondary' variant='h6'>
+                  /100
+                </Typography>
+              </Typography>
+              <LinearProgress
+                variant='determinate'
+                value={selected.score}
+                sx={{
+                  height: 8,
+                  borderRadius: 5,
+                  bgcolor: '#282c33',
+                  '& .MuiLinearProgress-bar': { bgcolor: selected.color },
+                }}
+              />
+            </Box>
+          </Stack>
+        )}
+      </Panel>
+    </Stack>
+  )
+}
 
-function Keys({ keys, onCreate, onDelete }: { keys: { name: string; value: string; created: string }[]; onCreate: () => void; onDelete: (index: number) => void }) { return <Panel title='Production API keys' eyebrow='SECURE ACCESS' action={<Button onClick={onCreate} startIcon={<Add />} variant='contained' sx={primaryButton}>Create key</Button>}><Alert icon={<TipsAndUpdates />} severity='info' sx={{ mb: 3, bgcolor: '#122238', color: '#bfdbfe', '& .MuiAlert-icon': { color: '#93c5fd' } }}>Keys are shown only once when created. Store them in a secret manager, never in client code.</Alert><Stack spacing={1.5}>{keys.map((key, index) => <Paper key={`${key.name}-${index}`} elevation={0} sx={{ p: 2, bgcolor: '#0d0f12', border: '1px solid #30343b', display: 'flex', alignItems: 'center', gap: 2 }}><Key sx={{ color: '#fde047' }} /><Box sx={{ flexGrow: 1 }}><Typography fontWeight={800}>{key.name}</Typography><Typography variant='body2' sx={{ fontFamily: 'monospace', color: '#9ca3af' }}>{key.value} · created {key.created}</Typography></Box><IconButton aria-label='Copy API key' sx={{ color: '#93c5fd' }}><ContentCopy fontSize='small' /></IconButton><IconButton aria-label='Delete API key' onClick={() => onDelete(index)} sx={{ color: '#fca5a5' }}><DeleteOutline fontSize='small' /></IconButton></Paper>)}</Stack></Panel> }
+function Catalog({
+  query,
+  setQuery,
+  items,
+  onTry,
+}: {
+  query: string
+  setQuery: (value: string) => void
+  items: Model[]
+  onTry: (model: Model) => void
+}) {
+  return (
+    <>
+      <TextField
+        fullWidth
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder='Search models, categories, or capabilities'
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <Search />
+            </InputAdornment>
+          ),
+        }}
+        sx={{ ...fieldStyles, mb: 3 }}
+      />
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(245px, 1fr))',
+          gap: 2,
+        }}
+      >
+        {items.map((model) => (
+          <Card
+            key={model.name}
+            sx={{
+              bgcolor: '#14161a',
+              color: '#f3f4f6',
+              border: '1px solid #30343b',
+              borderTop: `3px solid ${model.color}`,
+              boxShadow: 'none',
+            }}
+          >
+            <CardContent>
+              <Typography variant='overline' sx={{ color: model.color, fontWeight: 800 }}>
+                {model.category}
+              </Typography>
+              <Typography variant='h6' fontWeight={800}>
+                {model.name}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {model.maker}
+              </Typography>
+              <Typography variant='body2' sx={{ mt: 2, minHeight: 62, color: '#d1d5db' }}>
+                {model.description}
+              </Typography>
+              <Divider sx={{ my: 2, borderColor: '#30343b' }} />
+              <Stack direction='row' justifyContent='space-between'>
+                <Typography variant='caption' color='text.secondary'>
+                  {model.price}
+                </Typography>
+                <Typography variant='caption' color='text.secondary'>
+                  {model.speed}
+                </Typography>
+              </Stack>
+              <Button
+                onClick={() => onTry(model)}
+                endIcon={<PlayArrow />}
+                fullWidth
+                sx={{ mt: 2, color: model.color, borderColor: model.color, fontWeight: 800 }}
+                variant='outlined'
+              >
+                Test in arena
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+    </>
+  )
+}
 
-function PublishModel() { return <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}><Panel title='Bring your model to Synapse' eyebrow='CREATOR STUDIO' sx={{ flex: 1 }}><Typography color='text.secondary'>Publish a hosted model, set its pricing, and reach developers through the catalog.</Typography><Stack spacing={2} sx={{ mt: 3 }}><TextField label='Model name' placeholder='e.g. Acme Vision Pro' sx={fieldStyles} /><TextField label='Repository or endpoint URL' placeholder='https://huggingface.co/your-org/model' sx={fieldStyles} /><Button variant='contained' startIcon={<Publish />} sx={primaryButton}>Start publishing</Button></Stack></Panel><Panel title='What you get' eyebrow='MADE FOR CREATORS' sx={{ flex: 1 }}><Stack spacing={2}>{[[<Image />, 'A clear storefront', 'Show capabilities, safety notes, and benchmarks.'], [<Bolt />, 'Usage insights', 'Track requests, latency, and earnings in one place.'], [<Api />, 'Developer-ready deployment', 'A documented endpoint and managed API keys.']].map(([icon, title, copy]) => <Stack key={String(title)} direction='row' spacing={1.5}><Box sx={{ color: '#d8b4fe' }}>{icon}</Box><Box><Typography fontWeight={800}>{title}</Typography><Typography variant='body2' color='text.secondary'>{copy}</Typography></Box></Stack>)}</Stack></Panel></Stack> }
+function Keys({
+  keys,
+  onCreate,
+  onDelete,
+}: {
+  keys: { name: string; value: string; created: string }[]
+  onCreate: () => void
+  onDelete: (index: number) => void
+}) {
+  return (
+    <Panel
+      title='Production API keys'
+      eyebrow='SECURE ACCESS'
+      action={
+        <Button onClick={onCreate} startIcon={<Add />} variant='contained' sx={primaryButton}>
+          Create key
+        </Button>
+      }
+    >
+      <Alert
+        icon={<TipsAndUpdates />}
+        severity='info'
+        sx={{
+          mb: 3,
+          bgcolor: '#122238',
+          color: '#bfdbfe',
+          '& .MuiAlert-icon': { color: '#93c5fd' },
+        }}
+      >
+        Keys are shown only once when created. Store them in a secret manager, never in client code.
+      </Alert>
+      <Stack spacing={1.5}>
+        {keys.map((key, index) => (
+          <Paper
+            key={`${key.name}-${index}`}
+            elevation={0}
+            sx={{
+              p: 2,
+              bgcolor: '#0d0f12',
+              border: '1px solid #30343b',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+            }}
+          >
+            <Key sx={{ color: '#fde047' }} />
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography fontWeight={800}>{key.name}</Typography>
+              <Typography variant='body2' sx={{ fontFamily: 'monospace', color: '#9ca3af' }}>
+                {key.value} · created {key.created}
+              </Typography>
+            </Box>
+            <IconButton aria-label='Copy API key' sx={{ color: '#93c5fd' }}>
+              <ContentCopy fontSize='small' />
+            </IconButton>
+            <IconButton
+              aria-label='Delete API key'
+              onClick={() => onDelete(index)}
+              sx={{ color: '#fca5a5' }}
+            >
+              <DeleteOutline fontSize='small' />
+            </IconButton>
+          </Paper>
+        ))}
+      </Stack>
+    </Panel>
+  )
+}
 
-function Panel({ title, eyebrow, children, action, sx }: { title: string; eyebrow: string; children: React.ReactNode; action?: React.ReactNode; sx?: object }) { return <Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, bgcolor: '#14161a', color: '#f3f4f6', border: '1px solid #30343b', borderRadius: 3, ...sx }}><Stack direction='row' justifyContent='space-between' alignItems='start' sx={{ mb: 2.5 }}><Box><Typography variant='overline' sx={{ color: '#9ca3af', fontWeight: 800, letterSpacing: 1.2 }}>{eyebrow}</Typography><Typography variant='h6' fontWeight={800}>{title}</Typography></Box>{action}</Stack>{children}</Paper> }
+function PublishModel() {
+  return (
+    <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
+      <Panel title='Bring your model to Synapse' eyebrow='CREATOR STUDIO' sx={{ flex: 1 }}>
+        <Typography color='text.secondary'>
+          Publish a hosted model, set its pricing, and reach developers through the catalog.
+        </Typography>
+        <Stack spacing={2} sx={{ mt: 3 }}>
+          <TextField label='Model name' placeholder='e.g. Acme Vision Pro' sx={fieldStyles} />
+          <TextField
+            label='Repository or endpoint URL'
+            placeholder='https://huggingface.co/your-org/model'
+            sx={fieldStyles}
+          />
+          <Button variant='contained' startIcon={<Publish />} sx={primaryButton}>
+            Start publishing
+          </Button>
+        </Stack>
+      </Panel>
+      <Panel title='What you get' eyebrow='MADE FOR CREATORS' sx={{ flex: 1 }}>
+        <Stack spacing={2}>
+          {[
+            [
+              <Image key='storefront' />,
+              'A clear storefront',
+              'Show capabilities, safety notes, and benchmarks.',
+            ],
+            [
+              <Bolt key='insights' />,
+              'Usage insights',
+              'Track requests, latency, and earnings in one place.',
+            ],
+            [
+              <Api key='deployment' />,
+              'Developer-ready deployment',
+              'A documented endpoint and managed API keys.',
+            ],
+          ].map(([icon, title, copy]) => (
+            <Stack key={String(title)} direction='row' spacing={1.5}>
+              <Box sx={{ color: '#d8b4fe' }}>{icon}</Box>
+              <Box>
+                <Typography fontWeight={800}>{title}</Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {copy}
+                </Typography>
+              </Box>
+            </Stack>
+          ))}
+        </Stack>
+      </Panel>
+    </Stack>
+  )
+}
+
+function Panel({
+  title,
+  eyebrow,
+  children,
+  action,
+  sx,
+}: {
+  title: string
+  eyebrow: string
+  children: React.ReactNode
+  action?: React.ReactNode
+  sx?: object
+}) {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: { xs: 2, sm: 3 },
+        bgcolor: '#14161a',
+        color: '#f3f4f6',
+        border: '1px solid #30343b',
+        borderRadius: 3,
+        ...sx,
+      }}
+    >
+      <Stack direction='row' justifyContent='space-between' alignItems='start' sx={{ mb: 2.5 }}>
+        <Box>
+          <Typography
+            variant='overline'
+            sx={{ color: '#9ca3af', fontWeight: 800, letterSpacing: 1.2 }}
+          >
+            {eyebrow}
+          </Typography>
+          <Typography variant='h6' fontWeight={800}>
+            {title}
+          </Typography>
+        </Box>
+        {action}
+      </Stack>
+      {children}
+    </Paper>
+  )
+}
