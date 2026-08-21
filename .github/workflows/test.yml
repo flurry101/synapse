@@ -71,6 +71,11 @@ jobs:
     name: Run backend unit tests
     runs-on: ubuntu-latest
     needs: run-python-linters
+    env:
+      PROJECT_NAME: synapse
+      FIRST_SUPERUSER: admin@synapse.com
+      FIRST_SUPERUSER_PASSWORD: admin
+      MONGO_DB: synapse
     defaults:
       run:
         working-directory: ./backend
