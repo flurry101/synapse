@@ -1,11 +1,23 @@
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
+import {
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material'
 import type { DeveloperModel } from '../../mocks/developerData'
 
 type ModelComparisonTableProps = {
   models: DeveloperModel[]
 }
 
-const higherIsBetterKeys: Array<keyof DeveloperModel['benchmarkResults']> = ['mmlu', 'humaneval', 'longContext']
+const higherIsBetterKeys: Array<keyof DeveloperModel['benchmarkResults']> = [
+  'mmlu',
+  'humaneval',
+  'longContext',
+]
 
 export default function ModelComparisonTable({ models }: ModelComparisonTableProps) {
   if (models.length === 0) {
@@ -23,7 +35,9 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
   }, {})
 
   return (
-    <TableContainer sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, backgroundColor: 'white' }}>
+    <TableContainer
+      sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, backgroundColor: 'white' }}
+    >
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: '#f5f8fc' }}>
@@ -39,7 +53,10 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
           <TableRow>
             <TableCell>Accuracy</TableCell>
             {models.map((model) => (
-              <TableCell key={`${model.id}-accuracy`} sx={cellStyle(model.accuracy === bestAccuracy)}>
+              <TableCell
+                key={`${model.id}-accuracy`}
+                sx={cellStyle(model.accuracy === bestAccuracy)}
+              >
                 {model.accuracy}%
               </TableCell>
             ))}
@@ -55,7 +72,10 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
           <TableRow>
             <TableCell>Latency</TableCell>
             {models.map((model) => (
-              <TableCell key={`${model.id}-latency`} sx={cellStyle(model.latencyMs === bestLatency)}>
+              <TableCell
+                key={`${model.id}-latency`}
+                sx={cellStyle(model.latencyMs === bestLatency)}
+              >
                 {model.latencyMs}ms
               </TableCell>
             ))}
@@ -74,7 +94,10 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
           <TableRow>
             <TableCell>Benchmark: MMLU</TableCell>
             {models.map((model) => (
-              <TableCell key={`${model.id}-mmlu`} sx={cellStyle(model.benchmarkResults.mmlu === bestBenchmarks.mmlu)}>
+              <TableCell
+                key={`${model.id}-mmlu`}
+                sx={cellStyle(model.benchmarkResults.mmlu === bestBenchmarks.mmlu)}
+              >
                 {model.benchmarkResults.mmlu}
               </TableCell>
             ))}

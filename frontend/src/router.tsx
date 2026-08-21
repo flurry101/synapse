@@ -23,6 +23,7 @@ import Register from './routes/register'
 import Root from './routes/root'
 import SSOLogin, { loader as ssoLoader } from './routes/sso.login'
 import Users, { loader as usersLoader } from './routes/users'
+import ProtectedRoute from './components/ProtectedRoute'
 
 export const routes = [
   {
@@ -37,8 +38,17 @@ export const routes = [
         loader: ssoLoader,
       },
       {
+        path: 'api/v1/login/google/callback',
+        Component: SSOLogin,
+        loader: ssoLoader,
+      },
+      {
         path: 'profile',
-        Component: Profile,
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'login',
@@ -56,7 +66,11 @@ export const routes = [
       },
       {
         path: 'developer',
-        Component: DeveloperLayout,
+        element: (
+          <ProtectedRoute requiredRole='developer'>
+            <DeveloperLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { index: true, Component: DeveloperDashboard },
           { path: 'search', Component: DeveloperSearch },
@@ -68,7 +82,11 @@ export const routes = [
       },
       {
         path: 'owner',
-        Component: OwnerLayout,
+        element: (
+          <ProtectedRoute requiredRole='owner'>
+            <OwnerLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { index: true, Component: OwnerDashboard },
           { path: 'models', Component: OwnerModels },

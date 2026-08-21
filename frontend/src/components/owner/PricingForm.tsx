@@ -12,7 +12,9 @@ export default function PricingForm({ model, onSave }: PricingFormProps) {
   const [pricePerRequest, setPricePerRequest] = useState(model.pricing.pricePerRequest)
   const [pricePer1kTokens, setPricePer1kTokens] = useState(model.pricing.pricePer1kTokens)
   const [monthlyPrice, setMonthlyPrice] = useState<number | ''>(model.pricing.monthlyPrice ?? '')
-  const [currency, setCurrency] = useState<OwnerModel['pricing']['currency']>(model.pricing.currency)
+  const [currency, setCurrency] = useState<OwnerModel['pricing']['currency']>(
+    model.pricing.currency,
+  )
 
   const preview = useMemo(() => {
     const monthly = monthlyPrice === '' ? 'None' : `${currency} ${Number(monthlyPrice).toFixed(2)}`

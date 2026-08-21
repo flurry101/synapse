@@ -22,16 +22,19 @@ async def register_user(
     email: EmailStr = Body(...),
     first_name: str = Body(None),
     last_name: str = Body(None),
+    roles: list[str] | None = Body(None),
 ):
     """
     Register a new user.
     """
     hashed_password = get_hashed_password(password)
+    user_roles = roles if roles and len(roles) > 0 else ["developer"]
     user = models.User(
         email=email,
         hashed_password=hashed_password,
         first_name=first_name,
         last_name=last_name,
+        roles=user_roles,
     )
     try:
         await user.create()

@@ -1,15 +1,6 @@
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 import PublishIcon from '@mui/icons-material/Publish'
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, Chip, MenuItem, Stack, TextField, Typography } from '@mui/material'
 import { useState } from 'react'
 import SectionCard from '../../components/workspace/SectionCard'
 import {
@@ -36,7 +27,11 @@ export default function OwnerAddModel() {
   })
 
   const saveModel = (status: OwnerModel['status']) => {
-    const slug = form.modelName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-') || `model-${Date.now()}`
+    const slug =
+      form.modelName
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-') || `model-${Date.now()}`
     const model: OwnerModel = {
       id: slug,
       name: form.modelName || 'Untitled Model',
@@ -71,7 +66,10 @@ export default function OwnerAddModel() {
   }
 
   return (
-    <SectionCard title='Add Model' subtitle='Create and publish model metadata with local mock state'>
+    <SectionCard
+      title='Add Model'
+      subtitle='Create and publish model metadata with local mock state'
+    >
       <Stack spacing={1.25}>
         <TextField
           label='Model name'
@@ -92,7 +90,12 @@ export default function OwnerAddModel() {
           value={form.description}
           onChange={(event) => setForm({ ...form, description: event.target.value })}
         />
-        <TextField select label='Task/category' value={form.task} onChange={(event) => setForm({ ...form, task: event.target.value })}>
+        <TextField
+          select
+          label='Task/category'
+          value={form.task}
+          onChange={(event) => setForm({ ...form, task: event.target.value })}
+        >
           {ownerTaskOptions.map((task) => (
             <MenuItem key={task} value={task}>
               {task}
@@ -136,14 +139,18 @@ export default function OwnerAddModel() {
               type='number'
               label='Price per request'
               value={form.pricePerRequest}
-              onChange={(event) => setForm({ ...form, pricePerRequest: Number(event.target.value) })}
+              onChange={(event) =>
+                setForm({ ...form, pricePerRequest: Number(event.target.value) })
+              }
             />
             <TextField
               fullWidth
               type='number'
               label='Price per 1K tokens'
               value={form.pricePer1kTokens}
-              onChange={(event) => setForm({ ...form, pricePer1kTokens: Number(event.target.value) })}
+              onChange={(event) =>
+                setForm({ ...form, pricePer1kTokens: Number(event.target.value) })
+              }
             />
           </Stack>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} sx={{ mt: 1.25 }}>
@@ -171,10 +178,18 @@ export default function OwnerAddModel() {
         </Box>
 
         <Stack direction='row' spacing={1}>
-          <Button variant='outlined' startIcon={<AddCircleOutlineIcon />} onClick={() => saveModel('Draft')}>
+          <Button
+            variant='outlined'
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={() => saveModel('Draft')}
+          >
             Save Draft
           </Button>
-          <Button variant='contained' startIcon={<PublishIcon />} onClick={() => saveModel('Published')}>
+          <Button
+            variant='contained'
+            startIcon={<PublishIcon />}
+            onClick={() => saveModel('Published')}
+          >
             Publish
           </Button>
         </Stack>

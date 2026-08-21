@@ -72,7 +72,7 @@ function setup() {
   const utils = render(
     <AuthProvider>
       <SnackBarProvider>
-        <RouterProvider router={router} />,
+        <RouterProvider router={router} />
       </SnackBarProvider>
     </AuthProvider>,
   )

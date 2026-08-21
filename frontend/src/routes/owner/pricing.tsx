@@ -1,4 +1,4 @@
-import { Alert, MenuItem, Stack, TextField } from '@mui/material'
+import { Alert, MenuItem, TextField } from '@mui/material'
 import { useMemo, useState } from 'react'
 import PricingForm from '../../components/owner/PricingForm'
 import SectionCard from '../../components/workspace/SectionCard'
@@ -29,7 +29,10 @@ export default function OwnerPricing() {
   }
 
   return (
-    <SectionCard title='Pricing' subtitle='Manage pricing for requests, tokens, and optional monthly plans'>
+    <SectionCard
+      title='Pricing'
+      subtitle='Manage pricing for requests, tokens, and optional monthly plans'
+    >
       <TextField
         select
         label='Model'

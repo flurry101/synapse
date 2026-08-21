@@ -26,7 +26,11 @@ export const developerNavItems = [
   { label: 'Dashboard', path: '/developer', hint: 'Discover and shortlist models' },
   { label: 'Search Results', path: '/developer/search', hint: 'Filter and sort candidates' },
   { label: 'Comparison', path: '/developer/compare', hint: 'Compare shortlisted models' },
-  { label: 'Model Details', path: '/developer/details/synapse-gpt-lite', hint: 'Benchmark and pricing' },
+  {
+    label: 'Model Details',
+    path: '/developer/details/synapse-gpt-lite',
+    hint: 'Benchmark and pricing',
+  },
   { label: 'Playground', path: '/developer/playground', hint: 'Test sample prompts' },
   { label: 'Deploy', path: '/developer/deploy', hint: 'Mock integration panel' },
 ]

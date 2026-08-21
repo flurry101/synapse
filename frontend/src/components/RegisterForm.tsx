@@ -1,5 +1,23 @@
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
-import { Avatar, Box, Button, Collapse, Link, TextField, Typography } from '@mui/material'
+import CodeIcon from '@mui/icons-material/Code'
+import StorefrontIcon from '@mui/icons-material/Storefront'
+import HubIcon from '@mui/icons-material/Hub'
+import {
+  Avatar,
+  Box,
+  Button,
+  Collapse,
+  FormControl,
+  FormLabel,
+  Link,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material'
 import Grid from '@mui/material/Grid'
 import { AxiosError } from 'axios'
 import { useState } from 'react'
@@ -21,6 +39,9 @@ export default function RegisterForm() {
   const navigate = useNavigate()
   const { showSnackBar } = useSnackBar()
   const [expanded, setExpanded] = useState(false)
+  const [selectedRoleType, setSelectedRoleType] = useState<'developer' | 'owner' | 'both'>(
+    'developer',
+  )
 
   const handleExpandClick = () => {
     setExpanded(!expanded)
@@ -28,8 +49,18 @@ export default function RegisterForm() {
 
   const onSubmit: SubmitHandler<User> = async (data) => {
     try {
-      await authService.register(data)
-      showSnackBar('Registration successful.', 'success')
+      const roles =
+        selectedRoleType === 'both'
+          ? ['developer', 'owner']
+          : selectedRoleType === 'owner'
+            ? ['owner']
+            : ['developer']
+
+      await authService.register({
+        ...data,
+        roles,
+      })
+      showSnackBar('Registration successful. Please sign in.', 'success')
       navigate('/login')
     } catch (error) {
       let msg
@@ -131,6 +162,104 @@ export default function RegisterForm() {
                   helperText={errors.password && 'Please provide a password.'}
                   {...register('password', { required: true })}
                 />
+              </Grid>
+
+              {/* Account Type Selection */}
+              <Grid size={12}>
+                <FormControl component='fieldset' sx={{ width: '100%', mt: 1 }}>
+                  <FormLabel component='legend' sx={{ color: '#d1d5db', fontWeight: 700, mb: 1 }}>
+                    Choose your account type
+                  </FormLabel>
+                  <RadioGroup
+                    value={selectedRoleType}
+                    onChange={(e) =>
+                      setSelectedRoleType(e.target.value as 'developer' | 'owner' | 'both')
+                    }
+                  >
+                    <Paper
+                      variant='outlined'
+                      sx={{
+                        p: 1.5,
+                        mb: 1,
+                        bgcolor: selectedRoleType === 'developer' ? '#152136' : 'transparent',
+                        borderColor: selectedRoleType === 'developer' ? '#60a5fa' : '#374151',
+                      }}
+                    >
+                      <FormControlLabel
+                        value='developer'
+                        control={<Radio size='small' />}
+                        label={
+                          <Stack direction='row' alignItems='center' spacing={1}>
+                            <CodeIcon fontSize='small' sx={{ color: '#60a5fa' }} />
+                            <Box>
+                              <Typography variant='body2' fontWeight={700}>
+                                Developer
+                              </Typography>
+                              <Typography variant='caption' color='text.secondary'>
+                                Discover, evaluate, and query models for your applications.
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        }
+                      />
+                    </Paper>
+
+                    <Paper
+                      variant='outlined'
+                      sx={{
+                        p: 1.5,
+                        mb: 1,
+                        bgcolor: selectedRoleType === 'owner' ? '#331f13' : 'transparent',
+                        borderColor: selectedRoleType === 'owner' ? '#f59e0b' : '#374151',
+                      }}
+                    >
+                      <FormControlLabel
+                        value='owner'
+                        control={<Radio size='small' />}
+                        label={
+                          <Stack direction='row' alignItems='center' spacing={1}>
+                            <StorefrontIcon fontSize='small' sx={{ color: '#f59e0b' }} />
+                            <Box>
+                              <Typography variant='body2' fontWeight={700}>
+                                Model Owner / Provider
+                              </Typography>
+                              <Typography variant='caption' color='text.secondary'>
+                                Publish models, set pricing tiers, benchmark and track analytics.
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        }
+                      />
+                    </Paper>
+
+                    <Paper
+                      variant='outlined'
+                      sx={{
+                        p: 1.5,
+                        bgcolor: selectedRoleType === 'both' ? '#261b36' : 'transparent',
+                        borderColor: selectedRoleType === 'both' ? '#c084fc' : '#374151',
+                      }}
+                    >
+                      <FormControlLabel
+                        value='both'
+                        control={<Radio size='small' />}
+                        label={
+                          <Stack direction='row' alignItems='center' spacing={1}>
+                            <HubIcon fontSize='small' sx={{ color: '#c084fc' }} />
+                            <Box>
+                              <Typography variant='body2' fontWeight={700}>
+                                Both (Developer & Model Owner)
+                              </Typography>
+                              <Typography variant='caption' color='text.secondary'>
+                                Access both developer and owner workspaces under one login.
+                              </Typography>
+                            </Box>
+                          </Stack>
+                        }
+                      />
+                    </Paper>
+                  </RadioGroup>
+                </FormControl>
               </Grid>
             </Grid>
             <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>

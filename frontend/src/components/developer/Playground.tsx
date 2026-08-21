@@ -84,7 +84,9 @@ export default function Playground({ models, defaultInput, output }: PlaygroundP
       )}
 
       {!running && !hasResult && (
-        <Alert severity='info'>Run a test to view mock output, response time, and token usage.</Alert>
+        <Alert severity='info'>
+          Run a test to view mock output, response time, and token usage.
+        </Alert>
       )}
 
       {!running && hasResult && (

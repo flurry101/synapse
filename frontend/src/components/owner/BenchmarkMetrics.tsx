@@ -19,7 +19,13 @@ export default function BenchmarkMetrics({
   throughputRps,
 }: BenchmarkMetricsProps) {
   return (
-    <Box sx={{ display: 'grid', gap: 1.25, gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gap: 1.25,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      }}
+    >
       <MetricCard label='Accuracy' value={`${accuracy.toFixed(1)}%`} />
       <MetricCard label='Precision' value={`${precision.toFixed(1)}%`} />
       <MetricCard label='Recall' value={`${recall.toFixed(1)}%`} />

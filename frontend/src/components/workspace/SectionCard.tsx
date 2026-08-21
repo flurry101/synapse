@@ -9,7 +9,10 @@ type SectionCardProps = {
 
 export default function SectionCard({ title, subtitle, action, children }: SectionCardProps) {
   return (
-    <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid #d7dee9', backgroundColor: 'white' }}>
+    <Paper
+      elevation={0}
+      sx={{ borderRadius: 3, border: '1px solid #d7dee9', backgroundColor: 'white' }}
+    >
       <Stack
         direction='row'
         justifyContent='space-between'

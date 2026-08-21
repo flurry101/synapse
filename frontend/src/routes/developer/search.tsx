@@ -38,7 +38,8 @@ export default function DeveloperSearch() {
   const results = useMemo(() => {
     const normalized = query.toLowerCase()
     const searched = developerModels.filter((model) => {
-      const searchable = `${model.name} ${model.description} ${model.task} ${model.creator}`.toLowerCase()
+      const searchable =
+        `${model.name} ${model.description} ${model.task} ${model.creator}`.toLowerCase()
       const queryMatch = normalized.length === 0 || searchable.includes(normalized)
       const taskMatch = taskFilter === 'All' || model.task === taskFilter
       return queryMatch && taskMatch
@@ -53,7 +54,9 @@ export default function DeveloperSearch() {
       }
       if (sortBy === 'price-asc') {
         return (
-          left.pricePerMInput + left.pricePerMOutput - (right.pricePerMInput + right.pricePerMOutput)
+          left.pricePerMInput +
+          left.pricePerMOutput -
+          (right.pricePerMInput + right.pricePerMOutput)
         )
       }
       return right.trustScore - left.trustScore
@@ -66,7 +69,11 @@ export default function DeveloperSearch() {
         title='Model search and results'
         subtitle='Search by use case, filter by task category, and compare shortlisted models'
       >
-        <SearchBar value={query} onChange={setQuery} placeholder='Search models by use case or capability' />
+        <SearchBar
+          value={query}
+          onChange={setQuery}
+          placeholder='Search models by use case or capability'
+        />
         <Stack direction={{ xs: 'column', md: 'row' }} spacing={1.25}>
           <TextField
             select
@@ -105,7 +112,12 @@ export default function DeveloperSearch() {
               onClick={() => setTaskFilter(task)}
             />
           ))}
-          <Chip label='Clear filters' variant='outlined' onClick={() => setTaskFilter('All')} clickable />
+          <Chip
+            label='Clear filters'
+            variant='outlined'
+            onClick={() => setTaskFilter('All')}
+            clickable
+          />
         </Stack>
       </SectionCard>
 
@@ -113,13 +125,20 @@ export default function DeveloperSearch() {
         title='Model cards'
         subtitle={`${results.length} matching models${compareIds.length > 0 ? ` • ${compareIds.length} selected for comparison` : ''}`}
         action={
-          <Button component={NavLink} to='/developer/compare' variant='contained' disabled={compareIds.length < 2}>
+          <Button
+            component={NavLink}
+            to='/developer/compare'
+            variant='contained'
+            disabled={compareIds.length < 2}
+          >
             Compare Selected
           </Button>
         }
       >
         {results.length === 0 && (
-          <Typography sx={{ color: '#5f6f88' }}>No models found. Try a different use case or category.</Typography>
+          <Typography sx={{ color: '#5f6f88' }}>
+            No models found. Try a different use case or category.
+          </Typography>
         )}
         <Stack spacing={1.5}>
           {results.map((model) => (

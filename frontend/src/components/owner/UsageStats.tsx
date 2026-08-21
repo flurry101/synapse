@@ -17,7 +17,13 @@ export default function UsageStats({
   averageLatencyMs,
 }: UsageStatsProps) {
   return (
-    <Box sx={{ display: 'grid', gap: 1.25, gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gap: 1.25,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+      }}
+    >
       <MetricCard label='Total requests' value={totalRequests.toLocaleString()} />
       <MetricCard label='Successful requests' value={successfulRequests.toLocaleString()} />
       <MetricCard label='Failed requests' value={failedRequests.toLocaleString()} />

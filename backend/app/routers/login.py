@@ -95,6 +95,15 @@ async def google_callback(
             detail="SSO Login callback url is not set. Google SSO not enabled.",
         )
 
+    if not request.query_params.get("code"):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Missing 'code' parameter in Google callback. "
+                "Please initiate login via /api/v1/login/google"
+            ),
+        )
+
     # Get user details from Google
     google_user = await google_sso.verify_and_process(request)
 
@@ -113,6 +122,7 @@ async def google_callback(
             last_name=google_user.last_name,
             picture=google_user.picture,
             provider=google_user.provider,
+            roles=["developer"],
         )
         user = await user.create()
 
@@ -122,12 +132,16 @@ async def google_callback(
     # Login user by creating access_token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(user.uuid, expires_delta=access_token_expires)
-    response = RedirectResponse(settings.SSO_LOGIN_CALLBACK_URL)
+
+    delimiter = "&" if "?" in settings.SSO_LOGIN_CALLBACK_URL else "?"
+    redirect_url = f"{settings.SSO_LOGIN_CALLBACK_URL}{delimiter}token={access_token}"
+    response = RedirectResponse(redirect_url)
     response.set_cookie(
         "Authorization",
         value=f"Bearer {access_token}",
         httponly=True,
         max_age=120,
         expires=120,
+        samesite="lax",
     )
     return response

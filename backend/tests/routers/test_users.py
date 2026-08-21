@@ -181,3 +181,32 @@ async def test_update_user_existing_email(
     response = r.json()
     assert r.status_code == 400
     assert response["detail"] == "User with that email already exists."
+
+
+@pytest.mark.anyio
+async def test_create_user_with_roles(client: AsyncClient) -> None:
+    username = random_email()
+    password = random_lower_string()
+    data = {"email": username, "password": password, "roles": ["owner"]}
+    r = await client.post(
+        f"{settings.API_V1_STR}/users",
+        json=data,
+    )
+    assert r.status_code == 200
+    created_user = r.json()
+    assert "roles" in created_user
+    assert created_user["roles"] == ["owner"]
+
+
+@pytest.mark.anyio
+async def test_update_profile_roles(client: AsyncClient) -> None:
+    user = await create_test_user()
+    token_headers = await generate_user_auth_headers(client, user)
+
+    data = {"roles": ["developer", "owner"]}
+    r = await client.patch(
+        f"{settings.API_V1_STR}/users/me", json=data, headers=token_headers
+    )
+    assert r.status_code == 200
+    profile = r.json()
+    assert profile["roles"] == ["developer", "owner"]

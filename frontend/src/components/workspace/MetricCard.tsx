@@ -1,5 +1,5 @@
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
-import { Box, Paper, Stack, Typography } from '@mui/material'
+import { Paper, Stack, Typography } from '@mui/material'
 
 type MetricCardProps = {
   label: string

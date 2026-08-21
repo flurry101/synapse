@@ -38,3 +38,10 @@ async def test_not_authorized(client: AsyncClient) -> None:
     headers = {"AUTHORIZATION": "Bearer eyJ0eXAiOiJKV1QiLCJhbG"}
     r = await client.get(f"{settings.API_V1_STR}/login/test-token", headers=headers)
     assert r.status_code == 401
+
+
+@pytest.mark.anyio
+async def test_google_callback_missing_code(client: AsyncClient) -> None:
+    r = await client.get(f"{settings.API_V1_STR}/login/google/callback")
+    assert r.status_code == 400
+    assert "Missing 'code' parameter" in r.json()["detail"]

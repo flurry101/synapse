@@ -28,14 +28,26 @@ type WorkspaceLayoutProps = {
 
 const drawerWidth = 272
 
-export default function WorkspaceLayout({ role, title, subtitle, items, children }: WorkspaceLayoutProps) {
+export default function WorkspaceLayout({
+  role,
+  title,
+  subtitle,
+  items,
+  children,
+}: WorkspaceLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname } = useLocation()
   const roleColor = role === 'developer' ? '#154c79' : '#7a3e00'
   const roleLabel = role === 'developer' ? 'Developer Workspace' : 'Model Owner Workspace'
 
   return (
-    <Box sx={{ display: 'flex', minHeight: 'calc(100vh - 64px)', background: 'linear-gradient(180deg, #f7f8fb 0%, #eef2f7 100%)' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: 'calc(100vh - 64px)',
+        background: 'linear-gradient(180deg, #f7f8fb 0%, #eef2f7 100%)',
+      }}
+    >
       <AppBar
         position='fixed'
         color='transparent'
@@ -58,7 +70,10 @@ export default function WorkspaceLayout({ role, title, subtitle, items, children
             <MenuIcon />
           </IconButton>
           <Stack spacing={0.25} sx={{ flexGrow: 1 }}>
-            <Typography variant='h5' sx={{ fontWeight: 800, letterSpacing: '-0.02em', color: '#10243e' }}>
+            <Typography
+              variant='h5'
+              sx={{ fontWeight: 800, letterSpacing: '-0.02em', color: '#10243e' }}
+            >
               {title}
             </Typography>
             <Typography variant='body2' sx={{ color: '#4f637e', maxWidth: 860 }}>
@@ -92,7 +107,11 @@ export default function WorkspaceLayout({ role, title, subtitle, items, children
             '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
-          <SidebarContent items={items} pathname={pathname} onClickItem={() => setMobileOpen(false)} />
+          <SidebarContent
+            items={items}
+            pathname={pathname}
+            onClickItem={() => setMobileOpen(false)}
+          />
         </Drawer>
         <Drawer
           variant='permanent'
@@ -131,7 +150,10 @@ function SidebarContent({
     <Box sx={{ mt: 0.5 }}>
       <Toolbar />
       <Box sx={{ px: 2.25, pb: 1.5 }}>
-        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid #d7dee9', bgcolor: '#ffffff' }}>
+        <Paper
+          elevation={0}
+          sx={{ p: 2, borderRadius: 3, border: '1px solid #d7dee9', bgcolor: '#ffffff' }}
+        >
           <Typography variant='overline' sx={{ color: '#5d6e85', fontWeight: 700 }}>
             Synapse Navigation
           </Typography>

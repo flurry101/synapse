@@ -1,12 +1,5 @@
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
-import {
-  Alert,
-  Button,
-  Paper,
-  Snackbar,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Alert, Button, Paper, Snackbar, Stack, Typography } from '@mui/material'
 import { useMemo, useState } from 'react'
 import type { DeveloperModel } from '../../mocks/developerData'
 
@@ -48,7 +41,8 @@ export default function DeploymentPanel({ selectedModelId, models, config }: Dep
           Selected model: {modelName}
         </Typography>
         <Typography variant='body2' sx={{ mt: 1, color: '#577191' }}>
-          Environment: {config.environment} • Region: {config.region} • Max tokens: {config.maxTokens} • Temperature: {config.temperature} • RPM limit: {config.rateLimitRpm}
+          Environment: {config.environment} • Region: {config.region} • Max tokens:{' '}
+          {config.maxTokens} • Temperature: {config.temperature} • RPM limit: {config.rateLimitRpm}
         </Typography>
       </Paper>
 
@@ -56,10 +50,24 @@ export default function DeploymentPanel({ selectedModelId, models, config }: Dep
         <Typography variant='subtitle1' sx={{ fontWeight: 700, color: '#12304f' }}>
           Generated mock API endpoint
         </Typography>
-        <Typography sx={{ mt: 1, p: 1.25, borderRadius: 2, bgcolor: '#f4f8fd', fontFamily: 'monospace', color: '#214060' }}>
+        <Typography
+          sx={{
+            mt: 1,
+            p: 1.25,
+            borderRadius: 2,
+            bgcolor: '#f4f8fd',
+            fontFamily: 'monospace',
+            color: '#214060',
+          }}
+        >
           {config.endpoint}
         </Typography>
-        <Button onClick={onCopy} variant='outlined' startIcon={<ContentCopyIcon />} sx={{ mt: 1.5 }}>
+        <Button
+          onClick={onCopy}
+          variant='outlined'
+          startIcon={<ContentCopyIcon />}
+          sx={{ mt: 1.5 }}
+        >
           Copy endpoint
         </Button>
       </Paper>

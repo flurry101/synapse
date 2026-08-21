@@ -41,24 +41,40 @@ export default function OwnerDashboard() {
           Model Owner Dashboard
         </Typography>
         <Typography sx={{ mt: 1, maxWidth: 830, color: '#fff6ea' }}>
-          Manage your model portfolio, benchmarks, pricing, and usage with mock data tailored for demo workflows.
+          Manage your model portfolio, benchmarks, pricing, and usage with mock data tailored for
+          demo workflows.
         </Typography>
         <Button
           component={NavLink}
           to='/owner/add-model'
           variant='contained'
           startIcon={<Add />}
-          sx={{ mt: 2, alignSelf: 'flex-start', bgcolor: '#fff4e5', color: '#6b3900', fontWeight: 800 }}
+          sx={{
+            mt: 2,
+            alignSelf: 'flex-start',
+            bgcolor: '#fff4e5',
+            color: '#6b3900',
+            fontWeight: 800,
+          }}
         >
           Add Model
         </Button>
       </Box>
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 2,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+        }}
+      >
         <MetricCard label='Total Models' value={String(summary.totalModels)} />
         <MetricCard label='Total Requests' value={summary.totalRequests.toLocaleString()} />
         <MetricCard label='Revenue' value={`$${summary.revenue.toLocaleString()}`} />
-        <MetricCard label='Average Trust Score' value={`${summary.averageTrustScore.toFixed(1)}%`} />
+        <MetricCard
+          label='Average Trust Score'
+          value={`${summary.averageTrustScore.toFixed(1)}%`}
+        />
       </Box>
 
       <SectionCard

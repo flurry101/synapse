@@ -8,10 +8,16 @@ import {
   DialogContent,
   DialogContentText,
   FormControlLabel,
+  FormGroup,
   IconButton,
+  Paper,
+  Stack,
   TextField,
+  Typography,
 } from '@mui/material'
 import Grid from '@mui/material/Grid'
+import CodeIcon from '@mui/icons-material/Code'
+import StorefrontIcon from '@mui/icons-material/Storefront'
 import { AxiosError } from 'axios'
 import { useEffect, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -43,21 +49,41 @@ export default function UserProfile(props: UserProfileProps) {
   const { showSnackBar } = useSnackBar()
   const [open, setOpen] = useState(false)
 
+  const initialRoles =
+    userProfile.roles && userProfile.roles.length > 0 ? userProfile.roles : ['developer']
+  const [devRole, setDevRole] = useState(initialRoles.includes('developer'))
+  const [ownerRole, setOwnerRole] = useState(initialRoles.includes('owner'))
+
   useEffect(() => {
     reset(userProfile)
+    const currentRoles =
+      userProfile.roles && userProfile.roles.length > 0 ? userProfile.roles : ['developer']
+    setDevRole(currentRoles.includes('developer'))
+    setOwnerRole(currentRoles.includes('owner'))
   }, [userProfile, reset])
 
   const onSubmit: SubmitHandler<User> = async (data) => {
     let updatedUser: User
     try {
+      // Calculate updated roles
+      const updatedRoles: string[] = []
+      if (devRole) updatedRoles.push('developer')
+      if (ownerRole) updatedRoles.push('owner')
+      if (updatedRoles.length === 0) updatedRoles.push('developer') // ensure at least one
+
+      const payload = {
+        ...data,
+        roles: updatedRoles,
+      }
+
       if (currentUser?.uuid === userProfile.uuid) {
         // Updating user profile.
-        updatedUser = await userService.updateProfile(data)
+        updatedUser = await userService.updateProfile(payload)
         setUser(updatedUser)
         showSnackBar('User profile updated successfully.', 'success')
       } else {
         // Updating user different from current user.
-        updatedUser = await userService.updateUser(userProfile.uuid, data)
+        updatedUser = await userService.updateUser(userProfile.uuid, payload)
         showSnackBar('User profile updated successfully.', 'success')
       }
       if (onUserUpdated) {
@@ -86,7 +112,7 @@ export default function UserProfile(props: UserProfileProps) {
   const handleConfirm = async () => {
     setOpen(false)
     await userService.deleteSelf()
-    showSnackBar('You account has been deleted.', 'success')
+    showSnackBar('Your account has been deleted.', 'success')
     logout()
     navigate('/')
   }
@@ -112,7 +138,7 @@ export default function UserProfile(props: UserProfileProps) {
         <Box
           component='form'
           onSubmit={handleSubmit(onSubmit)}
-          sx={{ mt: 3 }}
+          sx={{ mt: 3, width: '100%' }}
           key={userProfile.uuid}
           noValidate
           data-testid='user-profile-form'
@@ -183,6 +209,63 @@ export default function UserProfile(props: UserProfileProps) {
                 />
               </Grid>
             )}
+
+            {/* Account Roles Management */}
+            <Grid size={12}>
+              <Paper
+                variant='outlined'
+                sx={{
+                  p: 2,
+                  bgcolor: '#0f172a',
+                  borderColor: '#334155',
+                  borderRadius: 2,
+                }}
+              >
+                <Typography variant='subtitle2' fontWeight={700} sx={{ color: '#e2e8f0', mb: 1 }}>
+                  Workspace Roles & Permissions
+                </Typography>
+                <Typography variant='caption' sx={{ color: '#94a3b8', display: 'block', mb: 1.5 }}>
+                  Select the workspaces you want this account to access. Both workspaces operate
+                  independently.
+                </Typography>
+                <FormGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={devRole}
+                        onChange={(e) => setDevRole(e.target.checked)}
+                        sx={{ color: '#60a5fa', '&.Mui-checked': { color: '#60a5fa' } }}
+                      />
+                    }
+                    label={
+                      <Stack direction='row' alignItems='center' spacing={1}>
+                        <CodeIcon fontSize='small' sx={{ color: '#60a5fa' }} />
+                        <Typography variant='body2' fontWeight={600} sx={{ color: '#f1f5f9' }}>
+                          Developer Workspace Access
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={ownerRole}
+                        onChange={(e) => setOwnerRole(e.target.checked)}
+                        sx={{ color: '#f59e0b', '&.Mui-checked': { color: '#f59e0b' } }}
+                      />
+                    }
+                    label={
+                      <Stack direction='row' alignItems='center' spacing={1}>
+                        <StorefrontIcon fontSize='small' sx={{ color: '#f59e0b' }} />
+                        <Typography variant='body2' fontWeight={600} sx={{ color: '#f1f5f9' }}>
+                          Model Owner Workspace Access
+                        </Typography>
+                      </Stack>
+                    }
+                  />
+                </FormGroup>
+              </Paper>
+            </Grid>
 
             {currentUser?.is_superuser && (
               <>

@@ -6,7 +6,10 @@ import { deploymentConfiguration, developerModels } from '../../mocks/developerD
 export default function DeveloperDeploy() {
   return (
     <Stack spacing={2.25}>
-      <SectionCard title='Deploy' subtitle='Generate mock deployment config and endpoint for demo walkthroughs'>
+      <SectionCard
+        title='Deploy'
+        subtitle='Generate mock deployment config and endpoint for demo walkthroughs'
+      >
         <DeploymentPanel
           selectedModelId={deploymentConfiguration.selectedModelId}
           models={developerModels}

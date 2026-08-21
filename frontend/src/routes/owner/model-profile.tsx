@@ -21,9 +21,11 @@ export default function OwnerModelProfile() {
     return null
   }
 
-  const updateField = (partial: Partial<(typeof selectedModel)>) => {
+  const updateField = (partial: Partial<typeof selectedModel>) => {
     const updated = { ...selectedModel, ...partial }
-    setModels((current) => current.map((model) => (model.id === selectedModel.id ? updated : model)))
+    setModels((current) =>
+      current.map((model) => (model.id === selectedModel.id ? updated : model)),
+    )
     setSaved(false)
   }
 
@@ -33,7 +35,10 @@ export default function OwnerModelProfile() {
   }
 
   return (
-    <SectionCard title='Model Profile / Edit' subtitle='Update model metadata and owner-side controls (local mock state)'>
+    <SectionCard
+      title='Model Profile / Edit'
+      subtitle='Update model metadata and owner-side controls (local mock state)'
+    >
       <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
         {models.map((model) => (
           <Chip
@@ -93,8 +98,18 @@ export default function OwnerModelProfile() {
       />
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
-        <TextField fullWidth label='Owner name' value={selectedModel.owner.name} InputProps={{ readOnly: true }} />
-        <TextField fullWidth label='Owner email' value={selectedModel.owner.email} InputProps={{ readOnly: true }} />
+        <TextField
+          fullWidth
+          label='Owner name'
+          value={selectedModel.owner.name}
+          InputProps={{ readOnly: true }}
+        />
+        <TextField
+          fullWidth
+          label='Owner email'
+          value={selectedModel.owner.email}
+          InputProps={{ readOnly: true }}
+        />
       </Stack>
       <TextField
         label='Owner organization'

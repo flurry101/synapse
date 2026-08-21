@@ -21,11 +21,20 @@ export default function DeveloperModelDetails() {
         action={<Chip label={`Trust score ${selectedModel.trustScore}%`} color='primary' />}
       >
         <Stack spacing={0.5}>
-          <Typography sx={{ color: '#4f6683' }}>Creator / Model Owner: {selectedModel.creator}</Typography>
-          <Typography sx={{ color: '#4f6683' }}>Hugging Face ID (mock): {selectedModel.huggingFaceId}</Typography>
+          <Typography sx={{ color: '#4f6683' }}>
+            Creator / Model Owner: {selectedModel.creator}
+          </Typography>
+          <Typography sx={{ color: '#4f6683' }}>
+            Hugging Face ID (mock): {selectedModel.huggingFaceId}
+          </Typography>
         </Stack>
         <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
-          <Button component={NavLink} to='/developer/playground' variant='contained' endIcon={<OpenInNew />}>
+          <Button
+            component={NavLink}
+            to='/developer/playground'
+            variant='contained'
+            endIcon={<OpenInNew />}
+          >
             Open Playground
           </Button>
           <Button component={NavLink} to='/developer/deploy' variant='outlined'>
@@ -34,11 +43,23 @@ export default function DeveloperModelDetails() {
         </Stack>
       </SectionCard>
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 2,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+        }}
+      >
         <MetricCard label='Accuracy' value={`${selectedModel.accuracy}%`} />
         <MetricCard label='Latency' value={`${selectedModel.latencyMs}ms`} />
-        <MetricCard label='Price Input / 1M' value={`$${selectedModel.pricePerMInput.toFixed(2)}`} />
-        <MetricCard label='Price Output / 1M' value={`$${selectedModel.pricePerMOutput.toFixed(2)}`} />
+        <MetricCard
+          label='Price Input / 1M'
+          value={`$${selectedModel.pricePerMInput.toFixed(2)}`}
+        />
+        <MetricCard
+          label='Price Output / 1M'
+          value={`$${selectedModel.pricePerMOutput.toFixed(2)}`}
+        />
       </Box>
 
       <SectionCard title='Benchmark metrics'>
@@ -55,11 +76,15 @@ export default function DeveloperModelDetails() {
       </SectionCard>
 
       <SectionCard title='Usage information'>
-        <Typography sx={{ color: '#4f6683' }}>Active apps: {selectedModel.usage.activeApps}</Typography>
+        <Typography sx={{ color: '#4f6683' }}>
+          Active apps: {selectedModel.usage.activeApps}
+        </Typography>
         <Typography sx={{ color: '#4f6683' }}>
           Monthly requests: {selectedModel.usage.monthlyRequests}
         </Typography>
-        <Typography sx={{ color: '#4f6683' }}>Observed uptime: {selectedModel.usage.uptime}</Typography>
+        <Typography sx={{ color: '#4f6683' }}>
+          Observed uptime: {selectedModel.usage.uptime}
+        </Typography>
       </SectionCard>
     </Stack>
   )

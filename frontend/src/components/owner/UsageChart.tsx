@@ -34,7 +34,13 @@ export default function UsageChart({ title, color, points, valueFormatter }: Usa
       </Typography>
       <Box sx={{ border: '1px solid #dce5f2', borderRadius: 2, p: 1, bgcolor: '#fbfdff' }}>
         <svg width='100%' viewBox={`0 0 ${width} ${height}`} role='img' aria-label={title}>
-          <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke='#cfd9e7' />
+          <line
+            x1={padding}
+            y1={height - padding}
+            x2={width - padding}
+            y2={height - padding}
+            stroke='#cfd9e7'
+          />
           <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke='#cfd9e7' />
           <path d={path} fill='none' stroke={color} strokeWidth='3' />
           {points.map((point, index) => {

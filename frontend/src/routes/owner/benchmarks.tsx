@@ -74,7 +74,10 @@ export default function OwnerBenchmarks() {
         )}
       </SectionCard>
 
-      <SectionCard title='Benchmark results table' subtitle='Dataset-level test history for owner-managed models'>
+      <SectionCard
+        title='Benchmark results table'
+        subtitle='Dataset-level test history for owner-managed models'
+      >
         <TableContainer sx={{ border: '1px solid #dce5f2', borderRadius: 2.5 }}>
           <Table size='small'>
             <TableHead>
@@ -93,7 +96,9 @@ export default function OwnerBenchmarks() {
             <TableBody>
               {rows.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell>{models.find((model) => model.id === row.modelId)?.name ?? row.modelId}</TableCell>
+                  <TableCell>
+                    {models.find((model) => model.id === row.modelId)?.name ?? row.modelId}
+                  </TableCell>
                   <TableCell>{row.dataset}</TableCell>
                   <TableCell>{row.testDate}</TableCell>
                   <TableCell>{row.accuracy.toFixed(1)}%</TableCell>
@@ -212,7 +217,12 @@ export default function OwnerBenchmarks() {
             }}
           />
         </Stack>
-        <Button variant='contained' startIcon={<AddIcon />} sx={{ alignSelf: 'flex-start' }} onClick={addBenchmarkResult}>
+        <Button
+          variant='contained'
+          startIcon={<AddIcon />}
+          sx={{ alignSelf: 'flex-start' }}
+          onClick={addBenchmarkResult}
+        >
           Add Benchmark Result
         </Button>
         {saved && <Alert severity='success'>Benchmark result added to local mock state.</Alert>}

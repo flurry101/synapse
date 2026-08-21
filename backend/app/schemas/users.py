@@ -23,6 +23,7 @@ class PrivateUserBase(UserBase):
     is_active: bool | None = None
     is_superuser: bool | None = None
     provider: str | None = None
+    roles: list[str] = Field(default_factory=lambda: ["developer"])
 
 
 class UserUpdate(UserBase):
@@ -34,6 +35,7 @@ class UserUpdate(UserBase):
     email: EmailStr | None = None
     is_active: bool | None = None
     is_superuser: bool | None = None
+    roles: list[str] | None = None
 
 
 class User(PrivateUserBase):

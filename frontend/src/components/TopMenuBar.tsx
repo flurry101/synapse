@@ -1,15 +1,17 @@
-import { Bolt, Logout } from '@mui/icons-material'
+import { Bolt, Logout, Code, Storefront } from '@mui/icons-material'
 import {
   AppBar,
   Avatar,
   Box,
   Button,
+  Chip,
   Divider,
   IconButton,
   Link,
   ListItemIcon,
   Menu,
   MenuItem,
+  Stack,
   Toolbar,
   Tooltip,
   Typography,
@@ -23,6 +25,7 @@ export default function TopMenuBar() {
   const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
@@ -35,6 +38,10 @@ export default function TopMenuBar() {
     setAnchorEl(null)
     navigate('/')
   }
+
+  const userRoles = user?.roles && user.roles.length > 0 ? user.roles : ['developer']
+  const canAccessDev = Boolean(user && (user.is_superuser || userRoles.includes('developer')))
+  const canAccessOwner = Boolean(user && (user.is_superuser || userRoles.includes('owner')))
 
   return (
     <AppBar
@@ -61,13 +68,40 @@ export default function TopMenuBar() {
           </Link>
         </Typography>
 
-        <Box aria-label='workspace links' sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, mr: 1 }}>
-          <Button component={NavLink} to='/developer' sx={{ color: '#d1d5db', fontWeight: 700 }}>
-            Developer
-          </Button>
-          <Button component={NavLink} to='/owner' sx={{ color: '#d1d5db', fontWeight: 700 }}>
-            Model Owner
-          </Button>
+        {/* Dynamic Workspace Links based on user roles */}
+        <Box
+          aria-label='workspace links'
+          sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1, mr: 1 }}
+        >
+          {canAccessDev && (
+            <Button
+              component={NavLink}
+              to='/developer'
+              startIcon={<Code fontSize='small' />}
+              sx={{
+                color: '#d1d5db',
+                fontWeight: 700,
+                '&.active': { color: '#93c5fd', bgcolor: 'rgba(147, 197, 253, 0.1)' },
+              }}
+            >
+              Developer
+            </Button>
+          )}
+
+          {canAccessOwner && (
+            <Button
+              component={NavLink}
+              to='/owner'
+              startIcon={<Storefront fontSize='small' />}
+              sx={{
+                color: '#d1d5db',
+                fontWeight: 700,
+                '&.active': { color: '#fca5a5', bgcolor: 'rgba(252, 165, 165, 0.1)' },
+              }}
+            >
+              Model Owner
+            </Button>
+          )}
         </Box>
 
         {user === undefined && (
@@ -120,6 +154,7 @@ export default function TopMenuBar() {
             overflow: 'visible',
             filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
             mt: 1.5,
+            minWidth: 200,
             '& .MuiAvatar-root': {
               width: 32,
               height: 32,
@@ -143,13 +178,38 @@ export default function TopMenuBar() {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
+        <Box sx={{ px: 2, py: 1.5 }}>
+          <Typography variant='subtitle2' fontWeight={800} noWrap>
+            {user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email : ''}
+          </Typography>
+          <Typography variant='caption' color='text.secondary' display='block' noWrap>
+            {user?.email}
+          </Typography>
+          <Stack direction='row' spacing={0.5} sx={{ mt: 1 }}>
+            {userRoles.map((role) => (
+              <Chip
+                key={role}
+                label={role === 'developer' ? 'Developer' : 'Model Owner'}
+                size='small'
+                sx={{
+                  height: 20,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  bgcolor: role === 'developer' ? '#1e3a8a' : '#78350f',
+                  color: '#fff',
+                }}
+              />
+            ))}
+          </Stack>
+        </Box>
+        <Divider />
         <Link component={NavLink} to='/profile' color='inherit' underline='none'>
           <MenuItem onClick={handleClose}>
             <Avatar
               alt={user && user.first_name + ' ' + user.last_name}
               src={user && user.picture && user.picture}
             />{' '}
-            Profile
+            Profile & Roles
           </MenuItem>
         </Link>
 

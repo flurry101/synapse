@@ -25,7 +25,11 @@ export const developerNavItems: NavItem[] = [
   { label: 'Use Case Search', path: '/developer/search', hint: 'Describe what you need' },
   { label: 'Recommendations', path: '/developer/recommendations', hint: 'Best fit models' },
   { label: 'Compare Models', path: '/developer/compare', hint: 'Side-by-side metrics' },
-  { label: 'Model Details', path: '/developer/details/gpt-4o-mini', hint: 'Capabilities and limits' },
+  {
+    label: 'Model Details',
+    path: '/developer/details/gpt-4o-mini',
+    hint: 'Capabilities and limits',
+  },
   { label: 'Playground', path: '/developer/playground', hint: 'Try prompts in browser' },
   { label: 'Deploy', path: '/developer/deploy', hint: 'Mock deployment flow' },
 ]
@@ -167,6 +171,5 @@ export const mockPlaygroundResponse = {
     'Route short factual queries to low-cost fast model.',
     'Escalate complex multi-step prompts to stronger model only when needed.',
   ],
-  risk:
-    'Watch for stale context in long-running threads and enforce source-grounded answers.',
+  risk: 'Watch for stale context in long-running threads and enforce source-grounded answers.',
 }

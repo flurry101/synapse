@@ -12,7 +12,10 @@ export default function OwnerModelCard({ model, onView, onEdit }: OwnerModelCard
     model.status === 'Published' ? 'success' : model.status === 'Paused' ? 'warning' : 'default'
 
   return (
-    <Stack spacing={1.25} sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, p: 2, bgcolor: 'white' }}>
+    <Stack
+      spacing={1.25}
+      sx={{ border: '1px solid #dce5f2', borderRadius: 2.5, p: 2, bgcolor: 'white' }}
+    >
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' spacing={1}>
         <Stack spacing={0.5}>
           <Typography variant='h6' sx={{ fontWeight: 800, color: '#12304f' }}>

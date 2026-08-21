@@ -10,7 +10,9 @@ import { developerModels, popularTasks } from '../../mocks/developerData'
 
 export default function DeveloperDashboard() {
   const navigate = useNavigate()
-  const [query, setQuery] = useState('I need a reliable support assistant with low latency and strong factual grounding.')
+  const [query, setQuery] = useState(
+    'I need a reliable support assistant with low latency and strong factual grounding.',
+  )
   const recommended = useMemo(() => developerModels.slice(0, 3), [])
 
   const onFindModels = () => {
@@ -32,16 +34,29 @@ export default function DeveloperDashboard() {
           Welcome to Synapse Developer Workspace
         </Typography>
         <Typography sx={{ mt: 1, maxWidth: 840, color: '#e3eefb' }}>
-          Describe your use case, discover top model candidates, compare core metrics, and ship a mock integration in minutes.
+          Describe your use case, discover top model candidates, compare core metrics, and ship a
+          mock integration in minutes.
         </Typography>
         <Stack direction='row' spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }} useFlexGap>
-          <Chip label='Mock Playground Ready' sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }} />
-          <Chip label='No Backend Required' sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }} />
-          <Chip label='Hackathon Demo Flow' sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }} />
+          <Chip
+            label='Mock Playground Ready'
+            sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }}
+          />
+          <Chip
+            label='No Backend Required'
+            sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }}
+          />
+          <Chip
+            label='Hackathon Demo Flow'
+            sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }}
+          />
         </Stack>
       </Box>
 
-      <SectionCard title='Describe your use case' subtitle='Tell Synapse what you are building and find matching models'>
+      <SectionCard
+        title='Describe your use case'
+        subtitle='Tell Synapse what you are building and find matching models'
+      >
         <SearchBar
           value={query}
           onChange={setQuery}
@@ -51,12 +66,24 @@ export default function DeveloperDashboard() {
         />
         <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
           {popularTasks.map((task) => (
-            <Chip key={task} label={task} onClick={() => setQuery(task)} variant='outlined' clickable />
+            <Chip
+              key={task}
+              label={task}
+              onClick={() => setQuery(task)}
+              variant='outlined'
+              clickable
+            />
           ))}
         </Stack>
       </SectionCard>
 
-      <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gap: 2,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+        }}
+      >
         <MetricCard label='Active Model Candidates' value='12' delta='+3 this week' />
         <MetricCard label='Average Latency Target' value='250ms' delta='18% faster' />
         <MetricCard label='Budget Guardrail' value='$0.70 / 1M out' delta='On target' />
@@ -75,14 +102,25 @@ export default function DeveloperDashboard() {
         title='Suggested Next Steps'
         subtitle='Recommended journey for first-time builders'
         action={
-          <Button component={NavLink} to='/developer/search' variant='contained' endIcon={<ArrowForward />}>
+          <Button
+            component={NavLink}
+            to='/developer/search'
+            variant='contained'
+            endIcon={<ArrowForward />}
+          >
             Start Flow
           </Button>
         }
       >
-        <Typography color='text.secondary'>1. Describe your app goal and latency/cost constraints in Use Case Search.</Typography>
-        <Typography color='text.secondary'>2. Review model recommendations and compare benchmark fit.</Typography>
-        <Typography color='text.secondary'>3. Validate output quality in Playground and proceed to Deploy.</Typography>
+        <Typography color='text.secondary'>
+          1. Describe your app goal and latency/cost constraints in Use Case Search.
+        </Typography>
+        <Typography color='text.secondary'>
+          2. Review model recommendations and compare benchmark fit.
+        </Typography>
+        <Typography color='text.secondary'>
+          3. Validate output quality in Playground and proceed to Deploy.
+        </Typography>
       </SectionCard>
     </Stack>
   )

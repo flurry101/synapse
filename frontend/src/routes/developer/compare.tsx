@@ -35,7 +35,8 @@ export default function DeveloperCompare() {
       >
         {selectedModels.length < 2 && (
           <Alert severity='info'>
-            Select at least two models from Search Results to compare. Showing default models for now.
+            Select at least two models from Search Results to compare. Showing default models for
+            now.
           </Alert>
         )}
         <ModelComparisonTable models={selectedModels} />

@@ -15,3 +15,4 @@ class User(Document):
     picture: str | None = None
     is_active: bool = True
     is_superuser: bool = False
+    roles: list[str] = Field(default_factory=lambda: ["developer"])

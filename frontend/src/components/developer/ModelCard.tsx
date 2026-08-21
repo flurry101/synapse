@@ -83,7 +83,11 @@ export default function ModelCard({
 
 function MetricPill({ label, value }: { label: string; value: string }) {
   return (
-    <Stack direction='row' spacing={0.75} sx={{ px: 1, py: 0.75, borderRadius: 2, bgcolor: '#f4f8fd' }}>
+    <Stack
+      direction='row'
+      spacing={0.75}
+      sx={{ px: 1, py: 0.75, borderRadius: 2, bgcolor: '#f4f8fd' }}
+    >
       <Typography variant='caption' sx={{ color: '#667f9f', fontWeight: 700 }}>
         {label}
       </Typography>

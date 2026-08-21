@@ -1,4 +1,12 @@
-import { Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
+import {
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material'
 import UsageChart from '../../components/owner/UsageChart'
 import UsageStats from '../../components/owner/UsageStats'
 import SectionCard from '../../components/workspace/SectionCard'
@@ -14,7 +22,10 @@ export default function OwnerAnalytics() {
 
   return (
     <Stack spacing={2.25}>
-      <SectionCard title='Usage / Analytics' subtitle='Request and revenue monitoring with local mock data'>
+      <SectionCard
+        title='Usage / Analytics'
+        subtitle='Request and revenue monitoring with local mock data'
+      >
         <UsageStats
           totalRequests={totalRequests}
           successfulRequests={successfulRequests}
