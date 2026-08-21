@@ -25,8 +25,12 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
 
     # database configurations
-    MONGO_HOST: str
-    MONGO_PORT: int
+    # A full MongoDB connection string. This supports managed providers such as
+    # MongoDB Atlas (for example, ``mongodb+srv://...``). When it is unset, the
+    # individual host/port settings below retain the local Docker behaviour.
+    MONGO_URI: str | None = None
+    MONGO_HOST: str = "localhost"
+    MONGO_PORT: int = 27017
     MONGO_USER: str | None = None
     MONGO_PASSWORD: str | None = None
     MONGO_DB: str

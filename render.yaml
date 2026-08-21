@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: synapse-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: fastapi run --host 0.0.0.0 --port $PORT app/main.py
+    healthCheckPath: /api/v1/
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PROJECT_NAME
+        value: Synapse
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FIRST_SUPERUSER
+        sync: false
+      - key: FIRST_SUPERUSER_PASSWORD
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB
+        value: synapse
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SSO_CALLBACK_HOSTNAME
+        sync: false
+      - key: SSO_LOGIN_CALLBACK_URL
+        sync: false
+
+  - type: web
+    name: synapse-web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    rootDir: ./frontend
+    envVars:
+      - key: VITE_BACKEND_API_URL
+        sync: false
+      - key: VITE_PWD_SIGNUP_ENABLED
+        value: "true"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
