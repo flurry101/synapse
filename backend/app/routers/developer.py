@@ -376,6 +376,8 @@ async def sync_hf_for_developers(
         total_synced=total,
         created_count=created,
         updated_count=updated,
-        message=f"Successfully synced {total} models from Hugging Face Hub ({created} created, {updated} updated).",
+        message=(
+            f"Successfully synced {total} models from Hugging Face Hub "
+            f"({created} created, {updated} updated)."
+        ),
     )
-

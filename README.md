@@ -209,5 +209,3 @@ uv run black app tests
 # Type check with Mypy
 uv run mypy
 ```
-
----

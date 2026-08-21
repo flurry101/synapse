@@ -124,7 +124,8 @@ class HuggingFaceService:
                 )
                 if res.status_code != 200:
                     logger.warning(
-                        f"Hugging Face API returned status {res.status_code}. Using fallback records."
+                        "Hugging Face API returned status "
+                        f"{res.status_code}. Using fallback records."
                     )
                     return self._fallback_hf_records(query, task, limit=fetch_limit)
 
@@ -170,7 +171,9 @@ class HuggingFaceService:
                     return results
                 return self._fallback_hf_records(query, task, limit=fetch_limit)
         except Exception as exc:
-            logger.warning(f"Error querying Hugging Face API: {exc}. Using fallback records.")
+            logger.warning(
+                f"Error querying Hugging Face API: {exc}. Using fallback records."
+            )
             return self._fallback_hf_records(query, task, limit=fetch_limit)
 
     async def get_hf_model_details(
@@ -261,7 +264,7 @@ class HuggingFaceService:
         token: str | None = None,
     ) -> tuple[int, int, int]:
         """
-        Fetch models from Hugging Face Hub and upsert (seed/update) them into the MongoDB database.
+        Fetch models from Hugging Face Hub and upsert (seed/update) them into MongoDB.
         Returns (total_synced, created_count, updated_count).
         """
         records = await self.search_hf_models(
@@ -287,7 +290,9 @@ class HuggingFaceService:
                 # Update dynamic metadata
                 existing.downloads = rec.downloads
                 existing.likes = rec.likes
-                if rec.description and len(rec.description) > len(existing.description or ""):
+                if rec.description and len(rec.description) > len(
+                    existing.description or ""
+                ):
                     existing.description = rec.description
                 if rec.tags:
                     existing.tags = list(set(existing.tags + rec.tags))[:10]
@@ -315,12 +320,16 @@ class HuggingFaceService:
                 code_score = int(min(94, max(60, 68 + like_mod * 1.5)))
                 ctx_score = int(min(95, max(70, 78 + like_mod * 1.2)))
 
+                fallback_desc = (
+                    f"High-performance {rec.task} model hosted on "
+                    f"Hugging Face by {rec.author}."
+                )
+
                 new_model = Model(
                     slug=slug,
                     name=rec.name,
                     hugging_face_id=rec.id,
-                    description=rec.description
-                    or f"High-performance {rec.task} model hosted on Hugging Face by {rec.author}.",
+                    description=rec.description or fallback_desc,
                     task=rec.task or "General Chat",
                     version="1.0.0",
                     model_type="Decoder-only Transformer",
@@ -507,7 +516,9 @@ class HuggingFaceService:
                 license="llama3.1",
                 parameters="8B",
                 context_window="128K",
-                description="Meta's state-of-the-art 8B instruction tuned multilingual model.",
+                description=(
+                    "Meta's state-of-the-art 8B instruction tuned multilingual" "model."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -521,7 +532,10 @@ class HuggingFaceService:
                 license="llama3.1",
                 parameters="70B",
                 context_window="128K",
-                description="Flagship 70B enterprise reasoning and conversation model from Meta.",
+                description=(
+                    "Flagship 70B enterprise reasoning and conversation model"
+                    "from Meta."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -535,7 +549,10 @@ class HuggingFaceService:
                 license="llama3.2",
                 parameters="3B",
                 context_window="128K",
-                description="Lightweight 3B model optimized for on-device and low-latency edge deployment.",
+                description=(
+                    "Lightweight 3B model optimized for on-device and low-latency"
+                    "edge deployment."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -549,7 +566,10 @@ class HuggingFaceService:
                 license="llama3.2",
                 parameters="1B",
                 context_window="128K",
-                description="Ultra-compact 1B parameter model with impressive general capabilities.",
+                description=(
+                    "Ultra-compact 1B parameter model with impressive general"
+                    "capabilities."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -563,7 +583,10 @@ class HuggingFaceService:
                 license="llama3.3",
                 parameters="70B",
                 context_window="128K",
-                description="Industry benchmark-topping 70B model delivering 405B-grade capabilities.",
+                description=(
+                    "Industry benchmark-topping 70B model delivering 405B-grade"
+                    "capabilities."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -577,7 +600,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="32K",
-                description="Instruction tuned Mistral 7B with function calling and tokenizer v3.",
+                description=(
+                    "Instruction tuned Mistral 7B with function calling and"
+                    "tokenizer v3."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -591,7 +617,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="46.7B",
                 context_window="32K",
-                description="High-throughput Sparse Mixture of Experts model outperforming 70B dense models.",
+                description=(
+                    "High-throughput Sparse Mixture of Experts model"
+                    "outperforming 70B dense models."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -605,7 +634,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="12B",
                 context_window="128K",
-                description="12B parameter model built jointly with NVIDIA featuring 128K context window.",
+                description=(
+                    "12B parameter model built jointly with NVIDIA featuring 128K"
+                    "context window."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -619,7 +651,10 @@ class HuggingFaceService:
                 license="mncl",
                 parameters="22B",
                 context_window="32K",
-                description="Open-weight generative code model supporting 80+ programming languages.",
+                description=(
+                    "Open-weight generative code model supporting 80+ programming"
+                    "languages."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -633,7 +668,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="8B",
                 context_window="128K",
-                description="Top-tier compute-efficient edge model designed for local inference.",
+                description=(
+                    "Top-tier compute-efficient edge model designed for local"
+                    "inference."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -647,7 +685,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="128K",
-                description="Flagship open weights model with exceptional coding, math, and instruction following.",
+                description=(
+                    "Flagship open weights model with exceptional coding, math,"
+                    "and instruction following."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -661,7 +702,9 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="14B",
                 context_window="128K",
-                description="Balanced 14B powerhouse model matching larger 32B class models.",
+                description=(
+                    "Balanced 14B powerhouse model matching larger 32B class" "models."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -675,7 +718,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="72B",
                 context_window="128K",
-                description="State-of-the-art open foundation model rivaling top commercial frontier models.",
+                description=(
+                    "State-of-the-art open foundation model rivaling top"
+                    "commercial frontier models."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -689,7 +735,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="128K",
-                description="Code-focused LLM with exceptional HumanEval and patch drafting scores.",
+                description=(
+                    "Code-focused LLM with exceptional HumanEval and patch"
+                    "drafting scores."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -703,7 +752,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="32B",
                 context_window="128K",
-                description="The ultimate open-source coding agent matching GPT-4o on code generation benchmarks.",
+                description=(
+                    "The ultimate open-source coding agent matching GPT-4o on"
+                    "code generation benchmarks."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -717,7 +769,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="128K",
-                description="Specialized mathematical reasoning model dominating competition-level benchmarks.",
+                description=(
+                    "Specialized mathematical reasoning model dominating"
+                    "competition-level benchmarks."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -731,7 +786,7 @@ class HuggingFaceService:
                 license="gemma",
                 parameters="2B",
                 context_window="8K",
-                description="Google's ultra-efficient on-device 2B instruction model.",
+                description=("Google's ultra-efficient on-device 2B instruction model."),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -745,7 +800,9 @@ class HuggingFaceService:
                 license="gemma",
                 parameters="9B",
                 context_window="8K",
-                description="Google's lightweight, state-of-the-art open model from Gemini.",
+                description=(
+                    "Google's lightweight, state-of-the-art open model from" "Gemini."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -759,7 +816,10 @@ class HuggingFaceService:
                 license="gemma",
                 parameters="27B",
                 context_window="8K",
-                description="Google's high-tier 27B open weights model delivering competitive 70B performance.",
+                description=(
+                    "Google's high-tier 27B open weights model delivering"
+                    "competitive 70B performance."
+                ),
                 is_gated=True,
             ),
             HFModelRecord(
@@ -773,7 +833,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="671B",
                 context_window="128K",
-                description="Frontier 671B MoE model (37B active) setting new industry efficiency records.",
+                description=(
+                    "Frontier 671B MoE model (37B active) setting new industry"
+                    "efficiency records."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -787,7 +850,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="671B",
                 context_window="128K",
-                description="Reinforcement learning-driven reasoning model rivaling OpenAI o1 performance.",
+                description=(
+                    "Reinforcement learning-driven reasoning model rivaling"
+                    "OpenAI o1 performance."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -801,7 +867,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="7B",
                 context_window="128K",
-                description="R1 reasoning capabilities distilled into an ultra-fast Qwen 7B base.",
+                description=(
+                    "R1 reasoning capabilities distilled into an ultra-fast Qwen"
+                    "7B base."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -815,7 +884,10 @@ class HuggingFaceService:
                 license="llama3.1",
                 parameters="8B",
                 context_window="128K",
-                description="DeepSeek R1 chain-of-thought reasoning distilled into Llama-3.1 8B.",
+                description=(
+                    "DeepSeek R1 chain-of-thought reasoning distilled into"
+                    "Llama-3.1 8B."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -829,7 +901,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="16B",
                 context_window="128K",
-                description="MoE code model with 2.4B active parameters supporting 300+ programming languages.",
+                description=(
+                    "MoE code model with 2.4B active parameters supporting 300+"
+                    "programming languages."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -843,7 +918,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="3.8B",
                 context_window="128K",
-                description="Microsoft's lightweight, high-reasoning 3.8B model with 128K context.",
+                description=(
+                    "Microsoft's lightweight, high-reasoning 3.8B model with 128K"
+                    "context."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -857,7 +935,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="16x3.8B",
                 context_window="128K",
-                description="Microsoft's first Mixture of Experts model with 6.6B active params.",
+                description=(
+                    "Microsoft's first Mixture of Experts model with 6.6B active"
+                    "params."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -871,7 +952,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="4.2B",
                 context_window="128K",
-                description="Multimodal vision-language model for chart, diagram, and OCR parsing.",
+                description=(
+                    "Multimodal vision-language model for chart, diagram, and OCR"
+                    "parsing."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -885,7 +969,9 @@ class HuggingFaceService:
                 license="mit",
                 parameters="14B",
                 context_window="128K",
-                description="State-of-the-art 14B model trained with synthetic reasoning data.",
+                description=(
+                    "State-of-the-art 14B model trained with synthetic reasoning" "data."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -899,7 +985,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="335M",
                 context_window="512",
-                description="Leading dense retrieval embedding model for RAG and search workflows.",
+                description=(
+                    "Leading dense retrieval embedding model for RAG and search"
+                    "workflows."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -913,7 +1002,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="560M",
                 context_window="8K",
-                description="Multi-lingual, multi-functionality hybrid retrieval model with 8K context.",
+                description=(
+                    "Multi-lingual, multi-functionality hybrid retrieval model"
+                    "with 8K context."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -927,7 +1019,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="560M",
                 context_window="512",
-                description="Cross-encoder reranking model for precision document reordering in RAG pipelines.",
+                description=(
+                    "Cross-encoder reranking model for precision document"
+                    "reordering in RAG pipelines."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -941,7 +1036,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="22.7M",
                 context_window="256",
-                description="Lightning-fast 384-dimensional sentence embedding model for high-throughput search.",
+                description=(
+                    "Lightning-fast 384-dimensional sentence embedding model for"
+                    "high-throughput search."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -955,7 +1053,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="109M",
                 context_window="384",
-                description="Top quality 768-dimensional sentence transformer model for semantic similarity.",
+                description=(
+                    "Top quality 768-dimensional sentence transformer model for"
+                    "semantic similarity."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -969,7 +1070,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="560M",
                 context_window="512",
-                description="Instruction-tuned multilingual embedding model covering 100+ languages.",
+                description=(
+                    "Instruction-tuned multilingual embedding model covering 100+"
+                    "languages."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -983,7 +1087,9 @@ class HuggingFaceService:
                 license="bigcode-openrail-m",
                 parameters="15B",
                 context_window="16K",
-                description="Trained on 600+ programming languages with The Stack v2 dataset.",
+                description=(
+                    "Trained on 600+ programming languages with The Stack v2" "dataset."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -997,7 +1103,10 @@ class HuggingFaceService:
                 license="bigcode-openrail-m",
                 parameters="7B",
                 context_window="16K",
-                description="Compute-efficient code generation model trained by ServiceNow and Hugging Face.",
+                description=(
+                    "Compute-efficient code generation model trained by"
+                    "ServiceNow and Hugging Face."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1011,7 +1120,10 @@ class HuggingFaceService:
                 license="llama3.1",
                 parameters="8B",
                 context_window="128K",
-                description="Flagship agentic reasoning and function calling model from Nous Research.",
+                description=(
+                    "Flagship agentic reasoning and function calling model from"
+                    "Nous Research."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1025,7 +1137,9 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="32K",
-                description="Specialized in JSON mode and structured tool calling workflows.",
+                description=(
+                    "Specialized in JSON mode and structured tool calling" "workflows."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1039,7 +1153,10 @@ class HuggingFaceService:
                 license="cc-by-nc-4.0",
                 parameters="104B",
                 context_window="128K",
-                description="Enterprise-grade RAG and tool-use model optimized for multi-step reasoning.",
+                description=(
+                    "Enterprise-grade RAG and tool-use model optimized for multi-"
+                    "step reasoning."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1053,7 +1170,10 @@ class HuggingFaceService:
                 license="cc-by-nc-4.0",
                 parameters="35B",
                 context_window="128K",
-                description="Scalable 35B model built specifically for grounded retrieval augmented generation.",
+                description=(
+                    "Scalable 35B model built specifically for grounded retrieval"
+                    "augmented generation."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1067,7 +1187,7 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="2K",
-                description="Popular open source causal decoder-only model from TII.",
+                description=("Popular open source causal decoder-only model from TII."),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1081,7 +1201,7 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="9B",
                 context_window="4K",
-                description="Strong general reasoning and coding model from 01.AI.",
+                description=("Strong general reasoning and coding model from 01.AI."),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1095,7 +1215,9 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="34B",
                 context_window="4K",
-                description="Top-tier 34B model with exceptional bilingual performance.",
+                description=(
+                    "Top-tier 34B model with exceptional bilingual performance."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1109,7 +1231,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="400M",
                 context_window="1024",
-                description="Industry standard sequence-to-sequence model fine-tuned on CNN/DailyMail.",
+                description=(
+                    "Industry standard sequence-to-sequence model fine-tuned on"
+                    "CNN/DailyMail."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1123,7 +1248,9 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="400M",
                 context_window="1024",
-                description="Zero-shot topic and customer intent classification engine.",
+                description=(
+                    "Zero-shot topic and customer intent classification engine."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1137,7 +1264,9 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="67M",
                 context_window="512",
-                description="High-speed customer sentiment and ticket tone classification.",
+                description=(
+                    "High-speed customer sentiment and ticket tone" "classification."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1151,7 +1280,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="125M",
                 context_window="512",
-                description="RoBERTa model fine-tuned on real-world customer dialogues and social feeds.",
+                description=(
+                    "RoBERTa model fine-tuned on real-world customer dialogues"
+                    "and social feeds."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1165,7 +1297,10 @@ class HuggingFaceService:
                 license="mit",
                 parameters="809M",
                 context_window="30s",
-                description="Turbocharged automatic speech recognition with multilingual transcription.",
+                description=(
+                    "Turbocharged automatic speech recognition with multilingual"
+                    "transcription."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1179,7 +1314,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="11B",
                 context_window="2048",
-                description="Instruction-tuned encoder-decoder model for structured text conversion.",
+                description=(
+                    "Instruction-tuned encoder-decoder model for structured text"
+                    "conversion."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1193,7 +1331,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="8B",
                 context_window="128K",
-                description="Balanced assistant model for product copilots and workflow automation.",
+                description=(
+                    "Balanced assistant model for product copilots and workflow"
+                    "automation."
+                ),
                 is_gated=False,
             ),
             HFModelRecord(
@@ -1207,7 +1348,10 @@ class HuggingFaceService:
                 license="apache-2.0",
                 parameters="7B",
                 context_window="32K",
-                description="Low-latency support model for ticket triage and conversational workflows.",
+                description=(
+                    "Low-latency support model for ticket triage and"
+                    "conversational workflows."
+                ),
                 is_gated=False,
             ),
         ]
