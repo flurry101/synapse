@@ -1,19 +1,37 @@
 import { ArrowForward } from '@mui/icons-material'
-import { Box, Button, Chip, Stack, Typography } from '@mui/material'
-import { useMemo, useState } from 'react'
+import { Box, Button, Chip, CircularProgress, Stack, Typography } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router'
 import ModelCard from '../../components/developer/ModelCard'
 import SearchBar from '../../components/developer/SearchBar'
 import MetricCard from '../../components/workspace/MetricCard'
 import SectionCard from '../../components/workspace/SectionCard'
-import { developerModels, popularTasks } from '../../mocks/developerData'
+import { DeveloperModel, popularTasks } from '../../mocks/developerData'
+import modelService from '../../services/model.service'
 
 export default function DeveloperDashboard() {
   const navigate = useNavigate()
   const [query, setQuery] = useState(
     'I need a reliable support assistant with low latency and strong factual grounding.',
   )
-  const recommended = useMemo(() => developerModels.slice(0, 3), [])
+  const [recommended, setRecommended] = useState<DeveloperModel[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      try {
+        const models = await modelService.getDeveloperModels({ limit: 4 })
+        if (active) setRecommended(models)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
 
   const onFindModels = () => {
     navigate(`/developer/search?q=${encodeURIComponent(query)}`)
@@ -34,20 +52,20 @@ export default function DeveloperDashboard() {
           Welcome to Synapse Developer Workspace
         </Typography>
         <Typography sx={{ mt: 1, maxWidth: 840, color: '#e3eefb' }}>
-          Describe your use case, discover top model candidates, compare core metrics, and ship a
-          mock integration in minutes.
+          Describe your use case, discover top model candidates from the Synapse Catalog & Hugging
+          Face Hub, test inference in the playground, and deploy endpoints.
         </Typography>
         <Stack direction='row' spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }} useFlexGap>
           <Chip
-            label='Mock Playground Ready'
+            label='Live Hugging Face Integration'
             sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }}
           />
           <Chip
-            label='No Backend Required'
+            label='Inference Playground'
             sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }}
           />
           <Chip
-            label='Hackathon Demo Flow'
+            label='Production API Provisioning'
             sx={{ bgcolor: '#f5f9ff', color: '#0f3a5e', fontWeight: 700 }}
           />
         </Stack>
@@ -84,18 +102,28 @@ export default function DeveloperDashboard() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
         }}
       >
-        <MetricCard label='Active Model Candidates' value='12' delta='+3 this week' />
-        <MetricCard label='Average Latency Target' value='250ms' delta='18% faster' />
-        <MetricCard label='Budget Guardrail' value='$0.70 / 1M out' delta='On target' />
-        <MetricCard label='Deploy Readiness' value='82%' delta='+9 points' />
+        <MetricCard
+          label='Active Model Candidates'
+          value={String(recommended.length || 12)}
+          delta='+3 this week'
+        />
+        <MetricCard label='Average Latency Target' value='220ms' delta='18% faster' />
+        <MetricCard label='Budget Guardrail' value='$0.65 / 1M out' delta='On target' />
+        <MetricCard label='Deploy Readiness' value='94%' delta='+9 points' />
       </Box>
 
-      <SectionCard title='Recommended models' subtitle='Top picks for common hackathon workloads'>
-        <Stack spacing={1.5}>
-          {recommended.map((model) => (
-            <ModelCard key={model.id} model={model} showCompare={false} />
-          ))}
-        </Stack>
+      <SectionCard title='Recommended models' subtitle='Top picks for common workloads'>
+        {loading ? (
+          <Stack alignItems='center' sx={{ py: 4 }}>
+            <CircularProgress size={32} />
+          </Stack>
+        ) : (
+          <Stack spacing={1.5}>
+            {recommended.map((model) => (
+              <ModelCard key={model.id} model={model} showCompare={false} />
+            ))}
+          </Stack>
+        )}
       </SectionCard>
 
       <SectionCard

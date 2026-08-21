@@ -9,4 +9,6 @@ export interface User {
   is_active?: boolean
   is_superuser?: boolean
   roles?: string[]
+  organization?: string
+  hf_token?: string
 }

@@ -16,3 +16,5 @@ class User(Document):
     is_active: bool = True
     is_superuser: bool = False
     roles: list[str] = Field(default_factory=lambda: ["developer"])
+    organization: str | None = None
+    hf_token: str | None = None

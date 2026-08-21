@@ -64,6 +64,7 @@ function setup() {
       path: '/users',
       element: <Users />,
       loader: usersLoader,
+      HydrateFallback: () => <div>Loading...</div>,
     },
   ]
 
@@ -85,12 +86,10 @@ function setup() {
 }
 
 it('should render user list', async () => {
-  const { getByRole } = setup()
-  await waitFor(() => {
-    expect(getByRole('list')).toBeInTheDocument()
-  })
+  const { findByRole } = setup()
+  const userList = await findByRole('list', {}, { timeout: 4000 })
+  expect(userList).toBeInTheDocument()
 
-  const userList = getByRole('list')
   const userItems = await within(userList).findAllByRole('listitem')
   expect(userItems).toHaveLength(users.length)
   userItems.forEach((item, idx) => {

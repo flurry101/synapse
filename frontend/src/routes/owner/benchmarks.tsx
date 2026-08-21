@@ -2,6 +2,7 @@ import AddIcon from '@mui/icons-material/Add'
 import {
   Alert,
   Button,
+  CircularProgress,
   MenuItem,
   Stack,
   Table,
@@ -12,22 +13,21 @@ import {
   TableRow,
   TextField,
 } from '@mui/material'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BenchmarkMetrics from '../../components/owner/BenchmarkMetrics'
 import SectionCard from '../../components/workspace/SectionCard'
-import {
-  getOwnerBenchmarks,
-  getOwnerModels,
-  saveOwnerBenchmarks,
-  type BenchmarkResult,
-} from '../../mocks/ownerData'
+import { type BenchmarkResult, type OwnerModel } from '../../mocks/ownerData'
+import modelService from '../../services/model.service'
 
 export default function OwnerBenchmarks() {
-  const [models] = useState(getOwnerModels())
-  const [rows, setRows] = useState(getOwnerBenchmarks())
-  const [saved, setSaved] = useState(false)
+  const [models, setModels] = useState<OwnerModel[]>([])
+  const [rows, setRows] = useState<BenchmarkResult[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saved, setSaved] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const [newResult, setNewResult] = useState({
-    modelId: models[0]?.id ?? '',
+    modelId: '',
     dataset: 'Synapse Eval v2',
     testDate: new Date().toISOString().slice(0, 10),
     accuracy: 89,
@@ -38,12 +38,38 @@ export default function OwnerBenchmarks() {
     throughputRps: 40,
   })
 
+  useEffect(() => {
+    let active = true
+    async function load() {
+      try {
+        const [modelsData, bmData] = await Promise.all([
+          modelService.getOwnerModels(),
+          modelService.getOwnerBenchmarks(),
+        ])
+        if (active) {
+          setModels(modelsData)
+          setRows(bmData)
+          if (modelsData.length > 0) {
+            setNewResult((prev) => ({ ...prev, modelId: modelsData[0].id }))
+          }
+        }
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
+
   const latest = useMemo(() => rows[0], [rows])
 
-  const addBenchmarkResult = () => {
-    const result: BenchmarkResult = {
-      id: `bm-${Date.now()}`,
-      modelId: newResult.modelId,
+  const addBenchmarkResult = async () => {
+    setIsSubmitting(true)
+    setSaved(null)
+    const resultPayload: Partial<BenchmarkResult> = {
+      modelId: newResult.modelId || models[0]?.id,
       dataset: newResult.dataset,
       testDate: newResult.testDate,
       accuracy: Number(newResult.accuracy),
@@ -53,10 +79,25 @@ export default function OwnerBenchmarks() {
       latencyMs: Number(newResult.latencyMs),
       throughputRps: Number(newResult.throughputRps),
     }
-    const updated = [result, ...rows]
-    setRows(updated)
-    saveOwnerBenchmarks(updated)
-    setSaved(true)
+    try {
+      const added = await modelService.addOwnerBenchmark(resultPayload)
+      setRows((prev) => [added, ...prev])
+      setSaved(`Benchmark for "${added.dataset}" logged successfully!`)
+    } catch {
+      setSaved('Failed to add benchmark to backend.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <SectionCard title='Benchmark Results' subtitle='Loading benchmarks...'>
+        <Stack alignItems='center' sx={{ py: 4 }}>
+          <CircularProgress size={32} />
+        </Stack>
+      </SectionCard>
+    )
   }
 
   return (
@@ -114,118 +155,124 @@ export default function OwnerBenchmarks() {
         </TableContainer>
       </SectionCard>
 
-      <SectionCard title='Add Benchmark Result' subtitle='Mock/local entry only'>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
-          <TextField
-            fullWidth
-            select
-            label='Model'
-            value={newResult.modelId}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, modelId: event.target.value })
-            }}
+      <SectionCard
+        title='Add Benchmark Result'
+        subtitle='Submit a new benchmark dataset evaluation'
+      >
+        <Stack spacing={1.5}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+            <TextField
+              fullWidth
+              select
+              label='Model'
+              value={newResult.modelId}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, modelId: event.target.value })
+              }}
+            >
+              {models.map((model) => (
+                <MenuItem key={model.id} value={model.id}>
+                  {model.name}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              fullWidth
+              label='Benchmark dataset'
+              value={newResult.dataset}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, dataset: event.target.value })
+              }}
+            />
+          </Stack>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+            <TextField
+              fullWidth
+              type='date'
+              label='Test date'
+              value={newResult.testDate}
+              InputLabelProps={{ shrink: true }}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, testDate: event.target.value })
+              }}
+            />
+            <TextField
+              fullWidth
+              type='number'
+              label='Accuracy (%)'
+              value={newResult.accuracy}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, accuracy: Number(event.target.value) })
+              }}
+            />
+            <TextField
+              fullWidth
+              type='number'
+              label='Precision (%)'
+              value={newResult.precision}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, precision: Number(event.target.value) })
+              }}
+            />
+          </Stack>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
+            <TextField
+              fullWidth
+              type='number'
+              label='Recall (%)'
+              value={newResult.recall}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, recall: Number(event.target.value) })
+              }}
+            />
+            <TextField
+              fullWidth
+              type='number'
+              label='F1 score (%)'
+              value={newResult.f1Score}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, f1Score: Number(event.target.value) })
+              }}
+            />
+            <TextField
+              fullWidth
+              type='number'
+              label='Latency (ms)'
+              value={newResult.latencyMs}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, latencyMs: Number(event.target.value) })
+              }}
+            />
+            <TextField
+              fullWidth
+              type='number'
+              label='Throughput (rps)'
+              value={newResult.throughputRps}
+              onChange={(event) => {
+                setSaved(null)
+                setNewResult({ ...newResult, throughputRps: Number(event.target.value) })
+              }}
+            />
+          </Stack>
+          <Button
+            variant='contained'
+            disabled={isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={16} color='inherit' /> : <AddIcon />}
+            sx={{ alignSelf: 'flex-start' }}
+            onClick={addBenchmarkResult}
           >
-            {models.map((model) => (
-              <MenuItem key={model.id} value={model.id}>
-                {model.name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            fullWidth
-            label='Benchmark dataset'
-            value={newResult.dataset}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, dataset: event.target.value })
-            }}
-          />
+            Add Benchmark Result
+          </Button>
+          {saved && <Alert severity='success'>{saved}</Alert>}
         </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
-          <TextField
-            fullWidth
-            type='date'
-            label='Test date'
-            value={newResult.testDate}
-            InputLabelProps={{ shrink: true }}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, testDate: event.target.value })
-            }}
-          />
-          <TextField
-            fullWidth
-            type='number'
-            label='Accuracy'
-            value={newResult.accuracy}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, accuracy: Number(event.target.value) })
-            }}
-          />
-          <TextField
-            fullWidth
-            type='number'
-            label='Precision'
-            value={newResult.precision}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, precision: Number(event.target.value) })
-            }}
-          />
-        </Stack>
-        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25}>
-          <TextField
-            fullWidth
-            type='number'
-            label='Recall'
-            value={newResult.recall}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, recall: Number(event.target.value) })
-            }}
-          />
-          <TextField
-            fullWidth
-            type='number'
-            label='F1 score'
-            value={newResult.f1Score}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, f1Score: Number(event.target.value) })
-            }}
-          />
-          <TextField
-            fullWidth
-            type='number'
-            label='Latency (ms)'
-            value={newResult.latencyMs}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, latencyMs: Number(event.target.value) })
-            }}
-          />
-          <TextField
-            fullWidth
-            type='number'
-            label='Throughput (rps)'
-            value={newResult.throughputRps}
-            onChange={(event) => {
-              setSaved(false)
-              setNewResult({ ...newResult, throughputRps: Number(event.target.value) })
-            }}
-          />
-        </Stack>
-        <Button
-          variant='contained'
-          startIcon={<AddIcon />}
-          sx={{ alignSelf: 'flex-start' }}
-          onClick={addBenchmarkResult}
-        >
-          Add Benchmark Result
-        </Button>
-        {saved && <Alert severity='success'>Benchmark result added to local mock state.</Alert>}
       </SectionCard>
     </Stack>
   )

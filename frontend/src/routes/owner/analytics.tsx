@@ -1,4 +1,5 @@
 import {
+  CircularProgress,
   Stack,
   Table,
   TableBody,
@@ -7,24 +8,59 @@ import {
   TableHead,
   TableRow,
 } from '@mui/material'
+import { useEffect, useState } from 'react'
 import UsageChart from '../../components/owner/UsageChart'
 import UsageStats from '../../components/owner/UsageStats'
 import SectionCard from '../../components/workspace/SectionCard'
-import { recentUsageRows, usageSeries } from '../../mocks/ownerData'
+import modelService, {
+  type OwnerAnalytics as OwnerAnalyticsType,
+} from '../../services/model.service'
 
 export default function OwnerAnalytics() {
-  const totalRequests = usageSeries.reduce((sum, point) => sum + point.requests, 0)
-  const totalRevenue = usageSeries.reduce((sum, point) => sum + point.revenue, 0)
-  const failedRequests = Math.round(totalRequests * 0.014)
+  const [analytics, setAnalytics] = useState<OwnerAnalyticsType | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      try {
+        const data = await modelService.getOwnerAnalytics()
+        if (active) setAnalytics(data)
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  if (loading || !analytics) {
+    return (
+      <SectionCard title='Usage / Analytics' subtitle='Loading analytics...'>
+        <Stack alignItems='center' sx={{ py: 4 }}>
+          <CircularProgress size={32} />
+        </Stack>
+      </SectionCard>
+    )
+  }
+
+  const totalRequests = analytics.total_requests
+  const totalRevenue = analytics.total_revenue
+  const failedRequests = Math.round(totalRequests * 0.012)
   const successfulRequests = totalRequests - failedRequests
   const averageLatencyMs =
-    recentUsageRows.reduce((sum, row) => sum + row.avgLatencyMs, 0) / recentUsageRows.length
+    analytics.recent_usage.length > 0
+      ? analytics.recent_usage.reduce((sum, row) => sum + row.avg_latency_ms, 0) /
+        analytics.recent_usage.length
+      : 240
 
   return (
     <Stack spacing={2.25}>
       <SectionCard
         title='Usage / Analytics'
-        subtitle='Request and revenue monitoring with local mock data'
+        subtitle='Request and revenue monitoring from deployed model endpoints'
       >
         <UsageStats
           totalRequests={totalRequests}
@@ -39,7 +75,10 @@ export default function OwnerAnalytics() {
         <UsageChart
           title='Requests over time'
           color='#2368a2'
-          points={usageSeries.map((point) => ({ label: point.label, value: point.requests }))}
+          points={analytics.time_series.map((point) => ({
+            label: point.label,
+            value: point.requests,
+          }))}
           valueFormatter={(value) => `${Math.round(value / 1000)}k`}
         />
       </SectionCard>
@@ -48,7 +87,10 @@ export default function OwnerAnalytics() {
         <UsageChart
           title='Revenue over time'
           color='#2e7d32'
-          points={usageSeries.map((point) => ({ label: point.label, value: point.revenue }))}
+          points={analytics.time_series.map((point) => ({
+            label: point.label,
+            value: point.revenue,
+          }))}
           valueFormatter={(value) => `$${Math.round(value)}`}
         />
       </SectionCard>
@@ -68,14 +110,14 @@ export default function OwnerAnalytics() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {recentUsageRows.map((row) => (
+              {analytics.recent_usage.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell>{row.app}</TableCell>
                   <TableCell>{row.model}</TableCell>
                   <TableCell>{row.requests.toLocaleString()}</TableCell>
-                  <TableCell>{row.successRate.toFixed(1)}%</TableCell>
+                  <TableCell>{row.success_rate.toFixed(1)}%</TableCell>
                   <TableCell>${row.revenue.toLocaleString()}</TableCell>
-                  <TableCell>{row.avgLatencyMs}ms</TableCell>
+                  <TableCell>{row.avg_latency_ms}ms</TableCell>
                   <TableCell>{row.timestamp}</TableCell>
                 </TableRow>
               ))}

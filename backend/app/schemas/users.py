@@ -24,6 +24,8 @@ class PrivateUserBase(UserBase):
     is_superuser: bool | None = None
     provider: str | None = None
     roles: list[str] = Field(default_factory=lambda: ["developer"])
+    organization: str | None = None
+    hf_token: str | None = None
 
 
 class UserUpdate(UserBase):
@@ -36,6 +38,8 @@ class UserUpdate(UserBase):
     is_active: bool | None = None
     is_superuser: bool | None = None
     roles: list[str] | None = None
+    organization: str | None = None
+    hf_token: str | None = None
 
 
 class User(PrivateUserBase):

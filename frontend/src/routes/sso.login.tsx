@@ -1,7 +1,7 @@
 import { CircularProgress, Container, Typography } from '@mui/material'
 import { AxiosError } from 'axios'
 import { useEffect } from 'react'
-import { LoaderFunctionArgs, useNavigate } from 'react-router'
+import { LoaderFunctionArgs, useNavigate, useSearchParams } from 'react-router'
 import { useAuth } from '../contexts/auth'
 import { useSnackBar } from '../contexts/snackbar'
 import authService from '../services/auth.service'
@@ -32,6 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
  */
 export default function SSOLogin() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { showSnackBar } = useSnackBar()
   const { setUser } = useAuth()
 
@@ -39,7 +40,11 @@ export default function SSOLogin() {
     let isMounted = true
 
     async function processSSOLogin() {
-      const token = localStorage.getItem('token')
+      const queryToken = searchParams.get('token')
+      if (queryToken) {
+        localStorage.setItem('token', queryToken)
+      }
+      const token = queryToken || localStorage.getItem('token')
       if (!token) {
         // Try one more refresh attempt
         try {
