@@ -14,6 +14,8 @@ from ..schemas.models import (
     DeploymentOut,
     HFModelRecord,
     HFSearchQuery,
+    HFSyncRequest,
+    HFSyncResponse,
     ModelOut,
     OwnerInfo,
     PlaygroundRequest,
@@ -354,3 +356,26 @@ async def search_hf_for_developers(
         sort=query.sort or "downloads",
         token=current_user.hf_token,
     )
+
+
+@router.post("/hf/sync", response_model=HFSyncResponse)
+async def sync_hf_for_developers(
+    payload: HFSyncRequest,
+    current_user: User = Depends(require_developer),
+) -> HFSyncResponse:
+    token = payload.hf_token or current_user.hf_token
+    total, created, updated = await hf_service.sync_hf_models_to_db(
+        limit=payload.limit,
+        sort=payload.sort,
+        task=payload.task,
+        owner_id=current_user.uuid,
+        token=token,
+    )
+    return HFSyncResponse(
+        status="success",
+        total_synced=total,
+        created_count=created,
+        updated_count=updated,
+        message=f"Successfully synced {total} models from Hugging Face Hub ({created} created, {updated} updated).",
+    )
+

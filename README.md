@@ -78,7 +78,7 @@ VITE_PWD_SIGNUP_ENABLED=true
 
 ## How to Run Locally
 
-### Option A: Running Frontend & Backend Individually (Recommended for Dev)
+### Option A: Running Frontend & Backend Individually 
 
 #### 1. Backend
 
@@ -110,7 +110,7 @@ npm run dev
 
 ---
 
-### Option B: Running with Docker Compose
+### Option B: Running with Docker Compose (Recommended for Dev)
 
 Start the full stack (Frontend, Backend, MongoDB, Traefik):
 
@@ -209,3 +209,5 @@ uv run black app tests
 # Type check with Mypy
 uv run mypy
 ```
+
+---

@@ -41,5 +41,10 @@ class Settings(BaseSettings):
     SSO_CALLBACK_HOSTNAME: str | None = None
     SSO_LOGIN_CALLBACK_URL: str | None = None
 
+    # Hugging Face configuration
+    HF_TOKEN: str | None = None
+    HF_AUTO_SYNC_ON_STARTUP: bool = True
+    HF_SYNC_MODEL_LIMIT: int = 50
+
 
 settings = Settings()  # type: ignore

@@ -112,7 +112,18 @@ async def test_owner_crud_and_benchmarks(client: AsyncClient) -> None:
     assert "name" in import_details
     assert import_details["hugging_face_id"] == "meta-llama/Llama-3.1-8B-Instruct"
 
-    # 9. Delete model
+    # 9. HF Sync
+    r = await client.post(
+        f"{settings.API_V1_STR}/owner/hf/sync",
+        json={"limit": 50, "sort": "downloads"},
+        headers=headers,
+    )
+    assert r.status_code == 200
+    sync_res = r.json()
+    assert sync_res["status"] == "success"
+    assert sync_res["total_synced"] >= 50
+
+    # 10. Delete model
     r = await client.delete(
         f"{settings.API_V1_STR}/owner/models/{model_slug}", headers=headers
     )

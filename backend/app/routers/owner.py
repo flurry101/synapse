@@ -14,6 +14,8 @@ from ..schemas.models import (
     HFImportRequest,
     HFModelRecord,
     HFSearchQuery,
+    HFSyncRequest,
+    HFSyncResponse,
     ModelCreate,
     ModelOut,
     ModelPricingUpdate,
@@ -440,3 +442,26 @@ async def import_hf_model(
     token = payload.hf_token or current_user.hf_token
     details = await hf_service.get_hf_model_details(payload.repo_id, token=token)
     return details
+
+
+@router.post("/hf/sync", response_model=HFSyncResponse)
+async def sync_hf_models_endpoint(
+    payload: HFSyncRequest,
+    current_user: User = Depends(require_owner),
+) -> HFSyncResponse:
+    token = payload.hf_token or current_user.hf_token
+    total, created, updated = await hf_service.sync_hf_models_to_db(
+        limit=payload.limit,
+        sort=payload.sort,
+        task=payload.task,
+        owner_id=current_user.uuid,
+        token=token,
+    )
+    return HFSyncResponse(
+        status="success",
+        total_synced=total,
+        created_count=created,
+        updated_count=updated,
+        message=f"Successfully synced {total} models from Hugging Face Hub ({created} created, {updated} updated).",
+    )
+

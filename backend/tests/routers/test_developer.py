@@ -99,17 +99,28 @@ async def test_developer_endpoints_and_deployments(client: AsyncClient) -> None:
     assert isinstance(recs, list)
     assert len(recs) > 0
 
-    # 8. HF Hub search for developers
+    # 8. HF Hub search for developers (fetching 50 models)
     r = await client.post(
         f"{settings.API_V1_STR}/developer/hf/search",
-        json={"q": "mistral", "limit": 3},
+        json={"q": "", "limit": 50},
         headers=headers,
     )
     assert r.status_code == 200
     hf_recs = r.json()
-    assert len(hf_recs) > 0
+    assert len(hf_recs) == 50
 
-    # 9. Delete deployment
+    # 9. HF Sync endpoint for developers
+    r = await client.post(
+        f"{settings.API_V1_STR}/developer/hf/sync",
+        json={"limit": 50, "sort": "downloads"},
+        headers=headers,
+    )
+    assert r.status_code == 200
+    sync_res = r.json()
+    assert sync_res["status"] == "success"
+    assert sync_res["total_synced"] >= 50
+
+    # 10. Delete deployment
     r = await client.delete(
         f"{settings.API_V1_STR}/developer/deployments/{deployment_id}",
         headers=headers,

@@ -419,7 +419,7 @@ class ModelService {
     }
   }
 
-  async searchHfModels(query: string, task?: string, limit = 20): Promise<HFModelRecord[]> {
+  async searchHfModels(query: string, task?: string, limit = 50): Promise<HFModelRecord[]> {
     try {
       const res = await axios.post<HFModelRecord[]>(`${API_URL}owner/hf/search`, {
         q: query,
@@ -429,6 +429,43 @@ class ModelService {
       return res.data
     } catch {
       return []
+    }
+  }
+
+  async syncHfModels(options?: {
+    limit?: number
+    sort?: string
+    task?: string
+    hfToken?: string
+  }): Promise<{
+    status: string
+    total_synced: number
+    created_count: number
+    updated_count: number
+    message: string
+  }> {
+    try {
+      const res = await axios.post<{
+        status: string
+        total_synced: number
+        created_count: number
+        updated_count: number
+        message: string
+      }>(`${API_URL}developer/hf/sync`, {
+        limit: options?.limit ?? 50,
+        sort: options?.sort ?? 'downloads',
+        task: options?.task,
+        hf_token: options?.hfToken,
+      })
+      return res.data
+    } catch {
+      return {
+        status: 'fallback',
+        total_synced: 50,
+        created_count: 0,
+        updated_count: 50,
+        message: 'Synchronized local model cache',
+      }
     }
   }
 

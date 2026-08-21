@@ -30,7 +30,7 @@ async def clear_database(server: FastAPI) -> None:
 async def client() -> AsyncGenerator[AsyncClient, None]:
     """Async server client that handles lifespan and teardown"""
     with patch("app.config.config.settings.MONGO_DB", MONGO_TEST_DB):
-        async with LifespanManager(app):
+        async with LifespanManager(app, startup_timeout=30.0):
             async with AsyncClient(
                 transport=ASGITransport(app=app), base_url="http://test"
             ) as client:

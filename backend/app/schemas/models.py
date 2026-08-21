@@ -166,7 +166,7 @@ class DeploymentOut(BaseModel):
 class HFSearchQuery(BaseModel):
     q: str = ""
     task: str | None = None
-    limit: int = 20
+    limit: int = 50
     sort: str | None = "downloads"
 
 
@@ -182,12 +182,27 @@ class HFModelRecord(BaseModel):
     parameters: str = "Unknown"
     context_window: str = "128K"
     description: str = ""
-    is_gated: bool = False
+    is_gated: bool | str = False
 
 
 class HFImportRequest(BaseModel):
     repo_id: str
     hf_token: str | None = None
+
+
+class HFSyncRequest(BaseModel):
+    limit: int = 50
+    sort: str = "downloads"
+    task: str | None = None
+    hf_token: str | None = None
+
+
+class HFSyncResponse(BaseModel):
+    status: str = "success"
+    total_synced: int
+    created_count: int
+    updated_count: int
+    message: str
 
 
 # -------------------------------------------------------------
