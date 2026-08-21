@@ -45,6 +45,15 @@ export default function TopMenuBar() {
           </Link>
         </Typography>
 
+        <Box aria-label='workspace links' sx={{ display: { xs: 'none', md: 'flex' }, gap: 0.5, mr: 1 }}>
+          <Button component={NavLink} to='/developer' sx={{ color: '#d1d5db', fontWeight: 700 }}>
+            Developer
+          </Button>
+          <Button component={NavLink} to='/owner' sx={{ color: '#d1d5db', fontWeight: 700 }}>
+            Model Owner
+          </Button>
+        </Box>
+
         {user === undefined && (
           <Box aria-label='button group'>
             <Button component={NavLink} to='/login' sx={{ color: '#d1d5db', fontWeight: 700 }}>
