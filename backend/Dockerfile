@@ -20,21 +20,20 @@ ENV UV_COMPILE_BYTECODE=1
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_LINK_MODE=copy
 
-# Install dependencies
+# Install dependencies from the committed lockfile.
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
+COPY uv.lock pyproject.toml ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-install-project
 
 # Copy the project into the image
-ADD pyproject.toml README.md ./
+ADD README.md ./
 ADD app /app/app
 
 # Sync the project
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync
+    uv sync --frozen
 
 # default cmd: run fastapi with 4 workers
 CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
