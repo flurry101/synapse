@@ -10,7 +10,8 @@ import { AxiosError } from 'axios'
 
 export async function loader() {
   try {
-    await authService.refreshToken()
+    const response = await authService.refreshToken()
+    localStorage.setItem('token', response.access_token)
     return null
   } catch {
     return redirect('/')
