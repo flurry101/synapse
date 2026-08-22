@@ -24,6 +24,13 @@ type OwnerModelCardProps = {
   onStatusChange?: (modelId: string, status: OwnerModelStatus) => void | Promise<void>
 }
 
+export default function OwnerModelCard({
+  model,
+  onView,
+  onEdit,
+  onDelete,
+  onStatusChange,
+}: OwnerModelCardProps) {
   const isPublished = model.status === 'Published'
   const [confirmOpen, setConfirmOpen] = useState(false)
 
@@ -119,6 +126,24 @@ type OwnerModelCardProps = {
         >
           Edit Model
         </Button>
+        {onStatusChange && (
+          <Button
+            variant='outlined'
+            onClick={() => onStatusChange(model.id, isPublished ? 'Draft' : 'Published')}
+            sx={{
+              color: isPublished ? '#fde047' : '#4ade80',
+              borderColor: isPublished ? 'rgba(253, 224, 71, 0.3)' : 'rgba(74, 222, 128, 0.3)',
+              fontWeight: 700,
+              borderRadius: 2,
+              '&:hover': {
+                borderColor: isPublished ? '#fde047' : '#4ade80',
+                bgcolor: isPublished ? 'rgba(253, 224, 71, 0.1)' : 'rgba(74, 222, 128, 0.1)',
+              },
+            }}
+          >
+            {isPublished ? 'Unpublish' : 'Publish'}
+          </Button>
+        )}
         <Button
           variant='outlined'
           startIcon={<DeleteOutlineIcon />}

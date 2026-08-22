@@ -127,6 +127,7 @@ interface RawBackendModel {
   requests?: number
   revenue?: number
   downloads?: number
+  likes?: number
   status?: OwnerModel['status']
   owner_name?: string
   owner_email?: string
