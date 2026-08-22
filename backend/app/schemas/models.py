@@ -166,6 +166,9 @@ class DeploymentOut(BaseModel):
 class HFSearchQuery(BaseModel):
     q: str = ""
     task: str | None = None
+    category: str | None = None
+    parameters: str | None = None
+    license: str | None = None
     limit: int = 50
     sort: str | None = "downloads"
 
@@ -177,12 +180,35 @@ class HFModelRecord(BaseModel):
     downloads: int = 0
     likes: int = 0
     task: str = ""
+    category: str = "Natural Language Processing"
     tags: list[str] = Field(default_factory=list)
     license: str = "apache-2.0"
     parameters: str = "Unknown"
     context_window: str = "128K"
     description: str = ""
     is_gated: bool | str = False
+    price_per_m_input: float = 0.15
+    price_per_m_output: float = 0.60
+    trust_score: float = 90.0
+    accuracy: float = 88.0
+    latency_ms: int = 220
+    benchmark_results: dict[str, Any] = Field(default_factory=dict)
+
+
+class DeploymentQuickstartSpecs(BaseModel):
+    model_id: str
+    model_name: str
+    author: str
+    endpoint_url: str
+    direct_deploy_url: str
+    chat_ui_url: str
+    curl_snippet: str
+    quickstart_python: str
+    vision_python: str
+    pi_models_json: str
+    pi_zsh_command: str
+    specs: dict[str, str]
+    rate_limit_info: dict[str, Any]
 
 
 class HFImportRequest(BaseModel):
@@ -275,3 +301,17 @@ class OwnerAnalyticsOut(BaseModel):
     active_models_count: int
     time_series: list[dict[str, Any]]
     recent_usage: list[UsageRow]
+
+
+class VerifyModelRequest(BaseModel):
+    hugging_face_id: str | None = None
+    repo_url: str | None = None
+    hf_token: str | None = None
+
+
+class VerifyModelResponse(BaseModel):
+    verified: bool
+    hf_verified: bool
+    repo_verified: bool
+    message: str
+    details: dict[str, Any] = Field(default_factory=dict)

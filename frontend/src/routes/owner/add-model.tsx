@@ -1,6 +1,9 @@
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import PublishIcon from '@mui/icons-material/Publish'
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser'
 import {
   Alert,
   Box,
@@ -24,12 +27,20 @@ export default function OwnerAddModel() {
   const [submitted, setSubmitted] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isVerified, setIsVerified] = useState(false)
+  const [verificationFeedback, setVerificationFeedback] = useState<{
+    verified: boolean
+    message: string
+  } | null>(null)
   const [hfSearchInput, setHfSearchInput] = useState('')
   const [importStatus, setImportStatus] = useState<string | null>(null)
 
   const [form, setForm] = useState({
     modelName: '',
     huggingFaceId: '',
+    repoUrl: '',
+    hfToken: '',
     description: '',
     task: ownerTaskOptions[0],
     version: '1.0.0',
@@ -40,6 +51,30 @@ export default function OwnerAddModel() {
     monthlyPrice: '',
     currency: 'USD' as 'USD' | 'EUR' | 'INR',
   })
+
+  const handleVerify = async () => {
+    setIsVerifying(true)
+    setVerificationFeedback(null)
+    try {
+      const res = await modelService.verifyModel({
+        hugging_face_id: form.huggingFaceId.trim(),
+        repo_url: form.repoUrl.trim(),
+        hf_token: form.hfToken.trim() || undefined,
+      })
+      setIsVerified(res.verified)
+      setVerificationFeedback({
+        verified: res.verified,
+        message: res.message,
+      })
+    } catch {
+      setVerificationFeedback({
+        verified: false,
+        message: 'Verification check failed. Please verify your network and credentials.',
+      })
+    } finally {
+      setIsVerifying(false)
+    }
+  }
 
   const handleImportHf = async () => {
     const targetRepo = hfSearchInput.trim() || form.huggingFaceId.trim()
@@ -64,7 +99,12 @@ export default function OwnerAddModel() {
           pricePerRequest: details.price_per_request ?? prev.pricePerRequest,
           pricePer1kTokens: details.price_per_1k_tokens ?? prev.pricePer1kTokens,
         }))
-        setImportStatus(`Successfully populated metadata from Hugging Face repo '${targetRepo}'.`)
+        setIsVerified(true)
+        setVerificationFeedback({
+          verified: true,
+          message: `Hugging Face repository "${targetRepo}" verified directly with Hugging Face Hub.`,
+        })
+        setImportStatus(`Successfully populated metadata and verified repo '${targetRepo}'.`)
       } else {
         setImportStatus(
           'Could not fetch metadata from Hugging Face. Please fill in details manually.',
@@ -78,6 +118,15 @@ export default function OwnerAddModel() {
   }
 
   const saveModel = async (status: OwnerModel['status']) => {
+    if (status === 'Published' && !isVerified) {
+      setVerificationFeedback({
+        verified: false,
+        message:
+          'Publication blocked: You must verify your Hugging Face model ID or Open-Weights repository (GitHub/GitLab) before publishing.',
+      })
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitted(null)
     const slug =
@@ -98,8 +147,8 @@ export default function OwnerAddModel() {
         .split(',')
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0),
-      trustScore: status === 'Published' ? 90 : 80,
-      status,
+      trustScore: isVerified ? 95 : 80,
+      status: isVerified && status === 'Published' ? 'Published' : 'Draft',
       pricing: {
         pricePerRequest: Number(form.pricePerRequest),
         pricePer1kTokens: Number(form.pricePer1kTokens),
@@ -111,9 +160,9 @@ export default function OwnerAddModel() {
     try {
       const created = await modelService.createOwnerModel(modelPayload)
       setSubmitted(
-        status === 'Published'
-          ? `Model "${created.name}" published successfully!`
-          : `Draft "${created.name}" saved successfully!`,
+        created.status === 'Published'
+          ? `Model "${created.name}" verified and published successfully to the hub!`
+          : `Draft "${created.name}" saved successfully! (Verification required before public listing)`,
       )
     } catch {
       setSubmitted('Failed to save model to backend.')
@@ -194,17 +243,124 @@ export default function OwnerAddModel() {
 
         <Divider sx={{ borderColor: '#1e293b' }} />
 
+        {/* Verification & Source Authenticity Section */}
+        <Box
+          sx={{
+            p: 2.5,
+            bgcolor: isVerified ? 'rgba(74, 222, 128, 0.05)' : '#0a0e17',
+            borderRadius: 3,
+            border: '1px solid',
+            borderColor: isVerified ? 'rgba(74, 222, 128, 0.4)' : '#1e293b',
+          }}
+        >
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            justifyContent='space-between'
+            alignItems={{ xs: 'flex-start', sm: 'center' }}
+            spacing={1.5}
+            sx={{ mb: 2 }}
+          >
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <VerifiedUserIcon sx={{ color: isVerified ? '#4ade80' : '#fb7185' }} />
+              <Typography variant='subtitle1' fontWeight={800} color='#f8fafc'>
+                Model Source & Verification Guard
+              </Typography>
+            </Stack>
+            <Chip
+              icon={isVerified ? <CheckCircleIcon /> : <ErrorOutlineIcon />}
+              label={isVerified ? 'Verified Authenticity' : 'Unverified (Draft Only)'}
+              color={isVerified ? 'success' : 'default'}
+              sx={{ fontWeight: 800 }}
+            />
+          </Stack>
+
+          <Typography variant='body2' sx={{ color: '#94a3b8', mb: 2 }}>
+            Synapse Public Model Hub requires verified ownership of the Hugging Face repository or an active Open Source repository (GitHub or GitLab) before listing models for developer use.
+          </Typography>
+
+          <Stack spacing={2}>
+            <TextField
+              fullWidth
+              label='Hugging Face Model ID'
+              placeholder='e.g. meta-llama/Llama-3.1-8B-Instruct or Qwen/Qwen3.8-27B'
+              value={form.huggingFaceId}
+              onChange={(event) => {
+                setForm({ ...form, huggingFaceId: event.target.value })
+                setIsVerified(false)
+              }}
+            />
+            <TextField
+              fullWidth
+              label='Open-Weights Repository (GitHub / GitLab URL)'
+              placeholder='e.g. https://github.com/meta-llama/llama3 or https://gitlab.com/...'
+              value={form.repoUrl}
+              onChange={(event) => {
+                setForm({ ...form, repoUrl: event.target.value })
+                setIsVerified(false)
+              }}
+            />
+            <TextField
+              fullWidth
+              type='password'
+              label='Optional Hugging Face Token (for private / gated repositories)'
+              placeholder='hf_••••••••••••••••••••'
+              value={form.hfToken}
+              onChange={(event) => setForm({ ...form, hfToken: event.target.value })}
+            />
+
+            <Button
+              variant='contained'
+              disabled={isVerifying || (!form.huggingFaceId.trim() && !form.repoUrl.trim())}
+              startIcon={
+                isVerifying ? (
+                  <CircularProgress size={16} color='inherit' />
+                ) : (
+                  <VerifiedUserIcon />
+                )
+              }
+              onClick={handleVerify}
+              sx={{
+                alignSelf: 'flex-start',
+                bgcolor: isVerified ? '#4ade80' : '#fb7185',
+                color: isVerified ? '#052e16' : '#0f172a',
+                fontWeight: 800,
+                borderRadius: 2,
+                px: 2.5,
+                '&:hover': { bgcolor: isVerified ? '#22c55e' : '#f43f5e' },
+              }}
+            >
+              {isVerifying ? 'Verifying with Registries...' : 'Verify Model Ownership'}
+            </Button>
+          </Stack>
+
+          {verificationFeedback && (
+            <Alert
+              severity={verificationFeedback.verified ? 'success' : 'warning'}
+              sx={{
+                mt: 2,
+                bgcolor: verificationFeedback.verified
+                  ? 'rgba(74, 222, 128, 0.15)'
+                  : 'rgba(253, 224, 71, 0.15)',
+                color: verificationFeedback.verified ? '#86efac' : '#fde047',
+                border: `1px solid ${
+                  verificationFeedback.verified
+                    ? 'rgba(74, 222, 128, 0.3)'
+                    : 'rgba(253, 224, 71, 0.3)'
+                }`,
+              }}
+            >
+              {verificationFeedback.message}
+            </Alert>
+          )}
+        </Box>
+
+        <Divider sx={{ borderColor: '#1e293b' }} />
+
         <TextField
-          label='Model Name'
+          label='Model Display Name'
           placeholder='e.g. Neuron Dialogue 3'
           value={form.modelName}
           onChange={(event) => setForm({ ...form, modelName: event.target.value })}
-        />
-        <TextField
-          label='Hugging Face Model ID'
-          placeholder='org/model-name'
-          value={form.huggingFaceId}
-          onChange={(event) => setForm({ ...form, huggingFaceId: event.target.value })}
         />
         <TextField
           label='Description'
@@ -311,7 +467,7 @@ export default function OwnerAddModel() {
           </Stack>
         </Box>
 
-        <Stack direction='row' spacing={1.5} sx={{ mt: 1 }}>
+        <Stack direction='row' spacing={1.5} sx={{ mt: 1 }} useFlexGap flexWrap='wrap'>
           <Button
             variant='outlined'
             disabled={isSubmitting}
@@ -329,7 +485,7 @@ export default function OwnerAddModel() {
           </Button>
           <Button
             variant='contained'
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isVerified}
             startIcon={<PublishIcon />}
             onClick={() => saveModel('Published')}
             sx={{
@@ -338,9 +494,10 @@ export default function OwnerAddModel() {
               fontWeight: 800,
               borderRadius: 2,
               '&:hover': { bgcolor: '#f43f5e' },
+              '&:disabled': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: '#64748b' },
             }}
           >
-            Publish to Hub
+            {isVerified ? 'Publish to Hub' : 'Verification Required to Publish'}
           </Button>
           <Button
             variant='text'

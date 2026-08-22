@@ -24,9 +24,7 @@ type PlaygroundProps = {
 
 export default function Playground({ models, defaultInput, initialModelId }: PlaygroundProps) {
   const [selectedModelId, setSelectedModelId] = useState(
-    initialModelId && models.some((m) => m.id === initialModelId)
-      ? initialModelId
-      : (models[0]?.id ?? ''),
+    initialModelId || (models[0]?.huggingFaceId || models[0]?.id || 'meta-llama/Llama-3.1-8B-Instruct'),
   )
   const [input, setInput] = useState(defaultInput)
   const [temperature, setTemperature] = useState<number>(0.7)
@@ -60,6 +58,8 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
     setError(null)
   }
 
+  const isCustomModel = selectedModelId && !models.some((m) => m.id === selectedModelId || m.huggingFaceId === selectedModelId)
+
   return (
     <Stack spacing={2.5}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -70,11 +70,19 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
           value={selectedModelId}
           onChange={(event) => setSelectedModelId(event.target.value)}
         >
-          {models.map((model) => (
-            <MenuItem key={model.id} value={model.id}>
-              {model.name} ({model.task})
+          {isCustomModel && (
+            <MenuItem key={selectedModelId} value={selectedModelId}>
+              {selectedModelId} (Hugging Face)
             </MenuItem>
-          ))}
+          )}
+          {models.map((model) => {
+            const val = model.huggingFaceId || model.id
+            return (
+              <MenuItem key={val} value={val}>
+                {model.name} ({val}) · {model.task}
+              </MenuItem>
+            )
+          })}
         </TextField>
         <TextField
           type='number'
@@ -129,6 +137,21 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
           }}
         >
           Clear
+        </Button>
+        <Button
+          component='a'
+          href={`https://huggingface.co/spaces?q=${encodeURIComponent(selectedModelId)}`}
+          target='_blank'
+          rel='noopener noreferrer'
+          variant='outlined'
+          sx={{
+            color: '#c084fc',
+            borderColor: 'rgba(192, 132, 252, 0.3)',
+            fontWeight: 700,
+            '&:hover': { borderColor: '#c084fc', bgcolor: 'rgba(192, 132, 252, 0.08)' },
+          }}
+        >
+          Explore Spaces for Model ↗
         </Button>
       </Stack>
 

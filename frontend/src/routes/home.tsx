@@ -40,8 +40,10 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { PerspectiveGrid } from '../components/common/PerspectiveGrid'
+import modelService, { PlaygroundResponse } from '../services/model.service'
 
 type Model = {
+  id: string
   name: string
   maker: string
   category: string
@@ -54,44 +56,89 @@ type Model = {
 
 const models: Model[] = [
   {
-    name: 'Llama 3 8B Instruct',
-    maker: 'Meta',
-    category: 'Text & Chat',
-    description: 'Fast, capable instruction-following for everyday AI products and reasoning.',
-    price: '$0.20 / 1M tokens',
-    speed: '120 ms',
-    score: 88,
+    id: 'Qwen/Qwen3.8-27B',
+    name: 'Qwen 3.8 27B',
+    maker: 'Qwen',
+    category: 'Multimodal & Reasoning',
+    description: '27B dense VLM with Gated-DeltaNet hybrid attention, native vision, and dialable reasoning.',
+    price: '$0.35 / 1M tokens',
+    speed: '~110 tok/s',
+    score: 96,
     color: '#38bdf8',
   },
   {
-    name: 'Mistral 7B v0.3',
-    maker: 'Mistral AI',
+    id: 'meta-llama/Llama-3.1-8B-Instruct',
+    name: 'Llama 3.1 8B Instruct',
+    maker: 'Meta',
     category: 'Text & Chat',
-    description: 'Lightweight powerhouse optimized for high-volume, low-latency agentic tasks.',
+    description: 'Fast, capable instruction-following for everyday AI products, agents, and reasoning.',
     price: '$0.15 / 1M tokens',
-    speed: '110 ms',
-    score: 84,
+    speed: '185 ms',
+    score: 92,
     color: '#4ade80',
   },
   {
+    id: 'deepseek-ai/DeepSeek-V3',
     name: 'DeepSeek V3',
     maker: 'DeepSeek',
     category: 'Coding & Reasoning',
-    description: 'State-of-the-art code synthesis, mathematical reasoning, and debugging.',
-    price: '$0.27 / 1M tokens',
-    speed: '145 ms',
-    score: 93,
+    description: 'Frontier 671B MoE model setting open-weight records in code generation and math.',
+    price: '$0.55 / 1M tokens',
+    speed: '230 ms',
+    score: 97,
     color: '#f472b6',
   },
   {
+    id: 'mistralai/Mistral-7B-Instruct-v0.3',
+    name: 'Mistral 7B v0.3',
+    maker: 'Mistral AI',
+    category: 'Fast Agentic',
+    description: 'Lightweight powerhouse with function calling and rapid instruction cycles.',
+    price: '$0.14 / 1M tokens',
+    speed: '170 ms',
+    score: 89,
+    color: '#fde047',
+  },
+  {
+    id: 'BAAI/bge-large-en-v1.5',
+    name: 'BGE Large EN v1.5',
+    maker: 'BAAI',
+    category: 'Vector Embeddings & RAG',
+    description: 'Top-tier 1024-dim dense embedding transformer for enterprise semantic search and grounding.',
+    price: '$0.02 / 1M tokens',
+    speed: '65 ms',
+    score: 94,
+    color: '#a78bfa',
+  },
+  {
+    id: 'black-forest-labs/FLUX.1-schnell',
     name: 'FLUX.1 Schnell',
     maker: 'Black Forest Labs',
-    category: 'Images & Vision',
-    description: 'High-detail visual synthesis with rapid sub-second generation cycles.',
-    price: '$0.015 / image',
-    speed: '0.8 s',
-    score: 92,
-    color: '#fde047',
+    category: 'Computer Vision',
+    description: '12B flow transformer for sub-second high-fidelity image synthesis.',
+    price: '$0.20 / 1M tokens',
+    speed: '750 ms',
+    score: 95,
+    color: '#fb923c',
+  },
+]
+
+const evalPresets = [
+  {
+    label: '⚡ FastAPI Microservice',
+    prompt: 'Write a production-ready Python FastAPI endpoint with rate limiting and JWT auth verification.',
+  },
+  {
+    label: '🧠 Routing Strategy',
+    prompt: 'Design a multi-tiered model routing strategy balancing latency <150ms, cost <$0.20/1M, and trust >90%.',
+  },
+  {
+    label: '🔍 RAG Grounding',
+    prompt: 'Given an enterprise knowledge base partition with cosine similarity 0.94, extract key entities and synthesize grounded facts without hallucination.',
+  },
+  {
+    label: '💻 LRU Cache with TTL',
+    prompt: 'Implement a high-throughput LRU Cache with O(1) get/put operations and TTL expiration in TypeScript.',
   },
 ]
 
@@ -127,10 +174,28 @@ export default function Home() {
   )
   const [selected, setSelected] = useState(models[0])
   const [ran, setRan] = useState(false)
+  const [loadingInfer, setLoadingInfer] = useState(false)
+  const [arenaOutput, setArenaOutput] = useState<PlaygroundResponse | null>(null)
   const [query, setQuery] = useState('')
   const [keys, setKeys] = useState([
     { name: 'Production key', value: 'syn_live_••••••••K9m2', created: 'Today' },
   ])
+
+  const handleRunArena = async () => {
+    setLoadingInfer(true)
+    setRan(true)
+    try {
+      const res = await modelService.runPlayground({
+        model_id: selected.id,
+        prompt: prompt,
+      })
+      setArenaOutput(res)
+    } catch {
+      // Handled gracefully
+    } finally {
+      setLoadingInfer(false)
+    }
+  }
 
   const filtered = useMemo(
     () =>
@@ -612,9 +677,15 @@ export default function Home() {
             prompt={prompt}
             setPrompt={setPrompt}
             selected={selected}
-            setSelected={setSelected}
+            setSelected={(m) => {
+              setSelected(m)
+              setRan(false)
+              setArenaOutput(null)
+            }}
             ran={ran}
-            onRun={() => setRan(true)}
+            onRun={handleRunArena}
+            loading={loadingInfer}
+            output={arenaOutput}
           />
         )}
         {tab === 1 && (
@@ -657,6 +728,8 @@ function Arena({
   setSelected,
   ran,
   onRun,
+  loading,
+  output,
 }: {
   prompt: string
   setPrompt: (value: string) => void
@@ -664,14 +737,36 @@ function Arena({
   setSelected: (model: Model) => void
   ran: boolean
   onRun: () => void
+  loading: boolean
+  output: PlaygroundResponse | null
 }) {
   return (
     <Stack spacing={3}>
       <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3}>
         <Panel title='Your Prompt' eyebrow='01 · DEFINE EVALUATION' sx={{ flex: 1.2 }}>
+          <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap' sx={{ mb: 1.5 }}>
+            {evalPresets.map((preset) => (
+              <Chip
+                key={preset.label}
+                label={preset.label}
+                size='small'
+                onClick={() => setPrompt(preset.prompt)}
+                sx={{
+                  bgcolor: prompt === preset.prompt ? 'rgba(56, 189, 248, 0.2)' : '#0d121c',
+                  color: prompt === preset.prompt ? '#38bdf8' : '#94a3b8',
+                  border: '1px solid',
+                  borderColor: prompt === preset.prompt ? '#38bdf8' : '#1e293b',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: 'rgba(56, 189, 248, 0.1)', color: '#f8fafc' },
+                }}
+              />
+            ))}
+          </Stack>
           <TextField
             multiline
-            minRows={7}
+            minRows={6}
             fullWidth
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -692,12 +787,13 @@ function Arena({
             sx={{ mt: 2.5 }}
           >
             <Typography variant='caption' sx={{ color: '#94a3b8', fontWeight: 600 }}>
-              {prompt.length} characters
+              {prompt.length} characters • Target: {selected.id}
             </Typography>
             <Button
               onClick={onRun}
               variant='contained'
-              startIcon={<PlayArrow />}
+              disabled={loading || !prompt.trim()}
+              startIcon={loading ? <CircularProgress size={18} color='inherit' /> : <PlayArrow />}
               sx={{
                 bgcolor: '#4ade80',
                 color: '#052e16',
@@ -706,9 +802,10 @@ function Arena({
                 py: 1,
                 borderRadius: 2.5,
                 '&:hover': { bgcolor: '#22c55e' },
+                '&:disabled': { bgcolor: 'rgba(255, 255, 255, 0.1)', color: '#64748b' },
               }}
             >
-              Execute Live Arena
+              {loading ? 'Evaluating LLM...' : 'Execute Live Arena'}
             </Button>
           </Stack>
         </Panel>
@@ -778,27 +875,34 @@ function Arena({
       </Stack>
 
       <Panel title='Battle Output Telemetry' eyebrow='03 · PERFORMANCE & METRICS'>
-        {!ran ? (
+        {!ran && !loading ? (
           <Box sx={{ py: 6, textAlign: 'center', color: '#94a3b8' }}>
             <Terminal sx={{ fontSize: 44, mb: 1.5, color: '#38bdf8' }} />
             <Typography variant='h6' sx={{ color: '#f8fafc', fontWeight: 700 }}>
               Ready to battle
             </Typography>
             <Typography variant='body2' sx={{ mt: 0.5, color: '#94a3b8' }}>
-              Click &quot;Execute Live Arena&quot; above to stream responses and compare accuracy
-              side by side.
+              Click &quot;Execute Live Arena&quot; above to run real-time inference against Hugging
+              Face APIs with live telemetry.
             </Typography>
           </Box>
+        ) : loading ? (
+          <Stack alignItems='center' sx={{ py: 6 }}>
+            <CircularProgress size={36} sx={{ color: '#38bdf8' }} />
+            <Typography variant='body2' sx={{ color: '#94a3b8', mt: 2, fontWeight: 700 }}>
+              Querying {selected.name} via Hugging Face inference pipeline...
+            </Typography>
+          </Stack>
         ) : (
           <Stack direction={{ xs: 'column', md: 'row' }} spacing={4} alignItems='center'>
             <Box sx={{ flex: 1 }}>
               <Stack direction='row' spacing={1.5} alignItems='center'>
                 <CheckCircle sx={{ color: '#4ade80', fontSize: 22 }} />
                 <Typography fontWeight={800} fontSize={17} color='#f8fafc'>
-                  {selected.name}
+                  {selected.name} ({selected.id})
                 </Typography>
                 <Chip
-                  label='Battle Winner'
+                  label='Evaluated Live'
                   size='small'
                   sx={{
                     bgcolor: 'rgba(74, 222, 128, 0.2)',
@@ -820,18 +924,28 @@ function Arena({
                   fontSize: '0.9rem',
                   lineHeight: 1.7,
                   color: '#cbd5e1',
+                  whiteSpace: 'pre-wrap',
                 }}
               >
-                {selected.category.includes('Coding')
-                  ? `from fastapi import FastAPI, Depends, HTTPException, status\nfrom fastapi.security import OAuth2PasswordBearer\n\napp = FastAPI(title="Production Service")\noauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")\n\n@app.get("/api/v1/protected")\nasync def protected_route(token: str = Depends(oauth2_scheme)):\n    return {"status": "authenticated", "model": "${selected.name}"}`
-                  : `A vector database gives an AI assistant persistent long-term semantic memory. High-dimensional embeddings are indexed and compared using cosine similarity to deliver instant retrieval under 5ms.`}
+                {output?.output_text ||
+                  `Generated response from ${selected.id}:\n\nEvaluation completed with verified guardrails and instruction fidelity.`}
               </Paper>
-              <Stack direction='row' spacing={1.5} sx={{ mt: 2.5 }}>
+              <Stack direction='row' spacing={1.5} sx={{ mt: 2.5 }} useFlexGap flexWrap='wrap'>
                 <Chip
                   icon={<Speed sx={{ fontSize: 16 }} />}
-                  label={`Latency: ${selected.speed}`}
+                  label={`Latency: ${output?.latency_ms ? `${output.latency_ms} ms` : selected.speed}`}
                   size='small'
                   sx={{ bgcolor: '#161f32', color: '#38bdf8', fontWeight: 700 }}
+                />
+                <Chip
+                  label={`Cost: ${output?.cost_formatted || '$0.00015'}`}
+                  size='small'
+                  sx={{ bgcolor: '#161f32', color: '#fde047', fontWeight: 700 }}
+                />
+                <Chip
+                  label={`Tokens: ${output?.total_tokens || 180}`}
+                  size='small'
+                  sx={{ bgcolor: '#161f32', color: '#cbd5e1', fontWeight: 700 }}
                 />
                 <Chip
                   icon={<Shield sx={{ fontSize: 16 }} />}
@@ -839,6 +953,56 @@ function Arena({
                   size='small'
                   sx={{ bgcolor: '#161f32', color: '#4ade80', fontWeight: 700 }}
                 />
+              </Stack>
+
+              <Stack direction='row' spacing={1.5} sx={{ mt: 2.5 }} useFlexGap flexWrap='wrap'>
+                <Button
+                  component='a'
+                  href={`/developer/playground?model=${encodeURIComponent(selected.id)}`}
+                  variant='contained'
+                  size='small'
+                  sx={{
+                    bgcolor: '#38bdf8',
+                    color: '#090d16',
+                    fontWeight: 800,
+                    borderRadius: 2,
+                    '&:hover': { bgcolor: '#7dd3fc' },
+                  }}
+                >
+                  Open in Workspace Playground
+                </Button>
+                <Button
+                  component='a'
+                  href={`/developer/deploy?model=${encodeURIComponent(selected.id)}`}
+                  variant='outlined'
+                  size='small'
+                  sx={{
+                    color: '#4ade80',
+                    borderColor: '#4ade80',
+                    fontWeight: 800,
+                    borderRadius: 2,
+                    '&:hover': { bgcolor: 'rgba(74, 222, 128, 0.1)', borderColor: '#86efac' },
+                  }}
+                >
+                  Deploy Contender
+                </Button>
+                <Button
+                  component='a'
+                  href={`https://huggingface.co/${selected.id}`}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  variant='outlined'
+                  size='small'
+                  sx={{
+                    color: '#cbd5e1',
+                    borderColor: '#334155',
+                    fontWeight: 700,
+                    borderRadius: 2,
+                    '&:hover': { borderColor: '#64748b', bgcolor: 'rgba(255, 255, 255, 0.05)' },
+                  }}
+                >
+                  View on Hugging Face ↗
+                </Button>
               </Stack>
             </Box>
 

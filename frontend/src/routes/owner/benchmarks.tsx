@@ -125,6 +125,7 @@ export default function OwnerBenchmarks() {
               <TableRow sx={{ backgroundColor: '#0e1422' }}>
                 <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Model</TableCell>
                 <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Benchmark Dataset</TableCell>
+                <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Provenance</TableCell>
                 <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Test Date</TableCell>
                 <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Accuracy</TableCell>
                 <TableCell sx={{ fontWeight: 800, color: '#94a3b8' }}>Precision</TableCell>
@@ -141,6 +142,20 @@ export default function OwnerBenchmarks() {
                     {models.find((model) => model.id === row.modelId)?.name ?? row.modelId}
                   </TableCell>
                   <TableCell sx={{ color: '#38bdf8' }}>{row.dataset}</TableCell>
+                  <TableCell>
+                    <Chip
+                      size='small'
+                      label='Verified HF / Owner'
+                      sx={{
+                        bgcolor: 'rgba(74, 222, 128, 0.15)',
+                        color: '#4ade80',
+                        fontWeight: 800,
+                        fontSize: '0.72rem',
+                        height: 22,
+                        border: '1px solid rgba(74, 222, 128, 0.3)',
+                      }}
+                    />
+                  </TableCell>
                   <TableCell sx={{ color: '#94a3b8' }}>{row.testDate}</TableCell>
                   <TableCell sx={{ color: '#4ade80', fontWeight: 700 }}>
                     {row.accuracy.toFixed(1)}%

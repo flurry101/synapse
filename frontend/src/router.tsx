@@ -75,6 +75,7 @@ export const routes = [
           { index: true, Component: DeveloperDashboard },
           { path: 'search', Component: DeveloperSearch },
           { path: 'compare', Component: DeveloperCompare },
+          { path: 'details', Component: DeveloperModelDetails },
           { path: 'details/:modelId', Component: DeveloperModelDetails },
           { path: 'playground', Component: DeveloperPlayground },
           { path: 'deploy', Component: DeveloperDeploy },

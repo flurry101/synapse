@@ -18,6 +18,7 @@ Synapse AI Hub is an open platform and marketplace connecting AI Developers and 
 ### Live Deployment
 | Service | URL |
 | :--- | :--- |
+|**Frontend url**|[https://synapse-hub-web.onrender.com/](https://synapse-hub-web.onrender.com/)|
 | **Render Backend API** | [https://synapse-ai-hub.onrender.com](https://synapse-ai-hub.onrender.com) |
 | **Render API Docs** | [https://synapse-ai-hub.onrender.com/docs](https://synapse-ai-hub.onrender.com/docs) |
 | **Google SSO Callback Endpoint** | `https://synapse-ai-hub.onrender.com/api/v1/login/google/callback` |

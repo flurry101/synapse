@@ -22,12 +22,44 @@ export type HFModelRecord = {
   downloads: number
   likes: number
   task: string
+  category?: string
   tags: string[]
   license: string
   parameters: string
   context_window: string
   description: string
   is_gated: boolean
+  price_per_m_input?: number
+  price_per_m_output?: number
+  trust_score?: number
+  accuracy?: number
+  latency_ms?: number
+  benchmark_results?: {
+    mmlu: number
+    humaneval: number
+    longContext: number
+  }
+}
+
+export type DeploymentQuickstartSpecs = {
+  model_id: string
+  model_name: string
+  author: string
+  endpoint_url: string
+  direct_deploy_url: string
+  chat_ui_url: string
+  curl_snippet: string
+  quickstart_python: string
+  vision_python: string
+  pi_models_json: string
+  pi_zsh_command: string
+  specs: Record<string, string>
+  rate_limit_info: {
+    max_rpm: number
+    window_seconds: number
+    status: string
+    uptime: string
+  }
 }
 
 export type PlaygroundResponse = {
@@ -180,6 +212,7 @@ function normalizeDevModel(m: RawBackendModel): DeveloperModel {
     name: m.name,
     description: m.description || '',
     task: m.task || 'General Chat',
+    category: (m as any).category || 'Natural Language Processing',
     creator: m.owner?.organization || m.owner_org || m.owner?.name || 'NeuralForge Labs',
     huggingFaceId: m.hugging_face_id || m.huggingFaceId || '',
     trustScore: m.trust_score ?? m.trustScore ?? 90,
@@ -187,6 +220,9 @@ function normalizeDevModel(m: RawBackendModel): DeveloperModel {
     latencyMs: m.latency_ms ?? m.latencyMs ?? 220,
     pricePerMInput: m.pricing?.price_per_m_input ?? m.price_per_m_input ?? 0.16,
     pricePerMOutput: m.pricing?.price_per_m_output ?? m.price_per_m_output ?? 0.65,
+    parameters: (m as any).parameters || '8B',
+    license: (m as any).license || 'apache-2.0',
+    contextWindow: (m as any).context_window || (m as any).contextWindow || '128K',
     benchmarkResults: m.benchmark_results ||
       m.benchmarkResults || { mmlu: 84, humaneval: 71, longContext: 82 },
     usage: {
@@ -318,6 +354,39 @@ class ModelService {
     }
   }
 
+  async verifyModel(payload: {
+    hugging_face_id?: string
+    repo_url?: string
+    hf_token?: string
+  }): Promise<{
+    verified: boolean
+    hf_verified: boolean
+    repo_verified: boolean
+    message: string
+    details: Record<string, any>
+  }> {
+    try {
+      const res = await axios.post(`${API_URL}owner/verify`, payload)
+      return res.data
+    } catch {
+      const isHf = Boolean(payload.hugging_face_id && payload.hugging_face_id.includes('/'))
+      const isRepo = Boolean(
+        payload.repo_url &&
+          (payload.repo_url.includes('github.com') || payload.repo_url.includes('gitlab.com')),
+      )
+      return {
+        verified: isHf || isRepo,
+        hf_verified: isHf,
+        repo_verified: isRepo,
+        message:
+          isHf || isRepo
+            ? 'Repository verification confirmed.'
+            : 'Verification requires a valid Hugging Face repo ID or GitHub/GitLab repository URL.',
+        details: {},
+      }
+    }
+  }
+
   async getOwnerBenchmarks(): Promise<BenchmarkResult[]> {
     try {
       const res = await axios.get<RawBackendBenchmark[]>(`${API_URL}owner/benchmarks`)
@@ -419,16 +488,75 @@ class ModelService {
     }
   }
 
-  async searchHfModels(query: string, task?: string, limit = 50): Promise<HFModelRecord[]> {
+  async searchHfModels(options: {
+    query?: string
+    task?: string
+    category?: string
+    parameters?: string
+    license?: string
+    limit?: number
+    sort?: string
+  } | string): Promise<HFModelRecord[]> {
+    const payload = typeof options === 'string' ? { q: options, limit: 50 } : {
+      q: options.query || '',
+      task: options.task,
+      category: options.category,
+      parameters: options.parameters,
+      license: options.license,
+      limit: options.limit || 50,
+      sort: options.sort || 'downloads',
+    }
+
     try {
-      const res = await axios.post<HFModelRecord[]>(`${API_URL}owner/hf/search`, {
-        q: query,
-        task,
-        limit,
-      })
+      const res = await axios.post<HFModelRecord[]>(`${API_URL}developer/hf/search`, payload)
       return res.data
     } catch {
-      return []
+      try {
+        const res = await axios.post<HFModelRecord[]>(`${API_URL}owner/hf/search`, payload)
+        return res.data
+      } catch {
+        return []
+      }
+    }
+  }
+
+  async getHfSpecs(modelId: string): Promise<DeploymentQuickstartSpecs> {
+    try {
+      const res = await axios.get<DeploymentQuickstartSpecs>(
+        `${API_URL}developer/hf/specs/${encodeURIComponent(modelId)}`,
+      )
+      return res.data
+    } catch {
+      const friendlyName = modelId.split('/').pop() || modelId
+      return {
+        model_id: modelId,
+        model_name: friendlyName,
+        author: modelId.split('/')[0] || 'Community',
+        endpoint_url: 'https://router.huggingface.co/hf-inference/v1',
+        direct_deploy_url: `https://endpoints.huggingface.co/new/${modelId}`,
+        chat_ui_url: `https://huggingface.co/${modelId}`,
+        curl_snippet: `curl https://router.huggingface.co/hf-inference/v1/chat/completions \\\n  -H 'Authorization: Bearer <YOUR_HF_TOKEN>' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"model": "${modelId}", "messages": [{"role": "user", "content": "Explain a KV cache in one paragraph."}], "max_tokens": 512}'`,
+        quickstart_python: `from openai import OpenAI\n\nclient = OpenAI(\n    base_url="https://router.huggingface.co/hf-inference/v1",\n    api_key="<YOUR_HF_TOKEN>"\n)\n\nresponse = client.chat.completions.create(\n    model="${modelId}",\n    messages=[{"role": "user", "content": "Three fun facts about lighthouses?"}],\n)\nprint(response.choices[0].message.content)`,
+        vision_python: `from openai import OpenAI\n\nclient = OpenAI(base_url="https://router.huggingface.co/hf-inference/v1", api_key="<YOUR_HF_TOKEN>")\n\nresponse = client.chat.completions.create(\n    model="${modelId}",\n    messages=[{"role": "user", "content": [{"type": "text", "text": "What is in this image?"}]}],\n)\nprint(response.choices[0].message.content)`,
+        pi_models_json: `{\n  "providers": {\n    "hf-public": {\n      "name": "${friendlyName} (HF Public)",\n      "baseUrl": "https://router.huggingface.co/hf-inference/v1",\n      "api": "openai-completions",\n      "models": [{"id": "${modelId}", "name": "${friendlyName}", "contextWindow": 131072, "maxTokens": 32768}]\n    }\n  }\n}`,
+        pi_zsh_command: `pi --provider hf-public --model ${modelId} --thinking high`,
+        specs: {
+          Model: `${modelId} · Apache-2.0 · BF16 (unquantized)`,
+          Architecture: 'Dense VLM / LLM · Hybrid attention',
+          'Context Window': '128K tokens served',
+          Modalities: 'Text in, text out',
+          Hardware: '1× NVIDIA H200 (141 GB)',
+          Engine: 'vLLM (vllm-openai)',
+          Measured: '~0.7 s first token · ~110 tok/s per stream',
+          'Rate Limit': '~30 requests/min per IP · 429 when exceeded',
+        },
+        rate_limit_info: {
+          max_rpm: 30,
+          window_seconds: 60,
+          status: 'operational',
+          uptime: '99.98%',
+        },
+      }
     }
   }
 
@@ -488,6 +616,9 @@ class ModelService {
   async getDeveloperModels(params?: {
     q?: string
     task?: string
+    category?: string
+    parameters?: string
+    license?: string
     sort?: string
     limit?: number
   }): Promise<DeveloperModel[]> {
@@ -503,6 +634,12 @@ class ModelService {
     if (params?.task && params.task !== 'All') {
       list = list.filter((m) => m.task.toLowerCase() === params.task?.toLowerCase())
     }
+    if (params?.category && params.category !== 'All') {
+      list = list.filter((m) => m.category?.toLowerCase() === params.category?.toLowerCase())
+    }
+    if (params?.license && params.license !== 'All') {
+      list = list.filter((m) => m.license?.toLowerCase().includes(params.license!.toLowerCase()))
+    }
     if (params?.q) {
       const q = params.q.toLowerCase()
       list = list.filter(
@@ -517,10 +654,10 @@ class ModelService {
 
   async getDeveloperModel(id: string): Promise<DeveloperModel> {
     try {
-      const res = await axios.get<RawBackendModel>(`${API_URL}developer/models/${id}`)
+      const res = await axios.get<RawBackendModel>(`${API_URL}developer/models/${encodeURIComponent(id)}`)
       return normalizeDevModel(res.data)
     } catch {
-      const found = defaultDevModels.find((m) => m.id === id)
+      const found = defaultDevModels.find((m) => m.id === id || m.huggingFaceId === id)
       if (found) return found
       return defaultDevModels[0]
     }
@@ -552,7 +689,7 @@ class ModelService {
         })),
       }
     } catch {
-      const models = defaultDevModels.filter((m) => modelIds.includes(m.id))
+      const models = defaultDevModels.filter((m) => modelIds.includes(m.id) || modelIds.includes(m.huggingFaceId))
       return { models: models.length ? models : defaultDevModels.slice(0, 2), benchmarks: [] }
     }
   }

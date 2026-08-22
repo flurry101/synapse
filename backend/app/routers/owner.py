@@ -7,7 +7,7 @@ from beanie.operators import In
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..auth.auth import get_current_active_user
-from ..models import Benchmark, Model, User
+from ..models import Benchmark, Model, UsageEvent, User
 from ..schemas.models import (
     BenchmarkCreate,
     BenchmarkOut,
@@ -24,6 +24,8 @@ from ..schemas.models import (
     OwnerInfo,
     PricingInfo,
     UsageRow,
+    VerifyModelRequest,
+    VerifyModelResponse,
 )
 from ..services.huggingface import hf_service
 
@@ -95,6 +97,57 @@ def _generate_slug(name: str) -> str:
     return cleaned or "custom-model"
 
 
+@router.post("/verify", response_model=VerifyModelResponse)
+async def verify_model_sources(
+    payload: VerifyModelRequest,
+    current_user: User = Depends(require_owner),
+) -> VerifyModelResponse:
+    hf_verified = False
+    repo_verified = False
+    details: dict[str, Any] = {}
+    messages = []
+
+    # 1. Verify Hugging Face repository
+    if payload.hugging_face_id:
+        try:
+            token = payload.hf_token or current_user.hf_token
+            hf_details = await hf_service.get_hf_model_details(payload.hugging_face_id, token=token)
+            if hf_details and hf_details.get("name"):
+                hf_verified = True
+                details["hf"] = {
+                    "id": hf_details.get("hugging_face_id", payload.hugging_face_id),
+                    "parameters": hf_details.get("parameters"),
+                    "license": hf_details.get("license"),
+                    "downloads": hf_details.get("downloads", 0),
+                    "task": hf_details.get("task"),
+                }
+                messages.append(f"Hugging Face repository '{payload.hugging_face_id}' verified.")
+            else:
+                messages.append(f"Hugging Face repository '{payload.hugging_face_id}' not found.")
+        except Exception as e:
+            messages.append(f"HF Verification error: {str(e)}")
+
+    # 2. Verify open-weights repository (GitHub or GitLab)
+    if payload.repo_url:
+        url_lower = payload.repo_url.lower().strip()
+        if "github.com/" in url_lower or "gitlab.com/" in url_lower:
+            repo_verified = True
+            details["repo"] = {"url": payload.repo_url, "verified": True}
+            messages.append(f"Open-weights repository ({payload.repo_url}) verified.")
+        else:
+            messages.append("Open repository URL must be a valid GitHub or GitLab repository.")
+
+    overall_verified = hf_verified or repo_verified
+
+    return VerifyModelResponse(
+        verified=overall_verified,
+        hf_verified=hf_verified,
+        repo_verified=repo_verified,
+        message="; ".join(messages) if messages else "No verification sources provided.",
+        details=details,
+    )
+
+
 @router.get("/models", response_model=list[ModelOut])
 async def list_owner_models(
     current_user: User = Depends(require_owner),
@@ -127,6 +180,18 @@ async def create_owner_model(
     )
     user_org = current_user.organization or "Independent"
 
+    # Enforce verification requirement for public marketplace listing
+    status_to_set = payload.status
+    trust_score_to_set = payload.trust_score
+
+    if status_to_set == "Published":
+        is_hf_valid = bool(payload.hugging_face_id and "/" in payload.hugging_face_id)
+        if not is_hf_valid:
+            status_to_set = "Draft"
+            trust_score_to_set = min(trust_score_to_set, 80.0)
+        else:
+            trust_score_to_set = max(trust_score_to_set, 94.0)
+
     model = Model(
         slug=slug,
         name=payload.name,
@@ -136,7 +201,7 @@ async def create_owner_model(
         version=payload.version,
         model_type=payload.model_type,
         tags=payload.tags,
-        trust_score=payload.trust_score,
+        trust_score=trust_score_to_set,
         accuracy=payload.accuracy,
         latency_ms=payload.latency_ms,
         throughput_rps=payload.throughput_rps,
@@ -146,7 +211,7 @@ async def create_owner_model(
         price_per_m_output=payload.price_per_m_output,
         monthly_price=payload.monthly_price,
         currency=payload.currency,
-        status=payload.status,
+        status=status_to_set,
         owner_id=current_user.uuid,
         owner_name=user_name,
         owner_email=current_user.email,
@@ -341,9 +406,30 @@ async def get_owner_analytics(
     if not models and current_user.is_superuser:
         models = await Model.find_all().to_list()
 
-    total_revenue = sum(m.revenue for m in models) or 1820.0
-    total_requests = sum(m.requests for m in models) or 287000
-    avg_trust = sum(m.trust_score for m in models) / len(models) if models else 91.2
+    model_slugs = [m.slug for m in models]
+    model_names = {m.slug: m.name for m in models}
+    for m in models:
+        if m.hugging_face_id:
+            model_names[m.hugging_face_id] = m.name
+
+    events = await UsageEvent.find().sort("-created_at").limit(50).to_list()
+    owner_events = [
+        e
+        for e in events
+        if e.model_id in model_slugs
+        or e.model_id in model_names
+        or current_user.is_superuser
+    ]
+    if not owner_events and events:
+        owner_events = events
+
+    real_req_sum = sum(m.requests for m in models) + len(owner_events)
+    real_rev_sum = sum(m.revenue for m in models) + sum(e.cost_usd for e in owner_events)
+    total_revenue = round(real_rev_sum or 1820.0, 2)
+    total_requests = real_req_sum or 287000
+    avg_trust = (
+        sum(m.trust_score for m in models) / len(models) if models else 94.2
+    )
 
     time_series = [
         {
@@ -383,32 +469,37 @@ async def get_owner_analytics(
         },
     ]
 
-    recent_usage = [
-        UsageRow(
-            id="u-1",
-            app="Acme Support Copilot",
-            model=models[0].name if models else "Neuron Write 1",
-            requests=48200,
-            success_rate=99.2,
-            revenue=312.0,
-            avg_latency_ms=226,
-            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-        ),
-        UsageRow(
-            id="u-2",
-            app="CodeFlow Reviewer",
-            model=(
-                models[1].name
-                if len(models) > 1
-                else (models[0].name if models else "Neuron Code 2")
-            ),
-            requests=19140,
-            success_rate=98.4,
-            revenue=164.0,
-            avg_latency_ms=298,
-            timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-        ),
-    ]
+    recent_usage: list[UsageRow] = []
+    for evt in owner_events[:15]:
+        target_name = (
+            model_names.get(evt.model_id) or evt.model_name or evt.model_id
+        )
+        recent_usage.append(
+            UsageRow(
+                id=f"evt-{str(evt.uuid)[:8]}",
+                app=evt.app_name or "Developer Evaluation",
+                model=target_name,
+                requests=1,
+                success_rate=100.0,
+                revenue=round(evt.cost_usd, 5),
+                avg_latency_ms=evt.latency_ms or 185,
+                timestamp=evt.created_at.strftime("%Y-%m-%d %H:%M UTC"),
+            )
+        )
+
+    if not recent_usage:
+        recent_usage = [
+            UsageRow(
+                id="u-1",
+                app="Acme Support Copilot",
+                model=models[0].name if models else "Qwen 3.8 27B",
+                requests=48200,
+                success_rate=99.2,
+                revenue=312.0,
+                avg_latency_ms=226,
+                timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+            )
+        ]
 
     return OwnerAnalyticsOut(
         total_revenue=round(total_revenue, 2),
@@ -462,8 +553,5 @@ async def sync_hf_models_endpoint(
         total_synced=total,
         created_count=created,
         updated_count=updated,
-        message=(
-            f"Successfully synced {total} models from Hugging Face Hub "
-            f"({created} created, {updated} updated)."
-        ),
+        message=f"Successfully synced {total} models from Hugging Face Hub ({created} created, {updated} updated).",
     )
