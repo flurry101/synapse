@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ..auth.auth import get_current_active_user
-from ..models import Deployment, Model, UsageEvent, User
+from ..models import Benchmark, Deployment, Model, UsageEvent, User
 from ..schemas.models import (
     BenchmarkOut,
     CompareRequest,
@@ -170,6 +170,46 @@ async def list_developer_models(
     limit: int = Query(default=50),
     current_user: User = Depends(require_developer),
 ) -> list[ModelOut]:
+    models = await Model.find(Model.status == "Published").to_list()
+    if models:
+        if task and task != "All":
+            models = [m for m in models if m.task.lower() == task.lower()]
+        if q:
+            q_lower = q.lower()
+            models = [
+                m
+                for m in models
+                if q_lower in m.name.lower()
+                or q_lower in m.description.lower()
+                or q_lower in m.hugging_face_id.lower()
+                or any(q_lower in tag.lower() for tag in m.tags)
+            ]
+        if category:
+            cat_lower = category.lower()
+            models = [
+                m
+                for m in models
+                if any(cat_lower in t.lower() for t in m.tags)
+                or cat_lower in m.task.lower()
+            ]
+        if parameters:
+            param_lower = parameters.lower()
+            models = [m for m in models if param_lower in m.parameters.lower()]
+        if license and license != "All":
+            lic_lower = license.lower()
+            models = [m for m in models if lic_lower in m.license.lower()]
+
+        if sort == "trust-desc":
+            models.sort(key=lambda m: m.trust_score, reverse=True)
+        elif sort == "accuracy-desc":
+            models.sort(key=lambda m: m.accuracy, reverse=True)
+        elif sort == "latency-asc":
+            models.sort(key=lambda m: m.latency_ms)
+        elif sort == "price-asc":
+            models.sort(key=lambda m: m.price_per_m_input)
+
+        return [_model_to_out(m) for m in models[:limit]]
+
     hf_records = await hf_service.search_hf_models(
         query=q,
         task=task,
@@ -192,6 +232,18 @@ async def get_developer_model(
     model_id: str,
     current_user: User = Depends(require_developer),
 ) -> ModelOut:
+    model = await Model.find_one(Model.slug == model_id)
+    if not model:
+        model = await Model.find_one(Model.hugging_face_id == model_id)
+    if not model:
+        try:
+            uuid_val = UUID(model_id)
+            model = await Model.find_one(Model.uuid == uuid_val)
+        except Exception:
+            pass
+    if model:
+        return _model_to_out(model)
+
     canonical_id = hf_service._resolve_canonical_repo_id(model_id)
     detail = await hf_service.get_hf_model_details(
         canonical_id, token=current_user.hf_token
@@ -208,11 +260,38 @@ async def compare_developer_models(
     bench_outs: list[BenchmarkOut] = []
 
     for mid in payload.model_ids:
-        canonical_id = hf_service._resolve_canonical_repo_id(mid)
-        detail = await hf_service.get_hf_model_details(
-            canonical_id, token=current_user.hf_token
-        )
-        model_outs.append(_hf_detail_to_out(detail))
+        model = await Model.find_one(Model.slug == mid)
+        if not model:
+            model = await Model.find_one(Model.hugging_face_id == mid)
+        if model:
+            model_outs.append(_model_to_out(model))
+            benchmarks = await Benchmark.find(Benchmark.model_id == model.slug).to_list()
+            bench_outs.extend(
+                [
+                    BenchmarkOut(
+                        id=str(b.uuid),
+                        uuid=b.uuid,
+                        model_id=b.model_id,
+                        owner_id=b.owner_id,
+                        dataset=b.dataset,
+                        test_date=b.test_date,
+                        accuracy=b.accuracy,
+                        precision=b.precision,
+                        recall=b.recall,
+                        f1_score=b.f1_score,
+                        latency_ms=b.latency_ms,
+                        throughput_rps=b.throughput_rps,
+                        created_at=b.created_at,
+                    )
+                    for b in benchmarks
+                ]
+            )
+        else:
+            canonical_id = hf_service._resolve_canonical_repo_id(mid)
+            detail = await hf_service.get_hf_model_details(
+                canonical_id, token=current_user.hf_token
+            )
+            model_outs.append(_hf_detail_to_out(detail))
 
     return CompareResponse(
         models=model_outs,

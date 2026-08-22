@@ -1,8 +1,5 @@
-# Synapse AI Hub
+# Synapse
 
-Synapse AI Hub is an open platform and marketplace connecting AI Developers and Model Owners/Providers. It provides independent, dedicated workspaces for discovering, evaluating, deploying, benchmarking, and monetizing AI models.
-
----
 
 ## URLs & Endpoints
 

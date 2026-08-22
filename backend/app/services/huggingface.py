@@ -587,8 +587,13 @@ class HuggingFaceService:
             "qwen-qwen3-8-27b": "Qwen/Qwen3.8-27B",
             "qwen-qwen2-5-7b-instruct": "Qwen/Qwen2.5-7B-Instruct",
             "deepseek-ai-deepseek-v3": "deepseek-ai/DeepSeek-V3",
+            "deepseek-ai-deepseek-r1-distill-qwen-7b": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+            "qwen-qwen2-5-coder-32b-instruct": "Qwen/Qwen2.5-Coder-32B-Instruct",
+            "meta-llama-llama-3-1-70b-instruct": "meta-llama/Llama-3.1-70B-Instruct",
             "mistralai-mistral-7b-instruct-v0-3": "mistralai/Mistral-7B-Instruct-v0.3",
             "baai-bge-large-en-v1-5": "BAAI/bge-large-en-v1.5",
+            "baai-bge-m3": "BAAI/bge-m3",
+            "sentence-transformers-all-minilm-l6-v2": "sentence-transformers/all-MiniLM-L6-v2",
             "black-forest-labs-flux-1-schnell": "black-forest-labs/FLUX.1-schnell",
             "openai-whisper-large-v3-turbo": "openai/whisper-large-v3-turbo",
             "google-gemma-2-9b-it": "google/gemma-2-9b-it",
@@ -599,7 +604,15 @@ class HuggingFaceService:
             "neuron-rag-pro": "BAAI/bge-large-en-v1.5",
             "synapse-chat-7b": "mistralai/Mistral-7B-Instruct-v0.3",
         }
-        return slug_map.get(cleaned.lower(), f"{cleaned}/{cleaned}")
+        if cleaned.lower() in slug_map:
+            return slug_map[cleaned.lower()]
+
+        for rec in self._fallback_hf_records():
+            rec_slug = re.sub(r"[^a-zA-Z0-9]+", "-", rec.id.lower()).strip("-")
+            if rec_slug == cleaned.lower() or rec.name.lower() == cleaned.lower():
+                return rec.id
+
+        return cleaned
 
     async def get_hf_model_details(
         self, repo_id: str, token: str | None = None
