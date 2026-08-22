@@ -14,16 +14,16 @@ import {
   Typography,
 } from '@mui/material'
 import { useState } from 'react'
-import type { OwnerModel } from '../../mocks/ownerData'
+import type { OwnerModel, OwnerModelStatus } from '../../mocks/ownerData'
 
 type OwnerModelCardProps = {
   model: OwnerModel
   onView?: (modelId: string) => void
   onEdit?: (modelId: string) => void
   onDelete?: (modelId: string) => void
+  onStatusChange?: (modelId: string, status: OwnerModelStatus) => void | Promise<void>
 }
 
-export default function OwnerModelCard({ model, onView, onEdit, onDelete }: OwnerModelCardProps) {
   const isPublished = model.status === 'Published'
   const [confirmOpen, setConfirmOpen] = useState(false)
 
