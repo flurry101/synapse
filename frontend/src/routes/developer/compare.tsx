@@ -101,8 +101,8 @@ export default function DeveloperCompare() {
         )}
       </SectionCard>
       <Typography variant='body2' sx={{ color: '#94a3b8' }}>
-        Strongest metrics are highlighted with green badges. For latency and pricing, lower
-        values indicate better efficiency and cost savings.
+        Strongest metrics are highlighted with green badges. For latency and pricing, lower values
+        indicate better efficiency and cost savings.
       </Typography>
     </Stack>
   )

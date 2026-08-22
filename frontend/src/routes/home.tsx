@@ -1,7 +1,6 @@
 import {
   Add,
   Api,
-  AutoAwesome,
   Bolt,
   CheckCircle,
   CompareArrows,
