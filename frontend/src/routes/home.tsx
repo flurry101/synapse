@@ -129,22 +129,22 @@ const models: Model[] = [
 
 const evalPresets = [
   {
-    label: '⚡ FastAPI Microservice',
+    label: 'FastAPI Microservice',
     prompt:
       'Write a production-ready Python FastAPI endpoint with rate limiting and JWT auth verification.',
   },
   {
-    label: '🧠 Routing Strategy',
+    label: 'Routing Strategy',
     prompt:
       'Design a multi-tiered model routing strategy balancing latency <150ms, cost <$0.20/1M, and trust >90%.',
   },
   {
-    label: '🔍 RAG Grounding',
+    label: 'RAG Grounding',
     prompt:
       'Given an enterprise knowledge base partition with cosine similarity 0.94, extract key entities and synthesize grounded facts without hallucination.',
   },
   {
-    label: '💻 LRU Cache with TTL',
+    label: 'LRU Cache with TTL',
     prompt:
       'Implement a high-throughput LRU Cache with O(1) get/put operations and TTL expiration in TypeScript.',
   },
@@ -1137,7 +1137,7 @@ function Catalog({
                   {model.price}
                 </Typography>
                 <Typography variant='caption' sx={{ color: '#4ade80', fontWeight: 700 }}>
-                  ⚡ {model.speed}
+                  {model.speed}
                 </Typography>
               </Stack>
               <Button

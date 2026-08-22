@@ -114,7 +114,7 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
                 key={`${model.id}-accuracy`}
                 sx={cellStyle(model.accuracy === bestAccuracy)}
               >
-                {model.accuracy}% {model.accuracy === bestAccuracy && '🏆'}
+                {model.accuracy}%
               </TableCell>
             ))}
           </TableRow>
@@ -122,7 +122,7 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
             <TableCell sx={{ color: '#94a3b8', fontWeight: 700 }}>Trust / Safety Score</TableCell>
             {models.map((model) => (
               <TableCell key={`${model.id}-trust`} sx={cellStyle(model.trustScore === bestTrust)}>
-                {model.trustScore}% {model.trustScore === bestTrust && '🏆'}
+                {model.trustScore}%
               </TableCell>
             ))}
           </TableRow>
@@ -133,7 +133,7 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
                 key={`${model.id}-latency`}
                 sx={cellStyle(model.latencyMs === bestLatency)}
               >
-                {model.latencyMs}ms {model.latencyMs === bestLatency && '⚡'}
+                {model.latencyMs}ms
               </TableCell>
             ))}
           </TableRow>

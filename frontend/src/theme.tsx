@@ -52,6 +52,8 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: [
+      '"Space Mono"',
+      'monospace',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',

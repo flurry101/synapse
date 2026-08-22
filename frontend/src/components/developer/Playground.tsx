@@ -233,7 +233,7 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
             flexWrap='wrap'
           >
             <Chip
-              label={`⏱️ Latency: ${result.latency_ms}ms`}
+              label={`Latency: ${result.latency_ms}ms`}
               sx={{
                 bgcolor: 'rgba(56, 189, 248, 0.12)',
                 color: '#38bdf8',
@@ -242,7 +242,7 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
               }}
             />
             <Chip
-              label={`📊 Tokens: ${result.prompt_tokens} prompt + ${result.completion_tokens} completion (${result.total_tokens} total)`}
+              label={`Tokens: ${result.prompt_tokens} prompt + ${result.completion_tokens} completion (${result.total_tokens} total)`}
               sx={{
                 bgcolor: 'rgba(74, 222, 128, 0.12)',
                 color: '#4ade80',
@@ -251,7 +251,7 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
               }}
             />
             <Chip
-              label={`💰 Cost: ${result.cost_formatted}`}
+              label={`Cost: ${result.cost_formatted}`}
               sx={{
                 bgcolor: 'rgba(192, 132, 252, 0.12)',
                 color: '#c084fc',

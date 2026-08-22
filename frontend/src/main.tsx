@@ -9,10 +9,10 @@ import theme from './theme'
 import { router } from './router'
 import { SnackBarProvider } from './contexts/snackbar'
 import { AuthProvider } from './contexts/auth'
-import '@fontsource/roboto/300.css'
-import '@fontsource/roboto/400.css'
-import '@fontsource/roboto/500.css'
-import '@fontsource/roboto/700.css'
+import '@fontsource/space-mono/400.css'
+import '@fontsource/space-mono/700.css'
+import '@fontsource/space-mono/400-italic.css'
+import '@fontsource/space-mono/700-italic.css'
 
 const GA_TRACKING_ID: string = import.meta.env.VITE_GA_TRACKING_ID
 

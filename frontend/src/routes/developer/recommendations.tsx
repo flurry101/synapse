@@ -107,7 +107,7 @@ export default function DeveloperRecommendations() {
                   />
                 </Box>
                 <Typography variant='body2' sx={{ color: '#cbd5e1' }}>
-                  ⚡ {model.latencyMs}ms P95 • 💰 ${model.pricePerMInput.toFixed(2)} in / $
+                  {model.latencyMs}ms P95 • ${model.pricePerMInput.toFixed(2)} in / $
                   {model.pricePerMOutput.toFixed(2)} out (1M tokens)
                 </Typography>
               </Stack>
