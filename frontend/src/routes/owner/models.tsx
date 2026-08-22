@@ -1,47 +1,74 @@
-import { Alert, CircularProgress, Stack } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { Alert, Stack } from '@mui/material'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import OwnerModelCard from '../../components/owner/OwnerModelCard'
+import { OwnerEmpty, OwnerError, OwnerLoading } from '../../components/owner/OwnerQueryState'
 import SectionCard from '../../components/workspace/SectionCard'
-import { OwnerModel } from '../../mocks/ownerData'
+import { OwnerModel, OwnerModelStatus } from '../../mocks/ownerData'
 import modelService from '../../services/model.service'
 
 export default function OwnerModels() {
   const [models, setModels] = useState<OwnerModel[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(
     null,
   )
   const navigate = useNavigate()
 
-  useEffect(() => {
-    let active = true
-    async function fetchModels() {
-      try {
-        const data = await modelService.getOwnerModels()
-        if (active) setModels(data)
-      } finally {
-        if (active) setLoading(false)
-      }
-    }
-    fetchModels()
-    return () => {
-      active = false
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await modelService.getOwnerModels()
+      setModels(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load models.')
+      setModels([])
+    } finally {
+      setLoading(false)
     }
   }, [])
 
+  useEffect(() => {
+    void load()
+  }, [load])
+
   const handleDelete = async (modelId: string) => {
+    setFeedback(null)
     try {
       await modelService.deleteOwnerModel(modelId)
-      setModels((current) => current.filter((m) => m.id !== modelId))
-      setFeedback({ type: 'success', message: 'Model deleted successfully from the hub.' })
-    } catch {
-      setFeedback({ type: 'error', message: 'Failed to delete model from the backend.' })
+      const data = await modelService.getOwnerModels()
+      setModels(data)
+      setFeedback({ type: 'success', message: 'Model deleted from the hub.' })
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to delete model.',
+      })
+    }
+  }
+
+  const handleStatus = async (modelId: string, status: OwnerModelStatus) => {
+    setFeedback(null)
+    try {
+      await modelService.updateOwnerModel(modelId, { status })
+      const data = await modelService.getOwnerModels()
+      setModels(data)
+      setFeedback({
+        type: 'success',
+        message: status === 'Published' ? 'Model published.' : 'Model unpublished (Draft).',
+      })
+    } catch (err) {
+      setFeedback({
+        type: 'error',
+        message: err instanceof Error ? err.message : 'Failed to update status.',
+      })
     }
   }
 
   return (
-    <SectionCard title='My Models' subtitle='Published and in-progress model catalog'>
+    <SectionCard title='My Models' subtitle='Published and in-progress listings from the database'>
       {feedback && (
         <Alert
           severity={feedback.type}
@@ -63,20 +90,16 @@ export default function OwnerModels() {
       )}
 
       {loading ? (
-        <Stack alignItems='center' sx={{ py: 4 }}>
-          <CircularProgress size={32} sx={{ color: '#fb7185' }} />
-        </Stack>
+        <OwnerLoading label='Loading models...' />
+      ) : error ? (
+        <OwnerError message={error} onRetry={() => void load()} />
       ) : models.length === 0 ? (
-        <Alert
-          severity='info'
-          sx={{
-            bgcolor: 'rgba(56, 189, 248, 0.1)',
-            color: '#bae6fd',
-            border: '1px solid rgba(56, 189, 248, 0.3)',
-          }}
-        >
-          No models listed yet. Click &quot;Add Model&quot; to create or import one.
-        </Alert>
+        <OwnerEmpty
+          title='No models yet'
+          message='Add your first model to see it listed here.'
+          actionLabel='Add your first model'
+          actionTo='/owner/add-model'
+        />
       ) : (
         <Stack spacing={2}>
           {models.map((model) => (
@@ -86,6 +109,7 @@ export default function OwnerModels() {
               onView={(modelId) => navigate(`/owner/model-profile?model=${modelId}`)}
               onEdit={(modelId) => navigate(`/owner/model-profile?model=${modelId}`)}
               onDelete={handleDelete}
+              onStatusChange={handleStatus}
             />
           ))}
         </Stack>

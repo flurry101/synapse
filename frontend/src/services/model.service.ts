@@ -1,12 +1,5 @@
-import axios from 'axios'
-import {
-  BenchmarkResult,
-  getOwnerBenchmarks as getMockBenchmarks,
-  getOwnerModels as getMockOwnerModels,
-  OwnerModel,
-  recentUsageRows,
-  usageSeries,
-} from '../mocks/ownerData'
+import axios, { isAxiosError } from 'axios'
+import { BenchmarkResult, OwnerModel } from '../mocks/ownerData'
 import {
   DeveloperModel,
   developerModels as defaultDevModels,
@@ -183,6 +176,29 @@ interface RawBackendBenchmark {
   throughput_rps?: number
 }
 
+function readApiError(error: unknown, fallback: string): Error {
+  if (isAxiosError(error)) {
+    const detail = error.response?.data?.detail
+    if (typeof detail === 'string' && detail.trim()) {
+      return new Error(detail)
+    }
+    if (Array.isArray(detail)) {
+      const joined = detail
+        .map((item) => (typeof item === 'string' ? item : item?.msg))
+        .filter(Boolean)
+        .join(' ')
+      if (joined) return new Error(joined)
+    }
+    if (error.message) {
+      return new Error(error.message)
+    }
+  }
+  if (error instanceof Error && error.message) {
+    return error
+  }
+  return new Error(fallback)
+}
+
 function normalizeOwnerModel(m: RawBackendModel): OwnerModel {
   return {
     id: m.slug || m.id || 'custom-model',
@@ -193,21 +209,31 @@ function normalizeOwnerModel(m: RawBackendModel): OwnerModel {
     version: m.version || '1.0.0',
     modelType: m.model_type || m.modelType || 'Decoder-only Transformer',
     tags: m.tags || [],
-    trustScore: m.trust_score ?? m.trustScore ?? 90,
+    trustScore: m.trust_score ?? m.trustScore ?? 0,
     requests: m.requests ?? 0,
     revenue: m.revenue ?? 0,
-    status: m.status || 'Published',
+    downloads: m.downloads ?? 0,
+    likes: m.likes ?? 0,
+    accuracy: m.accuracy,
+    latencyMs: m.latency_ms ?? m.latencyMs,
+    parameters: m.parameters,
+    license: m.license,
+    contextWindow: m.context_window || m.contextWindow,
+    status: m.status || 'Draft',
     owner: {
-      name: m.owner?.name || m.owner_name || 'Model Owner',
-      email: m.owner?.email || m.owner_email || 'owner@synapse.ai',
-      organization: m.owner?.organization || m.owner_org || 'Independent',
+      name: m.owner?.name || m.owner_name || '',
+      email: m.owner?.email || m.owner_email || '',
+      organization: m.owner?.organization || m.owner_org || '',
     },
     pricing: {
-      pricePerRequest: m.pricing?.price_per_request ?? m.price_per_request ?? 0.001,
-      pricePer1kTokens: m.pricing?.price_per_1k_tokens ?? m.price_per_1k_tokens ?? 0.015,
+      pricePerRequest: m.pricing?.price_per_request ?? m.price_per_request ?? 0,
+      pricePer1kTokens: m.pricing?.price_per_1k_tokens ?? m.price_per_1k_tokens ?? 0,
+      pricePerMInput: m.pricing?.price_per_m_input ?? m.price_per_m_input,
+      pricePerMOutput: m.pricing?.price_per_m_output ?? m.price_per_m_output,
       monthlyPrice: m.pricing?.monthly_price ?? m.monthly_price,
       currency: m.pricing?.currency || m.currency || 'USD',
     },
+    benchmarkResults: m.benchmark_results || m.benchmarkResults || {},
   }
 }
 
@@ -251,24 +277,18 @@ class ModelService {
   async getOwnerModels(): Promise<OwnerModel[]> {
     try {
       const res = await axios.get<RawBackendModel[]>(`${API_URL}owner/models`)
-      if (Array.isArray(res.data) && res.data.length > 0) {
-        return res.data.map(normalizeOwnerModel)
-      }
-    } catch {
-      // Graceful fallback to local mock storage
+      return Array.isArray(res.data) ? res.data.map(normalizeOwnerModel) : []
+    } catch (error) {
+      throw readApiError(error, 'Failed to load models.')
     }
-    return getMockOwnerModels()
   }
 
   async getOwnerModel(id: string): Promise<OwnerModel> {
     try {
-      const res = await axios.get<RawBackendModel>(`${API_URL}owner/models/${id}`)
+      const res = await axios.get<RawBackendModel>(`${API_URL}owner/models/${encodeURIComponent(id)}`)
       return normalizeOwnerModel(res.data)
-    } catch {
-      const list = getMockOwnerModels()
-      const found = list.find((m) => m.id === id)
-      if (found) return found
-      throw new Error('Model not found')
+    } catch (error) {
+      throw readApiError(error, 'Model not found.')
     }
   }
 
@@ -281,42 +301,23 @@ class ModelService {
       version: payload.version || '1.0.0',
       model_type: payload.modelType || 'Decoder-only Transformer',
       tags: payload.tags || [],
-      price_per_request: payload.pricing?.pricePerRequest ?? 0.001,
-      price_per_1k_tokens: payload.pricing?.pricePer1kTokens ?? 0.015,
+      price_per_request: payload.pricing?.pricePerRequest ?? 0,
+      price_per_1k_tokens: payload.pricing?.pricePer1kTokens ?? 0,
+      price_per_m_input: payload.pricing?.pricePerMInput,
+      price_per_m_output: payload.pricing?.pricePerMOutput,
       monthly_price: payload.pricing?.monthlyPrice,
       currency: payload.pricing?.currency || 'USD',
-      status: payload.status || 'Published',
+      status: payload.status || 'Draft',
+      parameters: payload.parameters,
+      license: payload.license,
+      context_window: payload.contextWindow,
+      slug: payload.id,
     }
     try {
       const res = await axios.post<RawBackendModel>(`${API_URL}owner/models`, backendPayload)
       return normalizeOwnerModel(res.data)
-    } catch {
-      // Fallback
-      const newModel: OwnerModel = {
-        id: payload.id || `model-${Date.now()}`,
-        name: payload.name || 'New Model',
-        huggingFaceId: payload.huggingFaceId || '',
-        description: payload.description || '',
-        task: payload.task || 'General Chat',
-        version: payload.version || '1.0.0',
-        modelType: payload.modelType || 'Decoder-only Transformer',
-        tags: payload.tags || [],
-        trustScore: payload.trustScore || 90,
-        requests: 0,
-        revenue: 0,
-        status: payload.status || 'Published',
-        owner: payload.owner || {
-          name: 'Model Owner',
-          email: 'owner@synapse.ai',
-          organization: 'Independent',
-        },
-        pricing: payload.pricing || {
-          pricePerRequest: 0.001,
-          pricePer1kTokens: 0.015,
-          currency: 'USD',
-        },
-      }
-      return newModel
+    } catch (error) {
+      throw readApiError(error, 'Failed to create model.')
     }
   }
 
@@ -330,32 +331,61 @@ class ModelService {
     if (payload.modelType !== undefined) backendPayload.model_type = payload.modelType
     if (payload.tags !== undefined) backendPayload.tags = payload.tags
     if (payload.status !== undefined) backendPayload.status = payload.status
-    if (payload.trustScore !== undefined) backendPayload.trust_score = payload.trustScore
+    if (payload.parameters !== undefined) backendPayload.parameters = payload.parameters
+    if (payload.license !== undefined) backendPayload.license = payload.license
+    if (payload.contextWindow !== undefined) backendPayload.context_window = payload.contextWindow
     if (payload.pricing) {
       if (payload.pricing.pricePerRequest !== undefined)
         backendPayload.price_per_request = payload.pricing.pricePerRequest
       if (payload.pricing.pricePer1kTokens !== undefined)
         backendPayload.price_per_1k_tokens = payload.pricing.pricePer1kTokens
+      if (payload.pricing.pricePerMInput !== undefined)
+        backendPayload.price_per_m_input = payload.pricing.pricePerMInput
+      if (payload.pricing.pricePerMOutput !== undefined)
+        backendPayload.price_per_m_output = payload.pricing.pricePerMOutput
       if (payload.pricing.monthlyPrice !== undefined)
         backendPayload.monthly_price = payload.pricing.monthlyPrice
       if (payload.pricing.currency !== undefined) backendPayload.currency = payload.pricing.currency
     }
 
     try {
-      const res = await axios.patch<RawBackendModel>(`${API_URL}owner/models/${id}`, backendPayload)
+      const res = await axios.patch<RawBackendModel>(
+        `${API_URL}owner/models/${encodeURIComponent(id)}`,
+        backendPayload,
+      )
       return normalizeOwnerModel(res.data)
-    } catch {
-      const list = getMockOwnerModels()
-      const existing = list.find((m) => m.id === id)
-      return { ...existing, ...payload } as OwnerModel
+    } catch (error) {
+      throw readApiError(error, 'Failed to update model.')
+    }
+  }
+
+  async updateOwnerPricing(
+    id: string,
+    pricing: OwnerModel['pricing'],
+  ): Promise<OwnerModel> {
+    try {
+      const res = await axios.patch<RawBackendModel>(
+        `${API_URL}owner/models/${encodeURIComponent(id)}/pricing`,
+        {
+          price_per_request: pricing.pricePerRequest,
+          price_per_1k_tokens: pricing.pricePer1kTokens,
+          price_per_m_input: pricing.pricePerMInput,
+          price_per_m_output: pricing.pricePerMOutput,
+          monthly_price: pricing.monthlyPrice ?? null,
+          currency: pricing.currency,
+        },
+      )
+      return normalizeOwnerModel(res.data)
+    } catch (error) {
+      throw readApiError(error, 'Failed to update pricing.')
     }
   }
 
   async deleteOwnerModel(id: string): Promise<void> {
     try {
-      await axios.delete(`${API_URL}owner/models/${id}`)
-    } catch {
-      // Ignored in fallback
+      await axios.delete(`${API_URL}owner/models/${encodeURIComponent(id)}`)
+    } catch (error) {
+      throw readApiError(error, 'Failed to delete model.')
     }
   }
 
@@ -373,46 +403,32 @@ class ModelService {
     try {
       const res = await axios.post(`${API_URL}owner/verify`, payload)
       return res.data
-    } catch {
-      const isHf = Boolean(payload.hugging_face_id && payload.hugging_face_id.includes('/'))
-      const isRepo = Boolean(
-        payload.repo_url &&
-          (payload.repo_url.includes('github.com') || payload.repo_url.includes('gitlab.com')),
-      )
-      return {
-        verified: isHf || isRepo,
-        hf_verified: isHf,
-        repo_verified: isRepo,
-        message:
-          isHf || isRepo
-            ? 'Repository verification confirmed.'
-            : 'Verification requires a valid Hugging Face repo ID or GitHub/GitLab repository URL.',
-        details: {},
-      }
+    } catch (error) {
+      throw readApiError(error, 'Verification request failed.')
     }
   }
 
   async getOwnerBenchmarks(): Promise<BenchmarkResult[]> {
     try {
       const res = await axios.get<RawBackendBenchmark[]>(`${API_URL}owner/benchmarks`)
-      if (Array.isArray(res.data) && res.data.length > 0) {
-        return res.data.map((b) => ({
-          id: b.id || b.uuid || `bm-${b.model_id}`,
-          modelId: b.model_id,
-          dataset: b.dataset,
-          testDate: b.test_date || '',
-          accuracy: b.accuracy || 0,
-          precision: b.precision || 0,
-          recall: b.recall || 0,
-          f1Score: b.f1_score || 0,
-          latencyMs: b.latency_ms || 0,
-          throughputRps: b.throughput_rps || 0,
-        }))
+      if (!Array.isArray(res.data)) {
+        return []
       }
-    } catch {
-      // Fallback
+      return res.data.map((b) => ({
+        id: b.id || b.uuid || `bm-${b.model_id}`,
+        modelId: b.model_id,
+        dataset: b.dataset,
+        testDate: b.test_date || '',
+        accuracy: b.accuracy || 0,
+        precision: b.precision || 0,
+        recall: b.recall || 0,
+        f1Score: b.f1_score || 0,
+        latencyMs: b.latency_ms || 0,
+        throughputRps: b.throughput_rps || 0,
+      }))
+    } catch (error) {
+      throw readApiError(error, 'Failed to load benchmarks.')
     }
-    return getMockBenchmarks()
   }
 
   async addOwnerBenchmark(payload: Partial<BenchmarkResult>): Promise<BenchmarkResult> {
@@ -445,19 +461,8 @@ class ModelService {
         latencyMs: b.latency_ms || 0,
         throughputRps: b.throughput_rps || 0,
       }
-    } catch {
-      return {
-        id: `bm-${Date.now()}`,
-        modelId: payload.modelId || 'neuron-write-1',
-        dataset: payload.dataset || 'Custom Eval',
-        testDate: payload.testDate || new Date().toISOString().split('T')[0],
-        accuracy: payload.accuracy ?? 90,
-        precision: payload.precision ?? 89,
-        recall: payload.recall ?? 88,
-        f1Score: payload.f1Score ?? 88.5,
-        latencyMs: payload.latencyMs ?? 220,
-        throughputRps: payload.throughputRps ?? 45,
-      }
+    } catch (error) {
+      throw readApiError(error, 'Failed to save benchmark.')
     }
   }
 
@@ -465,31 +470,28 @@ class ModelService {
     try {
       const res = await axios.get<OwnerAnalytics>(`${API_URL}owner/analytics`)
       return {
-        total_revenue: res.data.total_revenue,
-        total_requests: res.data.total_requests,
-        average_trust_score: res.data.average_trust_score,
-        active_models_count: res.data.active_models_count,
-        time_series: res.data.time_series,
-        recent_usage: res.data.recent_usage,
+        total_revenue: res.data.total_revenue ?? 0,
+        total_requests: res.data.total_requests ?? 0,
+        average_trust_score: res.data.average_trust_score ?? 0,
+        active_models_count: res.data.active_models_count ?? 0,
+        time_series: Array.isArray(res.data.time_series) ? res.data.time_series : [],
+        recent_usage: Array.isArray(res.data.recent_usage) ? res.data.recent_usage : [],
       }
-    } catch {
-      return {
-        total_revenue: 1820,
-        total_requests: 287000,
-        average_trust_score: 89.3,
-        active_models_count: 3,
-        time_series: usageSeries,
-        recent_usage: recentUsageRows.map((r) => ({
-          id: r.id,
-          app: r.app,
-          model: r.model,
-          requests: r.requests,
-          success_rate: r.successRate,
-          revenue: r.revenue,
-          avg_latency_ms: r.avgLatencyMs,
-          timestamp: r.timestamp,
-        })),
-      }
+    } catch (error) {
+      throw readApiError(error, 'Failed to load analytics.')
+    }
+  }
+
+  async searchOwnerHfModels(query: string, limit = 8): Promise<HFModelRecord[]> {
+    try {
+      const res = await axios.post<HFModelRecord[]>(`${API_URL}owner/hf/search`, {
+        q: query,
+        limit,
+        sort: 'downloads',
+      })
+      return Array.isArray(res.data) ? res.data : []
+    } catch (error) {
+      throw readApiError(error, 'Failed to search Hugging Face Hub.')
     }
   }
 
@@ -609,15 +611,15 @@ class ModelService {
     }
   }
 
-  async importHfModel(repoId: string, hfToken?: string): Promise<RawBackendModel | null> {
+  async importHfModel(repoId: string, hfToken?: string): Promise<RawBackendModel> {
     try {
       const res = await axios.post<RawBackendModel>(`${API_URL}owner/hf/import`, {
         repo_id: repoId,
         hf_token: hfToken,
       })
       return res.data
-    } catch {
-      return null
+    } catch (error) {
+      throw readApiError(error, 'Could not fetch Hugging Face metadata.')
     }
   }
 
