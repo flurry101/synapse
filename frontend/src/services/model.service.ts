@@ -285,7 +285,9 @@ class ModelService {
 
   async getOwnerModel(id: string): Promise<OwnerModel> {
     try {
-      const res = await axios.get<RawBackendModel>(`${API_URL}owner/models/${encodeURIComponent(id)}`)
+      const res = await axios.get<RawBackendModel>(
+        `${API_URL}owner/models/${encodeURIComponent(id)}`,
+      )
       return normalizeOwnerModel(res.data)
     } catch (error) {
       throw readApiError(error, 'Model not found.')
@@ -359,10 +361,7 @@ class ModelService {
     }
   }
 
-  async updateOwnerPricing(
-    id: string,
-    pricing: OwnerModel['pricing'],
-  ): Promise<OwnerModel> {
+  async updateOwnerPricing(id: string, pricing: OwnerModel['pricing']): Promise<OwnerModel> {
     try {
       const res = await axios.patch<RawBackendModel>(
         `${API_URL}owner/models/${encodeURIComponent(id)}/pricing`,

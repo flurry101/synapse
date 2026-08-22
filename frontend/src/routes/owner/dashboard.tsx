@@ -98,14 +98,8 @@ export default function OwnerDashboard() {
         }}
       >
         <MetricCard label='Total Models' value={String(summary.totalModels)} />
-        <MetricCard
-          label='Recorded Requests'
-          value={summary.totalRequests.toLocaleString()}
-        />
-        <MetricCard
-          label='Recorded Revenue'
-          value={`$${summary.revenue.toLocaleString()}`}
-        />
+        <MetricCard label='Recorded Requests' value={summary.totalRequests.toLocaleString()} />
+        <MetricCard label='Recorded Revenue' value={`$${summary.revenue.toLocaleString()}`} />
         <MetricCard
           label='Listing Score (avg)'
           value={
