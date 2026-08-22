@@ -54,9 +54,7 @@ export default function OwnerModels() {
                 : 'rgba(248, 113, 113, 0.15)',
             color: feedback.type === 'success' ? '#86efac' : '#fca5a5',
             border: `1px solid ${
-              feedback.type === 'success'
-                ? 'rgba(74, 222, 128, 0.3)'
-                : 'rgba(248, 113, 113, 0.3)'
+              feedback.type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(248, 113, 113, 0.3)'
             }`,
           }}
         >

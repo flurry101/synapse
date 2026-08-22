@@ -331,7 +331,9 @@ export default function DeveloperSearch() {
                 <ModelCard
                   key={model.id}
                   model={model}
-                  selectedForCompare={compareIds.includes(model.id) || compareIds.includes(model.huggingFaceId)}
+                  selectedForCompare={
+                    compareIds.includes(model.id) || compareIds.includes(model.huggingFaceId)
+                  }
                   onToggleCompare={toggleCompare}
                 />
               ))}
@@ -363,7 +365,13 @@ export default function DeveloperSearch() {
                   }}
                 >
                   <Box sx={{ flex: 1 }}>
-                    <Stack direction='row' spacing={1} alignItems='center' useFlexGap flexWrap='wrap'>
+                    <Stack
+                      direction='row'
+                      spacing={1}
+                      alignItems='center'
+                      useFlexGap
+                      flexWrap='wrap'
+                    >
                       <Typography variant='subtitle1' sx={{ fontWeight: 900, color: '#f8fafc' }}>
                         {hf.name}
                       </Typography>
@@ -425,7 +433,13 @@ export default function DeveloperSearch() {
                     </Typography>
                   </Box>
 
-                  <Stack direction={{ xs: 'row', sm: 'row' }} spacing={1.5} alignItems='center' useFlexGap flexWrap='wrap'>
+                  <Stack
+                    direction={{ xs: 'row', sm: 'row' }}
+                    spacing={1.5}
+                    alignItems='center'
+                    useFlexGap
+                    flexWrap='wrap'
+                  >
                     <FormControlLabel
                       control={
                         <Checkbox
@@ -438,7 +452,10 @@ export default function DeveloperSearch() {
                         />
                       }
                       label={
-                        <Typography variant='caption' sx={{ color: isSelected ? '#38bdf8' : '#94a3b8', fontWeight: 800 }}>
+                        <Typography
+                          variant='caption'
+                          sx={{ color: isSelected ? '#38bdf8' : '#94a3b8', fontWeight: 800 }}
+                        >
                           Compare
                         </Typography>
                       }

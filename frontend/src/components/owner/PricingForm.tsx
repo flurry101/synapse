@@ -27,7 +27,11 @@ export default function PricingForm({ model, onSave }: PricingFormProps) {
     if (nameLower.includes('70b') || nameLower.includes('671b') || nameLower.includes('deepseek')) {
       recommended1k = 0.0015
       recommendedReq = 0.0005
-    } else if (nameLower.includes('27b') || nameLower.includes('14b') || nameLower.includes('32b')) {
+    } else if (
+      nameLower.includes('27b') ||
+      nameLower.includes('14b') ||
+      nameLower.includes('32b')
+    ) {
       recommended1k = 0.0008
       recommendedReq = 0.0003
     } else if (nameLower.includes('8b') || nameLower.includes('7b')) {
@@ -96,7 +100,11 @@ export default function PricingForm({ model, onSave }: PricingFormProps) {
         </Stack>
 
         <Typography variant='body2' sx={{ color: '#94a3b8', mt: 1, mb: 1.5 }}>
-          {fairMarketRecommendation.reason} Recommended: <strong>${(fairMarketRecommendation.pricePer1kTokens * 1000).toFixed(2)} / 1M tokens</strong> (${fairMarketRecommendation.pricePerRequest} / request).
+          {fairMarketRecommendation.reason} Recommended:{' '}
+          <strong>
+            ${(fairMarketRecommendation.pricePer1kTokens * 1000).toFixed(2)} / 1M tokens
+          </strong>{' '}
+          (${fairMarketRecommendation.pricePerRequest} / request).
         </Typography>
 
         <Button

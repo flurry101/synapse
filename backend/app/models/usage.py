@@ -8,7 +8,7 @@ from pydantic import Field
 
 class UsageEvent(Document):
     uuid: Annotated[UUID, Field(default_factory=uuid4), Indexed(unique=True)]
-    model_id: str = Field(index=True)
+    model_id: Annotated[str, Indexed()] = ""
     model_name: str = ""
     app_name: str = "Developer Playground Run"
     user_id: UUID | None = None

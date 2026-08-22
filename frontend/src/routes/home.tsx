@@ -25,6 +25,7 @@ import {
   Card,
   CardContent,
   Chip,
+  CircularProgress,
   Container,
   Divider,
   IconButton,
@@ -60,7 +61,8 @@ const models: Model[] = [
     name: 'Qwen 3.8 27B',
     maker: 'Qwen',
     category: 'Multimodal & Reasoning',
-    description: '27B dense VLM with Gated-DeltaNet hybrid attention, native vision, and dialable reasoning.',
+    description:
+      '27B dense VLM with Gated-DeltaNet hybrid attention, native vision, and dialable reasoning.',
     price: '$0.35 / 1M tokens',
     speed: '~110 tok/s',
     score: 96,
@@ -71,7 +73,8 @@ const models: Model[] = [
     name: 'Llama 3.1 8B Instruct',
     maker: 'Meta',
     category: 'Text & Chat',
-    description: 'Fast, capable instruction-following for everyday AI products, agents, and reasoning.',
+    description:
+      'Fast, capable instruction-following for everyday AI products, agents, and reasoning.',
     price: '$0.15 / 1M tokens',
     speed: '185 ms',
     score: 92,
@@ -104,7 +107,8 @@ const models: Model[] = [
     name: 'BGE Large EN v1.5',
     maker: 'BAAI',
     category: 'Vector Embeddings & RAG',
-    description: 'Top-tier 1024-dim dense embedding transformer for enterprise semantic search and grounding.',
+    description:
+      'Top-tier 1024-dim dense embedding transformer for enterprise semantic search and grounding.',
     price: '$0.02 / 1M tokens',
     speed: '65 ms',
     score: 94,
@@ -126,19 +130,23 @@ const models: Model[] = [
 const evalPresets = [
   {
     label: '⚡ FastAPI Microservice',
-    prompt: 'Write a production-ready Python FastAPI endpoint with rate limiting and JWT auth verification.',
+    prompt:
+      'Write a production-ready Python FastAPI endpoint with rate limiting and JWT auth verification.',
   },
   {
     label: '🧠 Routing Strategy',
-    prompt: 'Design a multi-tiered model routing strategy balancing latency <150ms, cost <$0.20/1M, and trust >90%.',
+    prompt:
+      'Design a multi-tiered model routing strategy balancing latency <150ms, cost <$0.20/1M, and trust >90%.',
   },
   {
     label: '🔍 RAG Grounding',
-    prompt: 'Given an enterprise knowledge base partition with cosine similarity 0.94, extract key entities and synthesize grounded facts without hallucination.',
+    prompt:
+      'Given an enterprise knowledge base partition with cosine similarity 0.94, extract key entities and synthesize grounded facts without hallucination.',
   },
   {
     label: '💻 LRU Cache with TTL',
-    prompt: 'Implement a high-throughput LRU Cache with O(1) get/put operations and TTL expiration in TypeScript.',
+    prompt:
+      'Implement a high-throughput LRU Cache with O(1) get/put operations and TTL expiration in TypeScript.',
   },
 ]
 

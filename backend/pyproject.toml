@@ -61,7 +61,7 @@ src = ["app", "tests"]
 line-length = 90
 
 [tool.ruff.lint]
-ignore = []
+ignore = ["E501"]
 select = [
     "E",
     "F",

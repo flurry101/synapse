@@ -155,14 +155,13 @@ export default function OwnerModelCard({ model, onView, onEdit, onDelete }: Owne
         <DialogTitle sx={{ fontWeight: 800, color: '#f87171' }}>Delete Model?</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: '#94a3b8' }}>
-            Are you sure you want to delete <strong style={{ color: '#f8fafc' }}>{model.name}</strong>? This action cannot be undone and will remove the model from developer access.
+            Are you sure you want to delete{' '}
+            <strong style={{ color: '#f8fafc' }}>{model.name}</strong>? This action cannot be undone
+            and will remove the model from developer access.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ pb: 2, px: 3 }}>
-          <Button
-            onClick={() => setConfirmOpen(false)}
-            sx={{ color: '#94a3b8', fontWeight: 700 }}
-          >
+          <Button onClick={() => setConfirmOpen(false)} sx={{ color: '#94a3b8', fontWeight: 700 }}>
             Cancel
           </Button>
           <Button

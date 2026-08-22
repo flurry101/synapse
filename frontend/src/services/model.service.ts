@@ -117,10 +117,15 @@ interface RawBackendModel {
   huggingFaceId?: string
   description?: string
   task?: string
+  category?: string
   version?: string
   model_type?: string
   modelType?: string
   tags?: string[]
+  parameters?: string
+  license?: string
+  context_window?: string
+  contextWindow?: string
   trust_score?: number
   trustScore?: number
   accuracy?: number
@@ -212,7 +217,7 @@ function normalizeDevModel(m: RawBackendModel): DeveloperModel {
     name: m.name,
     description: m.description || '',
     task: m.task || 'General Chat',
-    category: (m as any).category || 'Natural Language Processing',
+    category: m.category || 'Natural Language Processing',
     creator: m.owner?.organization || m.owner_org || m.owner?.name || 'NeuralForge Labs',
     huggingFaceId: m.hugging_face_id || m.huggingFaceId || '',
     trustScore: m.trust_score ?? m.trustScore ?? 90,
@@ -220,9 +225,9 @@ function normalizeDevModel(m: RawBackendModel): DeveloperModel {
     latencyMs: m.latency_ms ?? m.latencyMs ?? 220,
     pricePerMInput: m.pricing?.price_per_m_input ?? m.price_per_m_input ?? 0.16,
     pricePerMOutput: m.pricing?.price_per_m_output ?? m.price_per_m_output ?? 0.65,
-    parameters: (m as any).parameters || '8B',
-    license: (m as any).license || 'apache-2.0',
-    contextWindow: (m as any).context_window || (m as any).contextWindow || '128K',
+    parameters: m.parameters || '8B',
+    license: m.license || 'apache-2.0',
+    contextWindow: m.context_window || m.contextWindow || '128K',
     benchmarkResults: m.benchmark_results ||
       m.benchmarkResults || { mmlu: 84, humaneval: 71, longContext: 82 },
     usage: {
@@ -363,7 +368,7 @@ class ModelService {
     hf_verified: boolean
     repo_verified: boolean
     message: string
-    details: Record<string, any>
+    details: Record<string, unknown>
   }> {
     try {
       const res = await axios.post(`${API_URL}owner/verify`, payload)
@@ -488,24 +493,31 @@ class ModelService {
     }
   }
 
-  async searchHfModels(options: {
-    query?: string
-    task?: string
-    category?: string
-    parameters?: string
-    license?: string
-    limit?: number
-    sort?: string
-  } | string): Promise<HFModelRecord[]> {
-    const payload = typeof options === 'string' ? { q: options, limit: 50 } : {
-      q: options.query || '',
-      task: options.task,
-      category: options.category,
-      parameters: options.parameters,
-      license: options.license,
-      limit: options.limit || 50,
-      sort: options.sort || 'downloads',
-    }
+  async searchHfModels(
+    options:
+      | {
+          query?: string
+          task?: string
+          category?: string
+          parameters?: string
+          license?: string
+          limit?: number
+          sort?: string
+        }
+      | string,
+  ): Promise<HFModelRecord[]> {
+    const payload =
+      typeof options === 'string'
+        ? { q: options, limit: 50 }
+        : {
+            q: options.query || '',
+            task: options.task,
+            category: options.category,
+            parameters: options.parameters,
+            license: options.license,
+            limit: options.limit || 50,
+            sort: options.sort || 'downloads',
+          }
 
     try {
       const res = await axios.post<HFModelRecord[]>(`${API_URL}developer/hf/search`, payload)
@@ -654,7 +666,9 @@ class ModelService {
 
   async getDeveloperModel(id: string): Promise<DeveloperModel> {
     try {
-      const res = await axios.get<RawBackendModel>(`${API_URL}developer/models/${encodeURIComponent(id)}`)
+      const res = await axios.get<RawBackendModel>(
+        `${API_URL}developer/models/${encodeURIComponent(id)}`,
+      )
       return normalizeDevModel(res.data)
     } catch {
       const found = defaultDevModels.find((m) => m.id === id || m.huggingFaceId === id)
@@ -689,7 +703,9 @@ class ModelService {
         })),
       }
     } catch {
-      const models = defaultDevModels.filter((m) => modelIds.includes(m.id) || modelIds.includes(m.huggingFaceId))
+      const models = defaultDevModels.filter(
+        (m) => modelIds.includes(m.id) || modelIds.includes(m.huggingFaceId),
+      )
       return { models: models.length ? models : defaultDevModels.slice(0, 2), benchmarks: [] }
     }
   }

@@ -1,4 +1,3 @@
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
@@ -23,10 +22,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import type { DeveloperModel } from '../../mocks/developerData'
-import modelService, {
-  Deployment,
-  DeploymentQuickstartSpecs,
-} from '../../services/model.service'
+import modelService, { Deployment, DeploymentQuickstartSpecs } from '../../services/model.service'
 
 type DeploymentPanelProps = {
   models: DeveloperModel[]
@@ -35,9 +31,10 @@ type DeploymentPanelProps = {
 
 export default function DeploymentPanel({ models, initialModelId }: DeploymentPanelProps) {
   const [selectedModelId, setSelectedModelId] = useState(
-    initialModelId && (models.some((m) => m.id === initialModelId || m.huggingFaceId === initialModelId))
+    initialModelId &&
+      models.some((m) => m.id === initialModelId || m.huggingFaceId === initialModelId)
       ? initialModelId
-      : (models[0]?.huggingFaceId || models[0]?.id || 'Qwen/Qwen3.8-27B'),
+      : models[0]?.huggingFaceId || models[0]?.id || 'Qwen/Qwen3.8-27B',
   )
   const [environment, setEnvironment] = useState('production')
   const [region, setRegion] = useState('us-east-2')
@@ -231,11 +228,27 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
                 border: '1px solid #1e293b',
               }}
             >
-              <Typography variant='caption' sx={{ color: '#94a3b8', fontWeight: 800, letterSpacing: 0.5 }}>
+              <Typography
+                variant='caption'
+                sx={{ color: '#94a3b8', fontWeight: 800, letterSpacing: 0.5 }}
+              >
                 OPENAI COMPATIBLE BASE URL
               </Typography>
-              <Stack direction='row' spacing={2} alignItems='center' justifyContent='space-between' sx={{ mt: 0.5 }}>
-                <Typography sx={{ fontFamily: 'monospace', color: '#38bdf8', fontSize: '0.95rem', wordBreak: 'break-all' }}>
+              <Stack
+                direction='row'
+                spacing={2}
+                alignItems='center'
+                justifyContent='space-between'
+                sx={{ mt: 0.5 }}
+              >
+                <Typography
+                  sx={{
+                    fontFamily: 'monospace',
+                    color: '#38bdf8',
+                    fontSize: '0.95rem',
+                    wordBreak: 'break-all',
+                  }}
+                >
                   {hfSpecs.endpoint_url}
                 </Typography>
                 <Button
@@ -269,28 +282,24 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
                   '& .MuiTabs-indicator': { bgcolor: '#38bdf8' },
                 }}
               >
-                <Tab icon={<TerminalIcon fontSize='small' />} iconPosition='start' label='Terminal — curl' />
+                <Tab
+                  icon={<TerminalIcon fontSize='small' />}
+                  iconPosition='start'
+                  label='Terminal — curl'
+                />
                 <Tab label='quickstart.py' />
                 <Tab label='vision.py' />
                 <Tab label='~/.pi/agent/models.json' />
                 <Tab label='Terminal (pi command)' />
               </Tabs>
 
-              {codeTab === 0 && (
-                <CodeSnippetBlock code={hfSpecs.curl_snippet} onCopy={onCopy} />
-              )}
+              {codeTab === 0 && <CodeSnippetBlock code={hfSpecs.curl_snippet} onCopy={onCopy} />}
               {codeTab === 1 && (
                 <CodeSnippetBlock code={hfSpecs.quickstart_python} onCopy={onCopy} />
               )}
-              {codeTab === 2 && (
-                <CodeSnippetBlock code={hfSpecs.vision_python} onCopy={onCopy} />
-              )}
-              {codeTab === 3 && (
-                <CodeSnippetBlock code={hfSpecs.pi_models_json} onCopy={onCopy} />
-              )}
-              {codeTab === 4 && (
-                <CodeSnippetBlock code={hfSpecs.pi_zsh_command} onCopy={onCopy} />
-              )}
+              {codeTab === 2 && <CodeSnippetBlock code={hfSpecs.vision_python} onCopy={onCopy} />}
+              {codeTab === 3 && <CodeSnippetBlock code={hfSpecs.pi_models_json} onCopy={onCopy} />}
+              {codeTab === 4 && <CodeSnippetBlock code={hfSpecs.pi_zsh_command} onCopy={onCopy} />}
             </Box>
 
             {/* Hardware & Endpoint Specifications */}
@@ -315,10 +324,16 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
                       border: '1px solid #1e293b',
                     }}
                   >
-                    <Typography variant='caption' sx={{ color: '#94a3b8', fontWeight: 700, display: 'block' }}>
+                    <Typography
+                      variant='caption'
+                      sx={{ color: '#94a3b8', fontWeight: 700, display: 'block' }}
+                    >
                       {key}
                     </Typography>
-                    <Typography variant='body2' sx={{ color: '#f8fafc', fontWeight: 800, mt: 0.25 }}>
+                    <Typography
+                      variant='body2'
+                      sx={{ color: '#f8fafc', fontWeight: 800, mt: 0.25 }}
+                    >
                       {val}
                     </Typography>
                   </Box>
@@ -619,13 +634,7 @@ export default function DeploymentPanel({ models, initialModelId }: DeploymentPa
   )
 }
 
-function CodeSnippetBlock({
-  code,
-  onCopy,
-}: {
-  code: string
-  onCopy: (text: string) => void
-}) {
+function CodeSnippetBlock({ code, onCopy }: { code: string; onCopy: (text: string) => void }) {
   return (
     <Box sx={{ position: 'relative' }}>
       <Button

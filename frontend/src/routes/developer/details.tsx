@@ -54,8 +54,9 @@ export default function DeveloperModelDetails() {
         if (active) setModel(data)
       } catch {
         const fallback =
-          availableModels.find((m) => m.id === activeModelId || m.huggingFaceId === activeModelId) ||
-          defaultDevModels[0]
+          availableModels.find(
+            (m) => m.id === activeModelId || m.huggingFaceId === activeModelId,
+          ) || defaultDevModels[0]
         if (active) setModel(fallback)
       } finally {
         if (active) setLoading(false)
@@ -255,8 +256,16 @@ export default function DeveloperModelDetails() {
           gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
         }}
       >
-        <MetricCard label='Accuracy Score' value={`${model.accuracy}%`} delta='Verified benchmark' />
-        <MetricCard label='P95 TTFT Latency' value={`${model.latencyMs}ms`} delta='Live stream test' />
+        <MetricCard
+          label='Accuracy Score'
+          value={`${model.accuracy}%`}
+          delta='Verified benchmark'
+        />
+        <MetricCard
+          label='P95 TTFT Latency'
+          value={`${model.latencyMs}ms`}
+          delta='Live stream test'
+        />
         <MetricCard
           label='Input Pricing'
           value={`$${model.pricePerMInput.toFixed(2)} / 1M`}

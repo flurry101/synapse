@@ -275,7 +275,9 @@ export default function OwnerAddModel() {
           </Stack>
 
           <Typography variant='body2' sx={{ color: '#94a3b8', mb: 2 }}>
-            Synapse Public Model Hub requires verified ownership of the Hugging Face repository or an active Open Source repository (GitHub or GitLab) before listing models for developer use.
+            Synapse Public Model Hub requires verified ownership of the Hugging Face repository or
+            an active Open Source repository (GitHub or GitLab) before listing models for developer
+            use.
           </Typography>
 
           <Stack spacing={2}>
@@ -312,11 +314,7 @@ export default function OwnerAddModel() {
               variant='contained'
               disabled={isVerifying || (!form.huggingFaceId.trim() && !form.repoUrl.trim())}
               startIcon={
-                isVerifying ? (
-                  <CircularProgress size={16} color='inherit' />
-                ) : (
-                  <VerifiedUserIcon />
-                )
+                isVerifying ? <CircularProgress size={16} color='inherit' /> : <VerifiedUserIcon />
               }
               onClick={handleVerify}
               sx={{

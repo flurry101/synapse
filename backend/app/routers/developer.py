@@ -3,11 +3,10 @@ import secrets
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
 
-from beanie.operators import In
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from ..auth.auth import get_current_active_user
-from ..models import Benchmark, Deployment, Model, UsageEvent, User
+from ..models import Deployment, Model, UsageEvent, User
 from ..schemas.models import (
     BenchmarkOut,
     CompareRequest,
@@ -70,9 +69,17 @@ def _model_to_out(model: Model) -> ModelOut:
         benchmark_results=model.benchmark_results,
         owner_id=model.owner_id,
         owner=OwnerInfo(
-            name=(model.hugging_face_id.split("/")[0] if (model.hugging_face_id and "/" in model.hugging_face_id) else (model.owner_name or "Community")),
+            name=(
+                model.hugging_face_id.split("/")[0]
+                if (model.hugging_face_id and "/" in model.hugging_face_id)
+                else (model.owner_name or "Community")
+            ),
             email="hub@huggingface.co",
-            organization=(model.hugging_face_id.split("/")[0] if (model.hugging_face_id and "/" in model.hugging_face_id) else (model.owner_org or "Community")),
+            organization=(
+                model.hugging_face_id.split("/")[0]
+                if (model.hugging_face_id and "/" in model.hugging_face_id)
+                else (model.owner_org or "Community")
+            ),
         ),
         pricing=PricingInfo(
             price_per_request=model.price_per_request,
@@ -97,7 +104,9 @@ def _hf_detail_to_out(detail: dict) -> ModelOut:
     p_in = detail.get("price_per_m_input", 0.15)
     p_out = detail.get("price_per_m_output", 0.45)
     now = datetime.now(timezone.utc)
-    author = detail.get("owner_name") or (hf_id.split("/")[0] if "/" in hf_id else "Community")
+    author = detail.get("owner_name") or (
+        hf_id.split("/")[0] if "/" in hf_id else "Community"
+    )
 
     return ModelOut(
         id=slug,
@@ -124,7 +133,9 @@ def _hf_detail_to_out(detail: dict) -> ModelOut:
         context_window=detail.get("context_window", "128K"),
         parameters=detail.get("parameters", "8B"),
         license=detail.get("license", "apache-2.0"),
-        benchmark_results=detail.get("benchmark_results", {"mmlu": 88, "humaneval": 82, "longContext": 86}),
+        benchmark_results=detail.get(
+            "benchmark_results", {"mmlu": 88, "humaneval": 82, "longContext": 86}
+        ),
         owner_id=None,
         owner=OwnerInfo(
             name=author,
@@ -168,7 +179,12 @@ async def list_developer_models(
         limit=limit,
         token=current_user.hf_token,
     )
-    return [_hf_detail_to_out(await hf_service.get_hf_model_details(r.id, token=current_user.hf_token)) for r in hf_records]
+    return [
+        _hf_detail_to_out(
+            await hf_service.get_hf_model_details(r.id, token=current_user.hf_token)
+        )
+        for r in hf_records
+    ]
 
 
 @router.get("/models/{model_id:path}", response_model=ModelOut)
@@ -177,7 +193,9 @@ async def get_developer_model(
     current_user: User = Depends(require_developer),
 ) -> ModelOut:
     canonical_id = hf_service._resolve_canonical_repo_id(model_id)
-    detail = await hf_service.get_hf_model_details(canonical_id, token=current_user.hf_token)
+    detail = await hf_service.get_hf_model_details(
+        canonical_id, token=current_user.hf_token
+    )
     return _hf_detail_to_out(detail)
 
 
@@ -191,7 +209,9 @@ async def compare_developer_models(
 
     for mid in payload.model_ids:
         canonical_id = hf_service._resolve_canonical_repo_id(mid)
-        detail = await hf_service.get_hf_model_details(canonical_id, token=current_user.hf_token)
+        detail = await hf_service.get_hf_model_details(
+            canonical_id, token=current_user.hf_token
+        )
         model_outs.append(_hf_detail_to_out(detail))
 
     return CompareResponse(
@@ -253,14 +273,14 @@ async def run_developer_playground(
             completion_tokens=res.completion_tokens,
             total_tokens=res.total_tokens,
             latency_ms=res.latency_ms,
-            cost_usd=res.cost_estimate,
+            cost_usd=res.cost_usd,
             status="success",
         )
         await event.create()
 
         if model:
             model.requests = (model.requests or 0) + 1
-            model.revenue = round((model.revenue or 0.0) + res.cost_estimate, 4)
+            model.revenue = round((model.revenue or 0.0) + res.cost_usd, 4)
             await model.save()
     except Exception:
         pass
@@ -290,11 +310,11 @@ async def list_developer_deployments(
             temperature=d.temperature,
             rate_limit_rpm=d.rate_limit_rpm,
             endpoint_url=d.endpoint_url
-            or f"https://router.huggingface.co/hf-inference/v1",
+            or "https://router.huggingface.co/hf-inference/v1",
             status=d.status,
             created_at=d.created_at,
             curl_example=(
-                f"curl https://router.huggingface.co/hf-inference/v1/chat/completions \\\n"
+                "curl https://router.huggingface.co/hf-inference/v1/chat/completions \\\n"
                 f'  -H "Authorization: Bearer {d.api_key}" \\\n'
                 '  -H "Content-Type: application/json" \\\n'
                 f'  -d \'{{"model": "{d.model_id}", "messages": [{{"role": "user", "content": "Hello world"}}], "max_tokens": '
@@ -314,7 +334,9 @@ async def create_developer_deployment(
     model = await Model.find_one(Model.slug == payload.model_id)
     if not model:
         model = await Model.find_one(Model.hugging_face_id == payload.model_id)
-    model_name = model.name if model else hf_service._extract_friendly_name(payload.model_id)
+    model_name = (
+        model.name if model else hf_service._extract_friendly_name(payload.model_id)
+    )
     api_key = f"syn_sec_{secrets.token_hex(16)}"
     endpoint_url = "https://router.huggingface.co/hf-inference/v1"
 
@@ -395,8 +417,13 @@ async def get_developer_recommendations(
     models = await Model.find(Model.status == "Published").to_list()
 
     if not models:
-        hf_records = await hf_service.search_hf_models(task=task, limit=limit, token=current_user.hf_token)
-        return [_hf_detail_to_out(await hf_service.get_hf_model_details(r.id)) for r in hf_records]
+        hf_records = await hf_service.search_hf_models(
+            task=task, limit=limit, token=current_user.hf_token
+        )
+        return [
+            _hf_detail_to_out(await hf_service.get_hf_model_details(r.id))
+            for r in hf_records
+        ]
 
     if task and task != "All":
         models = [m for m in models if m.task.lower() == task.lower()]

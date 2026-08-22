@@ -24,7 +24,10 @@ type PlaygroundProps = {
 
 export default function Playground({ models, defaultInput, initialModelId }: PlaygroundProps) {
   const [selectedModelId, setSelectedModelId] = useState(
-    initialModelId || (models[0]?.huggingFaceId || models[0]?.id || 'meta-llama/Llama-3.1-8B-Instruct'),
+    initialModelId ||
+      models[0]?.huggingFaceId ||
+      models[0]?.id ||
+      'meta-llama/Llama-3.1-8B-Instruct',
   )
   const [input, setInput] = useState(defaultInput)
   const [temperature, setTemperature] = useState<number>(0.7)
@@ -58,7 +61,9 @@ export default function Playground({ models, defaultInput, initialModelId }: Pla
     setError(null)
   }
 
-  const isCustomModel = selectedModelId && !models.some((m) => m.id === selectedModelId || m.huggingFaceId === selectedModelId)
+  const isCustomModel =
+    selectedModelId &&
+    !models.some((m) => m.id === selectedModelId || m.huggingFaceId === selectedModelId)
 
   return (
     <Stack spacing={2.5}>

@@ -3,7 +3,7 @@ import re
 import time
 from datetime import datetime, timezone
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 
@@ -60,10 +60,46 @@ class HuggingFaceService:
         if len(words) <= 2:
             return q
         stop_words = {
-            "i", "need", "a", "an", "the", "with", "and", "or", "for", "to", "in", "on",
-            "at", "by", "of", "is", "are", "want", "find", "looking", "good", "reliable",
-            "strong", "high", "low", "fast", "best", "some", "my", "our", "that", "this",
-            "can", "should", "like", "using", "application", "stack", "model", "models"
+            "i",
+            "need",
+            "a",
+            "an",
+            "the",
+            "with",
+            "and",
+            "or",
+            "for",
+            "to",
+            "in",
+            "on",
+            "at",
+            "by",
+            "of",
+            "is",
+            "are",
+            "want",
+            "find",
+            "looking",
+            "good",
+            "reliable",
+            "strong",
+            "high",
+            "low",
+            "fast",
+            "best",
+            "some",
+            "my",
+            "our",
+            "that",
+            "this",
+            "can",
+            "should",
+            "like",
+            "using",
+            "application",
+            "stack",
+            "model",
+            "models",
         }
         filtered = [w for w in words if w.lower() not in stop_words and len(w) > 2]
         if filtered:
@@ -110,7 +146,15 @@ class HuggingFaceService:
             if tag.startswith("license:"):
                 return tag.replace("license:", "")
         for tag in tags:
-            if tag in ["apache-2.0", "mit", "llama3.1", "llama3.2", "llama3.3", "gemma", "bsd-3-clause"]:
+            if tag in [
+                "apache-2.0",
+                "mit",
+                "llama3.1",
+                "llama3.2",
+                "llama3.3",
+                "gemma",
+                "bsd-3-clause",
+            ]:
                 return tag
         return "apache-2.0"
 
@@ -162,11 +206,31 @@ class HuggingFaceService:
         if not pipeline_tag:
             return "Natural Language Processing"
         tag = pipeline_tag.lower()
-        if any(t in tag for t in ["image-to-text", "visual-question-answering", "audio-text", "document-question"]):
+        if any(
+            t in tag
+            for t in [
+                "image-to-text",
+                "visual-question-answering",
+                "audio-text",
+                "document-question",
+            ]
+        ):
             return "Multimodal"
-        if any(t in tag for t in ["text-to-image", "image-to-image", "object-detection", "image-classification", "depth-estimation", "segmentation"]):
+        if any(
+            t in tag
+            for t in [
+                "text-to-image",
+                "image-to-image",
+                "object-detection",
+                "image-classification",
+                "depth-estimation",
+                "segmentation",
+            ]
+        ):
             return "Computer Vision"
-        if any(t in tag for t in ["audio", "speech", "voice", "automatic-speech-recognition"]):
+        if any(
+            t in tag for t in ["audio", "speech", "voice", "automatic-speech-recognition"]
+        ):
             return "Audio"
         if any(t in tag for t in ["tabular", "time-series"]):
             return "Tabular"
@@ -225,13 +289,19 @@ class HuggingFaceService:
         params = self._extract_parameters([], repo_id)
         price_in, price_out = self._calculate_token_pricing(params)
         context_win = self._extract_context_window([], repo_id)
-        context_win_tokens = 262144 if "262" in context_win else 131072 if "128" in context_win else 32768
+        context_win_tokens = (
+            262144 if "262" in context_win else 131072 if "128" in context_win else 32768
+        )
         direct_deploy = f"{self.ENDPOINTS_DEPLOY_URL}/{repo_id}"
         router_url = f"{self.ROUTER_BASE_URL}"
         chat_space_slug = re.sub(r"[^a-zA-Z0-9]+", "-", repo_id.lower()).strip("-")
         chat_ui = f"https://victor-chat-with-{chat_space_slug}.hf.space/"
 
-        hardware = "1× NVIDIA H200 (141 GB), autoscales to 2 under load" if any(s in params for s in ["27B", "70B", "671B"]) else "1× NVIDIA L4 (24 GB) or T4"
+        hardware = (
+            "1× NVIDIA H200 (141 GB), autoscales to 2 under load"
+            if any(s in params for s in ["27B", "70B", "671B"])
+            else "1× NVIDIA L4 (24 GB) or T4"
+        )
         engine = "vLLM (vllm-openai) · MTP speculative decoding (2 draft tokens)"
         measured = "~0.7 s first token · ~110 tok/s per stream idle · 50 concurrent requests verified"
         rate_limit = "~30 requests/min per IP · 429 + Retry-After when exceeded"
@@ -240,12 +310,12 @@ class HuggingFaceService:
             f"curl {router_url}/chat/completions \\\n"
             "  -H 'Content-Type: application/json' \\\n"
             "  -H 'Authorization: Bearer <YOUR_HF_TOKEN>' \\\n"
-            f'  -d \'{{\n'
+            f"  -d '{{\n"
             f'    "model": "{repo_id}",\n'
             f'    "messages": [{{"role": "user", "content": "Explain a KV cache in one paragraph."}}],\n'
             f'    "temperature": 0.7,\n'
             f'    "max_tokens": 512\n'
-            f'  }}\''
+            f"  }}'"
         )
 
         quickstart_py = (
@@ -286,7 +356,7 @@ class HuggingFaceService:
         )
 
         pi_json = (
-            '{\n'
+            "{\n"
             '  "providers": {\n'
             f'    "{provider_slug}": {{\n'
             f'      "name": "{friendly_name} (HF Public)",\n'
@@ -296,7 +366,7 @@ class HuggingFaceService:
             '      "compat": {\n'
             '        "supportsReasoningEffort": true,\n'
             '        "maxTokensField": "max_tokens"\n'
-            '      },\n'
+            "      },\n"
             '      "models": [{\n'
             f'        "id": "{repo_id}",\n'
             f'        "name": "{friendly_name}",\n'
@@ -308,15 +378,15 @@ class HuggingFaceService:
             '          "medium": "medium",\n'
             '          "high": "xhigh",\n'
             '          "xhigh": "xhigh"\n'
-            '        },\n'
+            "        },\n"
             '        "input": ["text", "image"],\n'
             f'        "contextWindow": {context_win_tokens},\n'
             '        "maxTokens": 32768,\n'
             '        "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0}\n'
-            '      }]\n'
-            '    }\n'
-            '  }\n'
-            '}'
+            "      }]\n"
+            "    }\n"
+            "  }\n"
+            "}"
         )
 
         pi_zsh = (
@@ -383,10 +453,19 @@ class HuggingFaceService:
         if task and task != "All":
             task_norm = task.lower().replace(" ", "-")
             if task_norm in [
-                "text-generation", "code-generation", "question-answering",
-                "summarization", "feature-extraction", "sentence-similarity",
-                "text-classification", "token-classification", "automatic-speech-recognition",
-                "text-to-speech", "text-to-image", "image-to-text", "object-detection"
+                "text-generation",
+                "code-generation",
+                "question-answering",
+                "summarization",
+                "feature-extraction",
+                "sentence-similarity",
+                "text-classification",
+                "token-classification",
+                "automatic-speech-recognition",
+                "text-to-speech",
+                "text-to-image",
+                "image-to-text",
+                "object-detection",
             ]:
                 params["pipeline_tag"] = task_norm
             elif "chat" in task_norm or "general" in task_norm:
@@ -427,9 +506,15 @@ class HuggingFaceService:
                         params_size = self._extract_parameters(tags, repo_id)
                         context_win = self._extract_context_window(tags, repo_id)
 
-                        if parameters and not self._matches_param_filter(params_size, parameters):
+                        if parameters and not self._matches_param_filter(
+                            params_size, parameters
+                        ):
                             continue
-                        if license and license != "All" and license.lower() not in license_name.lower():
+                        if (
+                            license
+                            and license != "All"
+                            and license.lower() not in license_name.lower()
+                        ):
                             continue
 
                         card_data = item.get("cardData") or {}
@@ -465,15 +550,21 @@ class HuggingFaceService:
                                 latency_ms=latency_ms,
                                 benchmark_results={
                                     "mmlu": int(min(96, max(70, 78 + like_mod * 1.3))),
-                                    "humaneval": int(min(94, max(62, 70 + like_mod * 1.4))),
-                                    "longContext": int(min(95, max(72, 80 + like_mod * 1.1))),
+                                    "humaneval": int(
+                                        min(94, max(62, 70 + like_mod * 1.4))
+                                    ),
+                                    "longContext": int(
+                                        min(95, max(72, 80 + like_mod * 1.1))
+                                    ),
                                 },
                             )
                         )
                     if results:
                         return results
         except Exception as exc:
-            logger.warning(f"Error querying Hugging Face API: {exc}. Using fallback catalog.")
+            logger.warning(
+                f"Error querying Hugging Face API: {exc}. Using fallback catalog."
+            )
 
         return self._fallback_hf_records(
             query=query,
@@ -524,7 +615,9 @@ class HuggingFaceService:
                 if res.status_code == 200:
                     item = res.json()
                     tags = item.get("tags") or []
-                    author = canonical_id.split("/")[0] if "/" in canonical_id else "Community"
+                    author = (
+                        canonical_id.split("/")[0] if "/" in canonical_id else "Community"
+                    )
                     pipeline_tag = item.get("pipeline_tag") or "text-generation"
                     mapped_task = self._map_pipeline_task(pipeline_tag)
                     downloads = item.get("downloads", 0)
@@ -547,7 +640,9 @@ class HuggingFaceService:
                         "tags": tags[:8],
                         "trust_score": min(99.0, max(80.0, 88.0 + (likes % 8))),
                         "accuracy": min(98.0, max(82.0, 89.0 + (likes % 7))),
-                        "latency_ms": 190 if any(s in params_size for s in ["7B", "8B"]) else 240,
+                        "latency_ms": (
+                            190 if any(s in params_size for s in ["7B", "8B"]) else 240
+                        ),
                         "price_per_request": 0.001,
                         "price_per_1k_tokens": round(p_in / 10, 4),
                         "price_per_m_input": p_in,
@@ -556,7 +651,9 @@ class HuggingFaceService:
                         "status": "Published",
                         "owner_name": author,
                         "owner_org": author,
-                        "context_window": self._extract_context_window(tags, canonical_id),
+                        "context_window": self._extract_context_window(
+                            tags, canonical_id
+                        ),
                         "parameters": params_size,
                         "license": self._extract_license(tags),
                         "downloads": downloads,
@@ -571,7 +668,10 @@ class HuggingFaceService:
             pass
 
         for rec in self._fallback_hf_records():
-            if rec.id.lower() == canonical_id.lower() or rec.name.lower() == canonical_id.lower():
+            if (
+                rec.id.lower() == canonical_id.lower()
+                or rec.name.lower() == canonical_id.lower()
+            ):
                 return {
                     "name": rec.name,
                     "hugging_face_id": rec.id,
@@ -666,7 +766,9 @@ class HuggingFaceService:
                 existing.name = rec.name
                 existing.owner_name = rec.author
                 existing.owner_org = rec.author
-                if rec.description and len(rec.description) > len(existing.description or ""):
+                if rec.description and len(rec.description) > len(
+                    existing.description or ""
+                ):
                     existing.description = rec.description
                 if rec.tags:
                     existing.tags = list(set(existing.tags + rec.tags))[:10]
@@ -774,12 +876,16 @@ class HuggingFaceService:
                             generated = choices[0]["message"].get("content", "").strip()
                             if generated:
                                 latency_ms = int((time.time() - start_time) * 1000)
-                                prompt_tokens = data.get("usage", {}).get("prompt_tokens") or max(1, len(prompt.split()) * 4 // 3)
-                                completion_tokens = data.get("usage", {}).get("completion_tokens") or max(1, len(generated.split()) * 4 // 3)
+                                prompt_tokens = data.get("usage", {}).get(
+                                    "prompt_tokens"
+                                ) or max(1, len(prompt.split()) * 4 // 3)
+                                completion_tokens = data.get("usage", {}).get(
+                                    "completion_tokens"
+                                ) or max(1, len(generated.split()) * 4 // 3)
                                 total_tokens = prompt_tokens + completion_tokens
-                                cost_usd = (prompt_tokens * (price_per_m_input / 1_000_000)) + (
-                                    completion_tokens * (price_per_m_output / 1_000_000)
-                                )
+                                cost_usd = (
+                                    prompt_tokens * (price_per_m_input / 1_000_000)
+                                ) + (completion_tokens * (price_per_m_output / 1_000_000))
                                 return PlaygroundResponse(
                                     model_id=canonical_model,
                                     output_text=generated,
@@ -822,9 +928,9 @@ class HuggingFaceService:
                             prompt_tokens = max(1, len(prompt.split()) * 4 // 3)
                             completion_tokens = max(1, len(generated.split()) * 4 // 3)
                             total_tokens = prompt_tokens + completion_tokens
-                            cost_usd = (prompt_tokens * (price_per_m_input / 1_000_000)) + (
-                                completion_tokens * (price_per_m_output / 1_000_000)
-                            )
+                            cost_usd = (
+                                prompt_tokens * (price_per_m_input / 1_000_000)
+                            ) + (completion_tokens * (price_per_m_output / 1_000_000))
                             return PlaygroundResponse(
                                 model_id=canonical_model,
                                 output_text=generated.strip(),
@@ -854,7 +960,18 @@ class HuggingFaceService:
                 "• Employ token-level logit bias and PII scrubbing before routing.\n"
                 "• Trigger human-in-the-loop escalation if retrieval confidence falls below 85%."
             )
-        elif any(k in p_low for k in ["code", "fastapi", "python", "endpoint", "function", "javascript", "typescript"]):
+        elif any(
+            k in p_low
+            for k in [
+                "code",
+                "fastapi",
+                "python",
+                "endpoint",
+                "function",
+                "javascript",
+                "typescript",
+            ]
+        ):
             output = (
                 f"```python\n"
                 f"# Implementation generated by {canonical_model}\n"
@@ -878,7 +995,9 @@ class HuggingFaceService:
                 "    }\n"
                 "```"
             )
-        elif any(k in p_low for k in ["rag", "embedding", "vector", "retrieve", "search"]):
+        elif any(
+            k in p_low for k in ["rag", "embedding", "vector", "retrieve", "search"]
+        ):
             output = (
                 f"[{canonical_model} · Context Retrieval Analysis]\n\n"
                 "• **Semantic Partition:** Query matches 3 indexed document chunks (Cosine Similarity = 0.942).\n"
@@ -888,7 +1007,7 @@ class HuggingFaceService:
         else:
             output = (
                 f"[{canonical_model} Response]\n\n"
-                f"Regarding your query: \"{prompt.strip()}\"\n\n"
+                f'Regarding your query: "{prompt.strip()}"\n\n'
                 f"Based on {canonical_model}'s instruction alignment and benchmarked knowledge:\n"
                 f"1. **Core Analysis:** The requested evaluation has been analyzed under temperature {temperature} and context limits.\n"
                 f"2. **Actionable Implementation:** Apply verified parameters and monitor token usage via standard OpenAI-compatible API schemas.\n"

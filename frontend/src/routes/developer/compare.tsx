@@ -19,7 +19,10 @@ export default function DeveloperCompare() {
       let ids: string[] = []
       const urlModels = searchParams.get('models')
       if (urlModels) {
-        ids = urlModels.split(',').map((s) => s.trim()).filter(Boolean)
+        ids = urlModels
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
       } else {
         const stored = localStorage.getItem(compareStorageKey)
         if (stored) {

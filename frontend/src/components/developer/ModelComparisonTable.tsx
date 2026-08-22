@@ -1,7 +1,6 @@
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import {
-  Box,
   Button,
   Chip,
   Stack,
@@ -55,7 +54,9 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
       <Table>
         <TableHead>
           <TableRow sx={{ backgroundColor: '#0e1422' }}>
-            <TableCell sx={{ fontWeight: 800, color: '#94a3b8', minWidth: 160 }}>Contender Spec</TableCell>
+            <TableCell sx={{ fontWeight: 800, color: '#94a3b8', minWidth: 160 }}>
+              Contender Spec
+            </TableCell>
             {models.map((model) => (
               <TableCell key={model.id} sx={{ fontWeight: 900, color: '#f8fafc', minWidth: 200 }}>
                 <Typography variant='subtitle2' sx={{ fontWeight: 900, color: '#38bdf8' }}>
@@ -199,7 +200,9 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
                 <TableCell key={`${model.id}-action`}>
                   <Stack direction='row' spacing={1}>
                     <Button
-                      onClick={() => navigate(`/developer/playground?model=${encodeURIComponent(targetId)}`)}
+                      onClick={() =>
+                        navigate(`/developer/playground?model=${encodeURIComponent(targetId)}`)
+                      }
                       variant='outlined'
                       size='small'
                       startIcon={<PlayArrowIcon />}
@@ -214,7 +217,9 @@ export default function ModelComparisonTable({ models }: ModelComparisonTablePro
                       Playground
                     </Button>
                     <Button
-                      onClick={() => navigate(`/developer/deploy?model=${encodeURIComponent(targetId)}`)}
+                      onClick={() =>
+                        navigate(`/developer/deploy?model=${encodeURIComponent(targetId)}`)
+                      }
                       variant='contained'
                       size='small'
                       startIcon={<RocketLaunchIcon />}

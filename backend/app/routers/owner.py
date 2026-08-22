@@ -111,7 +111,9 @@ async def verify_model_sources(
     if payload.hugging_face_id:
         try:
             token = payload.hf_token or current_user.hf_token
-            hf_details = await hf_service.get_hf_model_details(payload.hugging_face_id, token=token)
+            hf_details = await hf_service.get_hf_model_details(
+                payload.hugging_face_id, token=token
+            )
             if hf_details and hf_details.get("name"):
                 hf_verified = True
                 details["hf"] = {
@@ -121,9 +123,13 @@ async def verify_model_sources(
                     "downloads": hf_details.get("downloads", 0),
                     "task": hf_details.get("task"),
                 }
-                messages.append(f"Hugging Face repository '{payload.hugging_face_id}' verified.")
+                messages.append(
+                    f"Hugging Face repository '{payload.hugging_face_id}' verified."
+                )
             else:
-                messages.append(f"Hugging Face repository '{payload.hugging_face_id}' not found.")
+                messages.append(
+                    f"Hugging Face repository '{payload.hugging_face_id}' not found."
+                )
         except Exception as e:
             messages.append(f"HF Verification error: {str(e)}")
 
@@ -135,7 +141,9 @@ async def verify_model_sources(
             details["repo"] = {"url": payload.repo_url, "verified": True}
             messages.append(f"Open-weights repository ({payload.repo_url}) verified.")
         else:
-            messages.append("Open repository URL must be a valid GitHub or GitLab repository.")
+            messages.append(
+                "Open repository URL must be a valid GitHub or GitLab repository."
+            )
 
     overall_verified = hf_verified or repo_verified
 
@@ -427,9 +435,7 @@ async def get_owner_analytics(
     real_rev_sum = sum(m.revenue for m in models) + sum(e.cost_usd for e in owner_events)
     total_revenue = round(real_rev_sum or 1820.0, 2)
     total_requests = real_req_sum or 287000
-    avg_trust = (
-        sum(m.trust_score for m in models) / len(models) if models else 94.2
-    )
+    avg_trust = sum(m.trust_score for m in models) / len(models) if models else 94.2
 
     time_series = [
         {
@@ -471,9 +477,7 @@ async def get_owner_analytics(
 
     recent_usage: list[UsageRow] = []
     for evt in owner_events[:15]:
-        target_name = (
-            model_names.get(evt.model_id) or evt.model_name or evt.model_id
-        )
+        target_name = model_names.get(evt.model_id) or evt.model_name or evt.model_id
         recent_usage.append(
             UsageRow(
                 id=f"evt-{str(evt.uuid)[:8]}",
