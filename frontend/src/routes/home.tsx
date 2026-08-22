@@ -256,8 +256,7 @@ export default function Home() {
         >
           {/* Pill Badge */}
           <Chip
-            icon={<AutoAwesome sx={{ color: '#38bdf8 !important', fontSize: 16 }} />}
-            label='The Real AI Marketplace'
+            label='The AI Marketplace for Your Needs'
             sx={{
               mb: 3.5,
               py: 0.5,
